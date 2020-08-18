@@ -12,6 +12,13 @@ from flask_cors import CORS
 
 from flask_utils import EmailVerifier, EmailSender, ImageManager
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+sentry_sdk.init(
+    dsn=os.getenv('SENTRY_URL'),
+    integrations=[FlaskIntegration()]
+)
+
 app = Flask('app', template_folder='templates')
 
 # Configuration object for Flask app
