@@ -38,7 +38,7 @@ class FlaskConfig(object):
     JWT_SECRET_KEY = os.getenv('SECRET_KEY')
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=15)
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=15)
 
     # Mail SMTP server settings
