@@ -143,7 +143,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```json
 {
     "password": "examplepassword",
-    "confirm-password": "examplepassword"
+    "confirm_password": "examplepassword"
 }
 ```
 * Sample body output:
@@ -237,8 +237,8 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     "name": "Example Club",
     "owner": "example@gmail.com",
     "tags": [1, 3, 4],
-    "logo": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
-    "banner": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
+    "logo_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
+    "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
     "app_required": true,
     "new_members": false,
     "about_us": "This is something about the club.",
@@ -289,8 +289,8 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     "name": "Example Club",
     "owner": "example@gmail.com",
     "tags": [1, 3, 4],
-    "logo": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
-    "banner": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
+    "logo_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
+    "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
     "app_required": true,
     "new_members": false,
     "about_us": "This is something about the club.",
@@ -389,6 +389,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```json
 [
     {
+        "id": "example-resource-1",
         "name": "Example resource 1",
         "link": "http://example.com/"
     }
@@ -403,15 +404,52 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Sample body input:
 ```json
 {
-    "name": "Example Resource 1",
+    "name": "Example Resource 2",
     "link": "http://example.com/"
 }
 ```
 * Sample body output:
 ```json
+[
+    {
+        "id": "example-resource-1",
+        "name": "Example resource 1",
+        "link": "http://example.com/"
+    },
+    {
+        "id": "example-resource-2",
+        "name": "Example resource 2",
+        "link": "http://example.com/"
+    }
+]
+```
+
+### Update resource
+* Description: Updates a resource from the club
+* Path: `PUT /api/admin/resources/<resource-id>`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
 {
-    "status": "success"
+    "name": "Example Resource 10",
+    "link": "http://example.com/"
 }
+```
+* Sample body output:
+```json
+[
+    {
+        "id": "example-resource-1",
+        "name": "Example resource 10",
+        "link": "http://example.com/"
+    },
+    {
+        "id": "example-resource-2",
+        "name": "Example resource 2",
+        "link": "http://example.com/"
+    }
+]
 ```
 
 ### Delete resource
@@ -421,9 +459,13 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     - `Authorization: Bearer <access_token>`
 * Sample body output:
 ```json
-{
-    "status": "success"
-}
+[
+    {
+        "id": "example-resource-10",
+        "name": "Example resource 10",
+        "link": "http://example.com/"
+    }
+]
 ```
 
 ### Get events
@@ -435,10 +477,11 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```json
 [
     {
+        "id": "example-event-1",
         "name": "Example event 1",
         "link": "http://example.com/",
-        "event-start": "2020-04-01T07:00:00.000Z",
-        "event-end": "2020-08-01T07:00:00.000Z",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the event."
     }
 ]
@@ -452,18 +495,70 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Sample body input:
 ```json
 {
-    "name": "Example event 1",
+    "name": "Example event 2",
     "link": "http://example.com/",
-    "event-start": "2020-04-01T07:00:00.000Z",
-    "event-end": "2020-08-01T07:00:00.000Z",
+    "event_start": "2020-04-01T07:00:00.000Z",
+    "event_end": "2020-08-01T07:00:00.000Z",
     "description": "This is something about the event."
 }
 ```
 * Sample body output:
 ```json
+[
+    {
+        "id": "example-event-1",
+        "name": "Example event 1",
+        "link": "http://example.com/",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the event."
+    },
+    {
+        "id": "example-event-2",
+        "name": "Example event 2",
+        "link": "http://example.com/",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the event."
+    }
+]
+```
+
+### Update event
+* Description: Updates a event from the club
+* Path: `PUT /api/admin/events/<event-id>`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
 {
-    "status": "success"
+    "name": "Example event 10",
+    "link": "http://example.com/",
+    "event_start": "2020-04-01T07:00:00.000Z",
+    "event_end": "2020-08-01T07:00:00.000Z",
+    "description": "This is something about the new event."
 }
+```
+* Sample body output:
+```json
+[
+    {
+        "id": "example-event-1",
+        "name": "Example event 10",
+        "link": "http://example.com/",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the new event."
+    },
+    {
+        "id": "example-event-2",
+        "name": "Example event 2",
+        "link": "http://example.com/",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the event."
+    }
+]
 ```
 
 ### Delete event
@@ -473,7 +568,14 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     - `Authorization: Bearer <access_token>`
 * Sample body output:
 ```json
-{
-    "status": "success"
-}
+[
+    {
+        "id": "example-event-10",
+        "name": "Example event 10",
+        "link": "http://example.com/",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the new event."
+    }
+]
 ```

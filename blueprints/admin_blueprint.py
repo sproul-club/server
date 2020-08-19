@@ -128,6 +128,33 @@ def add_resource():
 
 
 @as_json
+@admin_blueprint.route('/resources/<resource_id>', methods=['PUT'])
+@validate_json(schema={
+    'name': {'type': 'string'},
+    'link': {'type': 'string'}
+})
+@jwt_required
+def update_resource(resource_id):
+    json = g.clean_json
+    club = current_user['club']
+
+    new_res_name = json['name']
+    new_res_link = json['link']
+
+    for (i, resource) in enumerate(club.resources):
+        if resource.id == resource_id:
+            club.resources[i] = Resource(
+                id=resource.id,
+                name=new_res_name,
+                link=new_res_link
+            )
+
+            return _get_list_resources(club)
+
+    raise JsonError(status='error', reason='Requested resource does not exist', status_=404)
+
+
+@as_json
 @admin_blueprint.route('/resources/<resource_id>', methods=['DELETE'])
 @jwt_required
 def delete_resource(resource_id):
@@ -149,7 +176,7 @@ def delete_resource(resource_id):
 @jwt_required
 def get_events():
     club = current_user['club']
-    return json.dumps([json.loads(event.to_json()) for event in club.events])
+    return _get_list_events(club)
 
 
 @as_json
@@ -190,6 +217,36 @@ def add_event():
     club.save()
 
     return _get_list_events(club)
+
+
+@as_json
+@admin_blueprint.route('/events/<event_id>', methods=['PUT'])
+@validate_json(schema={
+    'name': {'type': 'string'},
+    'link': {'type': 'string'},
+    'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'description': {'type': 'string'}
+})
+@jwt_required
+def update_event(event_id):
+    json = g.clean_json
+    club = current_user['club']
+
+    new_event_name = json['name']
+    new_event_link = json['link']
+
+    for (i, event) in enumerate(club.events):
+        if event.id == event_id:
+            club.events[i] = Event(
+                id=event.id,
+                name=new_event_name,
+                link=new_event_link
+            )
+
+            return _get_list_events(club)
+
+    raise JsonError(status='error', reason='Requested event does not exist', status_=404)
 
 
 @as_json
