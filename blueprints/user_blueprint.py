@@ -95,8 +95,8 @@ def does_email_exist():
     'email': {'type': 'string'},
     'password': {'type': 'string'},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}},
-    'app-required': {'type': 'boolean'},
-    'new-members': {'type': 'boolean'}
+    'app_required': {'type': 'boolean'},
+    'new_members': {'type': 'boolean'}
 }, require_all=True)
 def register():
     json = g.clean_json
@@ -105,8 +105,8 @@ def register():
     club_email = json['email']
     club_password = json['password']
     club_tag_ids = json['tags']
-    app_required = json['app-required']
-    new_members = json['new-members']
+    app_required = json['app_required']
+    new_members = json['new_members']
 
     # Check if email is part of pre-verified list of emails
     email_exists = PreVerifiedEmail.objects(email=club_email).first() is not None
@@ -280,7 +280,7 @@ def request_reset_password():
 @user_blueprint.route('/confirm-reset', methods=['POST'])
 @validate_json(schema={
     'password': {'type': 'string'},
-    'confirm-password': {'type': 'string'}
+    'confirm_password': {'type': 'string'}
 }, require_all=True)
 @jwt_required
 def confirm_reset_password():

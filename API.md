@@ -44,8 +44,8 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     "email": "example@gmail.com",
     "password": "examplepassword",
     "tags": [3, 1, 4],
-    "app-required": true,
-    "new-members": true,
+    "app_required": true,
+    "new_members": true,
 }
 ```
 * Sample body output:
@@ -206,8 +206,8 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 {
     "search": "example club",
     "tags": [],
-    "app-required": true,
-    "new-members": false,
+    "app_required": true,
+    "new_members": false,
     "limit": 50,
     "skip": 0
 }
@@ -258,8 +258,8 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
             "description": "This is a description about example event.",
         }
     ],
-    "social-media-links": {
-        "contact-email": "example-contact-email@gmail.com",
+    "social_media_links": {
+        "contact_email": "example-contact-email@gmail.com",
         "website": "http://example.com/",
         "facebook": "https://www.facebook.com/pages/example-club",
         "instagram": "https://www.instagram.com/example-club",
@@ -310,8 +310,8 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
             "description": "This is a description about example event.",
         }
     ],
-    "social-media-links": {
-        "contact-email": "example-contact-email@gmail.com",
+    "social_media_links": {
+        "contact_email": "example-contact-email@gmail.com",
         "website": "http://example.com/",
         "facebook": "https://www.facebook.com/pages/example-club",
         "instagram": "https://www.instagram.com/example-club",
@@ -336,12 +336,12 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 {
     "name": "Example Club",
     "tags": [1, 3, 4],
-    "app-required": true,
-    "new-members": false,
-    "about-us": "This is something about the club.",
-    "get-involved": "This is something about getting involved.",
-    "social-media-links": {
-        "contact-email": "example-contact-email@gmail.com",
+    "app_required": true,
+    "new_members": false,
+    "about_us": "This is something about the club.",
+    "get_involved": "This is something about getting involved.",
+    "social_media_links": {
+        "contact_email": "example-contact-email@gmail.com",
         "website": "http://example.com/",
         "facebook": "https://www.facebook.com/pages/example-club",
         "instagram": "https://www.instagram.com/example-club",
@@ -374,8 +374,8 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Sample body output
 ```json
 {
-    "banner-url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
-    "logo-url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
+    "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
+    "logo_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
     "status": "success"
 }
 ```

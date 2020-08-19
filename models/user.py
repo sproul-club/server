@@ -15,18 +15,18 @@ class User(gj.Document):
     email    = mongo.EmailField(primary_key=True)
     password = mongo.StringField(max_length=256)
 
-    registered_on = mongo.DateTimeField(db_field='registered-on', default=datetime.datetime.now)
+    registered_on = mongo.DateTimeField(default=datetime.datetime.now)
     confirmed     = mongo.BooleanField(default=False)
-    confirmed_on  = mongo.DateTimeField(db_field='confirmed-on', default=None)
+    confirmed_on  = mongo.DateTimeField(default=None)
 
 class PreVerifiedEmail(gj.Document):
     email = mongo.EmailField(unique=True)
 
 class AccessJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
-    token_id = mongo.StringField(db_field='token-id', required=True)
+    token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(db_field='expiry-time', default=datetime.datetime.now)
+    expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
 
     meta = {
         'collection': 'access-jti',
@@ -40,9 +40,9 @@ class AccessJTI(gj.Document):
 
 class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
-    token_id = mongo.StringField(db_field='token-id', required=True)
+    token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(db_field='expiry-time', default=datetime.datetime.now)
+    expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
 
     meta = {
         'collection': 'refresh-jti',

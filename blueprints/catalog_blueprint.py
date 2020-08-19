@@ -41,8 +41,8 @@ def get_organizations():
 @validate_json(schema={
     'search': {'type': 'string', 'default': ''},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'default': []},
-    'app-required': {'type': 'boolean', 'nullable': True, 'default': None},
-    'new-members': {'type': 'boolean', 'nullable': True, 'default': None},
+    'app_required': {'type': 'boolean', 'nullable': True, 'default': None},
+    'new_members': {'type': 'boolean', 'nullable': True, 'default': None},
     'limit': {'type': 'integer', 'default': 50},
     'skip': {'type': 'integer', 'default': 0}
 })
@@ -51,8 +51,8 @@ def search_orgs():
     
     search_text = json['search']
     club_tags = json['tags']
-    app_required = json['app-required']
-    new_members = json['new-members']
+    app_required = json['app_required']
+    new_members = json['new_members']
 
     limit = json['limit']
     skip = json['skip']
