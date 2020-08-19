@@ -285,15 +285,16 @@ def request_reset_password():
 @jwt_required
 def confirm_reset_password():
     json = g.clean_json
-
-    # First delete all access and refresh tokens from the user
     owner = current_user['user']
+    password = json['password']
+    confirm_pass = json['confirm_password']
 
-    AccessJTI.objects.find(owner=owner).delete()
-    RefreshJTI.objects.find(owner=owner).delete()
-    
-    # Next, set the new password
-    if (hash_manager.hash(json['password']) == hash_manager.hash(json['confirm-password'])):
+    if (hash_manager.hash(password) == hash_manager.hash(confirm_pass)):
+        # First delete all access and refresh tokens from the user
+        AccessJTI.objects.find(owner=owner).delete()
+        RefreshJTI.objects.find(owner=owner).delete()
+
+        # Next, set the new password
         owner.password = hash_manager.hash(json['password'])
         owner.save()
 
