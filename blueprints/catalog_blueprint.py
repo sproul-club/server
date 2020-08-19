@@ -17,7 +17,7 @@ def get_tags():
 
 
 @as_json
-@catalog_blueprint.route('/organizations', methods=['GET'])
+@catalog_blueprint.route('/organizations', methods=['POST'])
 @validate_json(schema={
     'limit': {'type': 'integer', 'default': 50},
     'skip': {'type': 'integer', 'default': 0}
@@ -37,7 +37,7 @@ def get_organizations():
 
 
 @as_json
-@catalog_blueprint.route('/search', methods=['GET'])
+@catalog_blueprint.route('/search', methods=['POST'])
 @validate_json(schema={
     'search': {'type': 'string', 'default': ''},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'default': []},
