@@ -14,6 +14,10 @@ from models import *
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/api/admin')
 
 
+_get_list_resources = lambda club: json.dumps([json.loads(resource.to_json()) for resource in club.resources])
+_get_list_events    = lambda club: json.dumps([json.loads(event.to_json()) for event in club.events])
+
+
 @as_json
 @admin_blueprint.route('/profile', methods=['GET'])
 @jwt_required
@@ -89,7 +93,7 @@ def upload_logo():
 @jwt_required
 def get_resources():
     club = current_user['club']
-    return json.dumps([json.loads(resource.to_json()) for resource in club.resources])
+    return _get_list_resources(club)
 
 
 @as_json
@@ -120,7 +124,7 @@ def add_resource():
     club.resources += [resource]
     club.save()
 
-    return {'status': 'success'}
+    return _get_list_resources(club)
 
 
 @as_json
@@ -135,7 +139,7 @@ def delete_resource(resource_id):
     
     new_len = len(club.resources)
     if new_len != prev_len:
-        return {'status': 'success'}
+        return _get_list_resources(club)
     else:
         raise JsonError(status='error', reason='Requested resource does not exist', status_=404)
 
@@ -185,7 +189,7 @@ def add_event():
     club.events += [event]
     club.save()
 
-    return {'status': 'success'}
+    return _get_list_events(club)
 
 
 @as_json
@@ -200,6 +204,6 @@ def delete_event(event_id):
     
     new_len = len(club.events)
     if new_len != prev_len:
-        return {'status': 'success'}
+        return _get_list_events(club)
     else:
         raise JsonError(status='error', reason='Requested event does not exist', status_=404)
