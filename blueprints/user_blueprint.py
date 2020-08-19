@@ -20,7 +20,8 @@ from flask_utils import validate_json, id_creator
 from init_app import app, flask_exts
 from models import *
 
-BASE_URL = 'http://127.0.0.1:5000'
+BASE_URL_LOCAL = 'http://127.0.0.1:5000'
+BASE_URL_REMOTE = 'https://sc-backend-v0.herokuapp.com'
 LOGIN_URL = 'https://www.sproul.club/signin'
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
@@ -137,7 +138,7 @@ def register():
     new_club.save()
 
     confirm_token = flask_exts.email_verifier.generate_token(club_email)
-    confirm_url = BASE_URL + url_for('user.confirm_email', token=confirm_token)
+    confirm_url = BASE_URL_REMOTE + url_for('user.confirm_email', token=confirm_token)
     html = render_template(
         'confirm-email.html',
         confirm_url=confirm_url,
