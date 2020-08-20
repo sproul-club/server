@@ -23,6 +23,7 @@ from models import *
 BASE_URL_LOCAL = 'http://127.0.0.1:5000'
 BASE_URL_REMOTE = 'https://sc-backend-v0.herokuapp.com'
 LOGIN_URL = 'https://www.sproul.club/signin'
+RECOVER_URL = 'https://www.sproul.club/recover'
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
 
@@ -265,7 +266,7 @@ def revoke_refresh():
 def request_reset_password():
     html = render_template(
         'reset-password.html',
-        reset_pass_url=DEFAULT_URL,
+        reset_pass_url=RECOVER_URL,
         email_sender=application.config['MAIL_DEFAULT_SENDER']
     )
 
@@ -287,6 +288,7 @@ def request_reset_password():
 def confirm_reset_password():
     json = g.clean_json
     owner = current_user['user']
+    
     password = json['password']
     confirm_pass = json['confirm_password']
 
