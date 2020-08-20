@@ -118,7 +118,7 @@ def register():
     # Check if email is already registered
     user_exists = User.objects(email=club_email).first() is not None
     if user_exists:
-        raise JsonError(status='error', reason='A club under that email already exists!')
+        raise JsonError(status='error', reason='A club under that email already exists!', status_=401)
 
     new_user = User(
         email=club_email,
@@ -279,6 +279,7 @@ def request_reset_password():
     return {'status': 'success'}
 
 
+@as_json
 @user_blueprint.route('/confirm-reset', methods=['POST'])
 @validate_json(schema={
     'password': {'type': 'string'},

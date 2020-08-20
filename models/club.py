@@ -1,12 +1,13 @@
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
+from models.relaxed_url_field import RelaxedURLField
 from models.user import User
 
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
     name = mongo.StringField(required=True, max_length=100)
-    link = mongo.URLField(null=True)
+    link = RelaxedURLField(null=True)
     event_start = mongo.DateTimeField(required=True)
     event_end   = mongo.DateTimeField(required=True)
     description = mongo.StringField(required=True, max_length=500)
@@ -14,20 +15,20 @@ class Event(gj.EmbeddedDocument):
 class Resource(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
     name = mongo.StringField(required=True, max_length=100)
-    link = mongo.URLField(required=True)
+    link = RelaxedURLField(required=True)
 
 class SocialMediaLinks(gj.EmbeddedDocument):
     contact_email = mongo.EmailField(null=True)
-    website     = mongo.URLField(null=True)
-    facebook    = mongo.URLField(null=True)
-    instagram   = mongo.URLField(null=True)
-    linkedin    = mongo.URLField(null=True)
-    twitter     = mongo.URLField(null=True)
-    youtube     = mongo.URLField(null=True)
-    github      = mongo.URLField(null=True)
-    behance     = mongo.URLField(null=True)
-    medium      = mongo.URLField(null=True)
-    gcalendar   = mongo.URLField(null=True) # TODO: ask if we're still integrating this
+    website     = RelaxedURLField(null=True)
+    facebook    = RelaxedURLField(null=True)
+    instagram   = RelaxedURLField(null=True)
+    linkedin    = RelaxedURLField(null=True)
+    twitter     = RelaxedURLField(null=True)
+    youtube     = RelaxedURLField(null=True)
+    github      = RelaxedURLField(null=True)
+    behance     = RelaxedURLField(null=True)
+    medium      = RelaxedURLField(null=True)
+    gcalendar   = RelaxedURLField(null=True) # TODO: ask if we're still integrating this
 
 class Tag(gj.Document):
     id   = mongo.IntField(required=True, primary_key=True)
@@ -42,8 +43,8 @@ class Club(gj.Document):
     app_required = mongo.BooleanField(required=True)
     new_members  = mongo.BooleanField(required=True)
     
-    logo_url   = mongo.URLField(null=True, default=None)
-    banner_url = mongo.URLField(null=True, default=None)
+    logo_url   = RelaxedURLField(null=True, default=None)
+    banner_url = RelaxedURLField(null=True, default=None)
 
     about_us     = mongo.StringField(default='', max_length=500)
     get_involved = mongo.StringField(default='', max_length=500)
