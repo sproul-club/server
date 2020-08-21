@@ -1,5 +1,8 @@
 import os
 import json
+import datetime
+
+from passlib.hash import pbkdf2_sha512 as hash_manager
 
 from flask import render_template, Blueprint, url_for, request, redirect, g
 from flask_json import as_json, JsonError
@@ -10,20 +13,15 @@ from flask_jwt_extended import (
     get_raw_jwt, get_jti, current_user
 )
 
-import datetime
-import hashlib
-
-from passlib.hash import pbkdf2_sha512 as hash_manager
-
 from flask_utils import validate_json, id_creator
 
-from init_app import app, flask_exts
+from init_app import flask_exts
 from models import *
 
 BASE_URL_LOCAL = 'http://127.0.0.1:5000'
 BASE_URL_REMOTE = 'https://sc-backend-v0.herokuapp.com'
 LOGIN_URL = 'https://www.sproul.club/signin'
-RECOVER_URL = 'https://www.sproul.club/recover'
+RECOVER_URL = 'https://www.sproul.club/resetpassword'
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
 
@@ -138,13 +136,9 @@ def register():
     new_user.save()
     new_club.save()
 
-    confirm_token = flask_exts.email_verifier.generate_token(club_email)
-    confirm_url = BASE_URL_REMOTE + url_for('user.confirm_email', token=confirm_token)
-    html = render_template(
-        'confirm-email.html',
-        confirm_url=confirm_url,
-        email_sender=app.config['MAIL_DEFAULT_SENDER']
-    )
+    verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
+    confirm_url = BASE_URL_REMOTE + url_for('user.confirm_email', token=verification_token)
+    html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(
         subject='Please confirm your email',
@@ -157,12 +151,12 @@ def register():
 
 @user_blueprint.route('/confirm/<token>', methods=['GET'])
 def confirm_email(token):
-    club_email = flask_exts.email_verifier.confirm_token(token)
+    club_email = flask_exts.email_verifier.confirm_token(token, 'confirm')
     if club_email is None:
         raise JsonError(status='error', reason='The confirmation link is invalid!', status_=404)
 
     matching_user = User.objects(email=club_email).first()
-    if not matching_user is not None:
+    if matching_user is None:
         raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
 
     if matching_user.confirmed:
@@ -203,6 +197,57 @@ def login():
     RefreshJTI(owner=user, token_id=refresh_jti).save()
 
     return {'access': access_token, 'refresh': refresh_token}
+
+
+@as_json
+@user_blueprint.route('/request-reset', methods=['POST'])
+@validate_json(schema={
+    'email': {'type': 'string'}
+}, require_all=True)
+def request_reset_password():
+    json = g.clean_json
+    club_email = json['email']
+    recover_token = flask_exts.email_verifier.generate_token(club_email, 'reset-password')
+    html = render_template('reset-password.html', reset_pass_url=f'{RECOVER_URL}?token={recover_token}')
+
+    flask_exts.email_sender.send(
+        subject='Reset your password',
+        recipients=[club_email],
+        body=html
+    )
+
+    return {'status': 'success'}
+
+
+@as_json
+@user_blueprint.route('/confirm-reset', methods=['POST'])
+@validate_json(schema={
+    'token': {'type': 'string'},
+    'password': {'type': 'string'}
+}, require_all=True)
+def confirm_reset_password():
+    json = g.clean_json
+
+    token = json['token']
+    password = json['password']
+
+    club_email = flask_exts.email_verifier.confirm_token(token, 'reset-password')
+    if club_email is None:
+        raise JsonError(status='error', reason='The recovery token is invalid!', status_=404)
+
+    owner = User.objects(email=club_email).first()
+    if owner is None:
+        raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
+
+    # First delete all access and refresh tokens from the user
+    AccessJTI.objects(owner=owner).delete()
+    RefreshJTI.objects(owner=owner).delete()
+
+    # Next, set the new password
+    owner.password = hash_manager.hash(password)
+    owner.save()
+
+    return {'status': 'success'}
 
 
 @as_json
@@ -255,53 +300,3 @@ def revoke_refresh():
         'status': 'success',
         'message': 'Refresh token revoked!'
     }
-
-
-@as_json
-@user_blueprint.route('/reset-password', methods=['POST'])
-@validate_json(schema={
-    'email': {'type': 'string'}
-}, require_all=True)
-@jwt_required
-def request_reset_password():
-    html = render_template(
-        'reset-password.html',
-        reset_pass_url=RECOVER_URL,
-        email_sender=application.config['MAIL_DEFAULT_SENDER']
-    )
-
-    flask_exts.email_sender.send(
-        subject='Please confirm your email',
-        recipients=[club_email],
-        body=html
-    )
-
-    return {'status': 'success'}
-
-
-@as_json
-@user_blueprint.route('/confirm-reset', methods=['POST'])
-@validate_json(schema={
-    'password': {'type': 'string'},
-    'confirm_password': {'type': 'string'}
-}, require_all=True)
-@jwt_required
-def confirm_reset_password():
-    json = g.clean_json
-    owner = current_user['user']
-    
-    password = json['password']
-    confirm_pass = json['confirm_password']
-
-    if (hash_manager.hash(password) == hash_manager.hash(confirm_pass)):
-        # First delete all access and refresh tokens from the user
-        AccessJTI.objects.find(owner=owner).delete()
-        RefreshJTI.objects.find(owner=owner).delete()
-
-        # Next, set the new password
-        owner.password = hash_manager.hash(json['password'])
-        owner.save()
-
-        return {'status': 'success'}
-    else:
-        raise JsonError(status='error', reason='The given passwords do not match.')

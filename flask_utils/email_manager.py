@@ -3,7 +3,7 @@ from flask import Flask
 from flask_mail import Mail
 from flask_json import JsonError
 
-VALID_SALT_TYPES = ['confirm', 'reset']
+VALID_SALT_TYPES = ['confirm-email', 'reset-password']
 
 class EmailVerifier:
     def __init__(self, app=None):
@@ -15,8 +15,8 @@ class EmailVerifier:
             secret_key = app.config['SECRET_KEY']
             self.serializer = URLSafeTimedSerializer(secret_key)
             self.pass_salts = {
-                'confirm': app.config['CONFIRM_EMAIL_SALT'],
-                'reset': app.config['RESET_PASSWORD_SALT'],
+                'confirm-email': app.config['CONFIRM_EMAIL_SALT'],
+                'reset-password': app.config['RESET_PASSWORD_SALT'],
             }
 
     def generate_token(self, email, salt_type):

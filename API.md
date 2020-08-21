@@ -78,6 +78,39 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 }
 ```
 
+### Request password reset
+* Description: Sends a password confirmation email to the user.
+* Path: `POST /api/user/request-reset`
+* Sample body input:
+```json
+{
+    "email": "example@gmail.com"
+}
+```
+* Sample body output:
+```json
+{
+    "status": "success"
+}
+```
+
+### Confirm Reset Password
+* Description: Resets the user's password and revokes all access and refresh tokens.
+* Path: `POST /api/user/confirm-reset`
+* Sample body input:
+```json
+{
+    "token": "<reset-password-token>",
+    "password": "examplepassword",
+}
+```
+* Sample body output:
+```json
+{
+    "status": "success"
+}
+```
+
 ### Refresh access token
 * Description: Fetches a new access token given a valid refresh token
 * Path: `POST /api/user/refresh`
@@ -113,43 +146,6 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 {
     "status": "success",
     "message": "Refresh token revoked!"
-}
-```
-
-### Reset Password
-* Description: Sends a password confirmation email to the user.
-* Path: `POST /api/user/reset-password`
-* Headers:
-    - `Authorization: Bearer <access_token>`
-* Sample body input:
-```json
-{
-    "email": "example@gmail.com"
-}
-```
-* Sample body output:
-```json
-{
-    "status": "success"
-}
-```
-
-### Confirm Reset Password
-* Description: Resets of the user and revokes all access and refresh tokens.
-* Path: `POST /api/user/confirm-reset`
-* Headers:
-    - `Authorization: Bearer <access_token>`
-* Sample body input:
-```json
-{
-    "password": "examplepassword",
-    "confirm_password": "examplepassword"
-}
-```
-* Sample body output:
-```json
-{
-    "status": "success"
 }
 ```
 

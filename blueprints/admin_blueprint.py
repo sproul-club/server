@@ -3,6 +3,8 @@ import json
 import datetime
 import dateutil
 
+from passlib.hash import pbkdf2_sha512 as hash_manager
+
 from init_app import app, flask_exts
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
@@ -12,7 +14,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, current_user
 from models import *
 
 admin_blueprint = Blueprint('admin', __name__, url_prefix='/api/admin')
-
 
 _get_list_resources = lambda club: json.dumps([json.loads(resource.to_json()) for resource in club.resources])
 _get_list_events    = lambda club: json.dumps([json.loads(event.to_json()) for event in club.events])
