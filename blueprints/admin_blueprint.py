@@ -138,16 +138,12 @@ def update_resource(resource_id):
     json = g.clean_json
     club = current_user['club']
 
-    new_res_name = json['name']
-    new_res_link = json['link']
-
     for (i, resource) in enumerate(club.resources):
         if resource.id == resource_id:
-            club.resources[i] = Resource(
-                id=resource.id,
-                name=new_res_name,
-                link=new_res_link
-            )
+            for key in json.keys():
+                if json.get(key) is not None:
+                    club.resources[i][key] = json[key]
+            club.save()
 
             return _get_list_resources(club)
 
@@ -233,16 +229,12 @@ def update_event(event_id):
     json = g.clean_json
     club = current_user['club']
 
-    new_event_name = json['name']
-    new_event_link = json['link']
-
     for (i, event) in enumerate(club.events):
         if event.id == event_id:
-            club.events[i] = Event(
-                id=event.id,
-                name=new_event_name,
-                link=new_event_link
-            )
+            for key in json.keys():
+                if json.get(key) is not None:
+                    club.events[i][key] = json[key]
+            club.save()
 
             return _get_list_events(club)
 
