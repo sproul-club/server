@@ -575,3 +575,22 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     }
 ]
 ```
+
+### Change password
+* Description: Changes the current user's password without revoking all the access and refresh tokens
+* Path: `POST /api/admin/change-password`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "old_password": "exampleoldpassword",
+    "new_password": "examplenewpassword",
+}
+```
+* Sample body output:
+```json
+{
+    "status": "success"
+}
+```

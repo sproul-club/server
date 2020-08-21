@@ -257,3 +257,27 @@ def delete_event(event_id):
         return _get_list_events(club)
     else:
         raise JsonError(status='error', reason='Requested event does not exist', status_=404)
+
+
+@as_json
+@admin_blueprint.route('/change-password', methods=['POST'])
+@validate_json(schema={
+    'old_password': {'type': 'string'},
+    'new_password': {'type': 'string'}
+}, require_all=True)
+@jwt_required
+def change_password():
+    json = g.clean_json
+    owner = current_user['user']
+    
+    old_password = json['old_password']
+    new_password = json['new_password']
+
+    if hash_manager.verify(old_password, owner.password):
+        # Only set the new password if the old password is verified
+        owner.password = hash_manager.hash(new_password)
+        owner.save()
+
+        return {'status': 'success'}
+    else:
+        raise JsonError(status='error', reason='The old password is incorrect.')
