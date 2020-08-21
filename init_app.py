@@ -27,7 +27,8 @@ class FlaskConfig(object):
     DEBUG = True
     SECRET_KEY = os.getenv('SECRET_KEY')
     FLASK_SECRET = os.getenv('SECRET_KEY')
-    SECURITY_PASSWORD_SALT = os.getenv('PASSWORD_SALT')
+    CONFIRM_EMAIL_SALT = os.getenv('CONFIRM_EMAIL_SALT')
+    RESET_PASSWORD_SALT = os.getenv('RESET_PASSWORD_SALT')
     JSON_ADD_STATUS = False
     CORS_HEADERS = '*' # TODO: [Security] - Tweak headers "specifically"
     UPLOAD_FOLDER = 'uploads'
@@ -64,9 +65,8 @@ class FlaskExtensions(object):
     def __init__(self, app):
         self.cors = CORS(app)
         self.jwt = JWTManager(app)
-        self.mail = Mail(app)
+        self.email_sender = EmailSender(app)
         self.email_verifier = EmailVerifier(app)
-        self.email_sender = EmailSender(app, self.mail)
         self.json = FlaskJSON(app)
         self.img_manager = ImageManager(app)
 
