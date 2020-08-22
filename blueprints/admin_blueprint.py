@@ -80,7 +80,7 @@ def upload_logo():
 
     banner_file = request.files.get('banner', None)
     if banner_file is not None:
-        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.id, banner_file, 'banner', 16 / 9)
+        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.id, banner_file, 'banner', 16 / 6)
         club.banner_url = banner_url
         response['banner-url'] = club.banner_url
 
