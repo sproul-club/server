@@ -5,10 +5,10 @@ import mongoengine_goodjson as gj
 from init_app import app
 
 class FutureUser(gj.Document):
-    org_name = mongo.StringField()
+    org_name = mongo.StringField(min_length=1)
     org_email = mongo.EmailField()
 
-    poc_name = mongo.StringField()
+    poc_name = mongo.StringField(min_length=1)
     poc_email = mongo.EmailField()
 
 class User(gj.Document):
@@ -24,7 +24,7 @@ class PreVerifiedEmail(gj.Document):
 
 class AccessJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
-    token_id = mongo.StringField(required=True)
+    token_id = mongo.StringField(required=True, min_length=1)
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
 
@@ -40,7 +40,7 @@ class AccessJTI(gj.Document):
 
 class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
-    token_id = mongo.StringField(required=True)
+    token_id = mongo.StringField(required=True, min_length=1)
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
 

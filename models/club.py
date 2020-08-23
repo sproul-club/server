@@ -13,12 +13,12 @@ class Event(gj.EmbeddedDocument):
     description = mongo.StringField(required=True, max_length=500)
 
 class Resource(gj.EmbeddedDocument):
-    id   = mongo.StringField(required=True, max_length=100)
-    name = mongo.StringField(required=True, max_length=100)
+    id   = mongo.StringField(required=True, min_length=1, max_length=100)
+    name = mongo.StringField(required=True, min_length=1, max_length=100)
     link = RelaxedURLField(required=True)
 
 class SocialMediaLinks(gj.EmbeddedDocument):
-    contact_email = mongo.EmailField(null=True)
+    contact_email = mongo.EmailField(required=True)
     website     = RelaxedURLField(null=True)
     facebook    = RelaxedURLField(null=True)
     instagram   = RelaxedURLField(null=True)
@@ -35,8 +35,8 @@ class Tag(gj.Document):
     name = mongo.StringField(required=True)
 
 class Club(gj.Document):
-    id    = mongo.StringField(required=True, primary_key=True)
-    name  = mongo.StringField(required=True, max_length=100)
+    id    = mongo.StringField(required=True, min_length=1, primary_key=True)
+    name  = mongo.StringField(required=True, min_length=1, max_length=100)
     owner = mongo.ReferenceField(User, required=True)
 
     tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
