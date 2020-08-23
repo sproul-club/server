@@ -59,7 +59,7 @@ class Club(gj.Document):
             {
                 'fields': ['$name', '$about_us'],
                 'default_language': 'english',
-                'weights': {'name': 8, 'about_us': 2}
+                'weights': {'name': 8, 'about_us': 4}
             }
         ]
     }
