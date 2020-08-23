@@ -5,12 +5,12 @@ from models.relaxed_url_field import RelaxedURLField
 from models.user import User
 
 class Event(gj.EmbeddedDocument):
-    id   = mongo.StringField(required=True, max_length=100)
-    name = mongo.StringField(required=True, max_length=100)
+    id   = mongo.StringField(required=True, min_length=1, max_length=60)
+    name = mongo.StringField(required=True, min_length=1, max_length=60)
     link = RelaxedURLField(null=True)
     event_start = mongo.DateTimeField(required=True)
     event_end   = mongo.DateTimeField(required=True)
-    description = mongo.StringField(required=True, max_length=500)
+    description = mongo.StringField(required=True, max_length=250)
 
 class Resource(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, min_length=1, max_length=100)

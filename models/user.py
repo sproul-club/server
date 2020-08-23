@@ -17,7 +17,7 @@ class FutureUser(gj.Document):
 
 class User(gj.Document):
     email    = mongo.EmailField(primary_key=True)
-    password = mongo.StringField(max_length=256)
+    password = mongo.StringField(required=True)
 
     registered_on = mongo.DateTimeField(default=datetime.datetime.utcnow)
     confirmed     = mongo.BooleanField(default=False)

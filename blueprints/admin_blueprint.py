@@ -30,16 +30,16 @@ def fetch_profile():
 @as_json
 @admin_blueprint.route('/profile', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string'},
+    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'minlength': 1, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
-    'about_us': {'type': 'string'},
-    'get_involved': {'type': 'string'},
+    'about_us': {'type': 'string', 'maxlength': 500},
+    'get_involved': {'type': 'string', 'maxlength': 500},
     'social_media_links': {
         'type': 'dict',
         'schema': {
-            'contact_email': {'type': 'string', 'nullable': True},
+            'contact_email': {'type': 'string'},
             'website': {'type': 'string', 'nullable': True},
             'facebook': {'type': 'string', 'nullable': True},
             'instagram': {'type': 'string', 'nullable': True},
@@ -100,7 +100,7 @@ def get_resources():
 @as_json
 @admin_blueprint.route('/resources', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string'},
+    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
     'link': {'type': 'string'}
 }, require_all=True)
 @jwt_required
@@ -131,7 +131,7 @@ def add_resource():
 @as_json
 @admin_blueprint.route('/resources/<resource_id>', methods=['PUT'])
 @validate_json(schema={
-    'name': {'type': 'string'},
+    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
     'link': {'type': 'string'}
 })
 @jwt_required
@@ -179,11 +179,11 @@ def get_events():
 @as_json
 @admin_blueprint.route('/events', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string'},
+    'name': {'type': 'string', 'maxlength': 60},
     'link': {'type': 'string'},
     'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string'}
+    'description': {'type': 'string', 'maxlength': 250}
 }, require_all=True)
 @jwt_required
 def add_event():
@@ -219,11 +219,11 @@ def add_event():
 @as_json
 @admin_blueprint.route('/events/<event_id>', methods=['PUT'])
 @validate_json(schema={
-    'name': {'type': 'string'},
+    'name': {'type': 'string', 'maxlength': 60},
     'link': {'type': 'string'},
     'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string'}
+    'description': {'type': 'string', 'maxlength': 250}
 })
 @jwt_required
 def update_event(event_id):

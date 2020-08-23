@@ -84,9 +84,9 @@ def does_email_exist():
 @as_json
 @user_blueprint.route('/register', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string'},
+    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
     'email': {'type': 'string'},
-    'password': {'type': 'string'},
+    'password': {'type': 'string', 'minlength': 1},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'minlength': 1, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'}
@@ -165,8 +165,8 @@ def confirm_email(token):
 @as_json
 @user_blueprint.route('/login', methods=['POST'])
 @validate_json(schema={
-    'email': {'type': 'string'},
-    'password': {'type': 'string'}
+    'email': {'type': 'string', 'minlength': 1},
+    'password': {'type': 'string', 'minlength': 1}
 }, require_all=True)
 def login():
     json = g.clean_json
@@ -195,7 +195,7 @@ def login():
 @as_json
 @user_blueprint.route('/request-reset', methods=['POST'])
 @validate_json(schema={
-    'email': {'type': 'string'}
+    'email': {'type': 'string', 'minlength': 1}
 }, require_all=True)
 def request_reset_password():
     json = g.clean_json
