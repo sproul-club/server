@@ -76,7 +76,7 @@ def revoked_jwt_handler():
     return {'status': 'error', 'reason': 'Token has been revoked'}, 401
 
 @as_json
-@user_blueprint.route('/email-exists', methods=['GET'])
+@user_blueprint.route('/email-exists', methods=['POST'])
 @validate_json(schema={
     'email': {'type': 'string'}
 }, require_all=True)

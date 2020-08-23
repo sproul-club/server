@@ -20,7 +20,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 
 ### Does email exist? (before sign up)
 * Description: Given an email for a potential sign up, check if it exists within to list of scrapped CalLink emails?
-* Path: `GET /api/user/email-exists`
+* Path: `POST /api/user/email-exists`
 * Sample body input:
 ```json
 {
