@@ -9,11 +9,11 @@ def create_expire_index(field, expire_after_key):
     return { 'fields': [field], 'expireAfterSeconds': int(datetime_obj.total_seconds()) }
 
 class FutureUser(gj.Document):
-    org_name = mongo.StringField(min_length=1)
-    org_email = mongo.EmailField()
+    org_name = mongo.StringField(required=True)
+    org_email = mongo.EmailField(required=True)
 
-    poc_name = mongo.StringField(min_length=1)
-    poc_email = mongo.EmailField()
+    poc_name = mongo.StringField(required=True)
+    poc_email = mongo.EmailField(required=True)
 
 class User(gj.Document):
     email    = mongo.EmailField(primary_key=True)
@@ -28,7 +28,7 @@ class PreVerifiedEmail(gj.Document):
 
 class AccessJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
-    token_id = mongo.StringField(required=True, min_length=1)
+    token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
@@ -39,7 +39,7 @@ class AccessJTI(gj.Document):
 
 class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
-    token_id = mongo.StringField(required=True, min_length=1)
+    token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
 
@@ -49,7 +49,7 @@ class RefreshJTI(gj.Document):
     }
 
 class ConfirmEmailToken(gj.Document):
-    token = mongo.StringField(required=True, min_length=1)
+    token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
@@ -58,7 +58,7 @@ class ConfirmEmailToken(gj.Document):
     }
 
 class ResetPasswordToken(gj.Document):
-    token = mongo.StringField(required=True, min_length=1)
+    token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 

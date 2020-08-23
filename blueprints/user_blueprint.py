@@ -71,7 +71,7 @@ def revoked_jwt_handler():
 @as_json
 @user_blueprint.route('/email-exists', methods=['POST'])
 @validate_json(schema={
-    'email': {'type': 'string'}
+    'email': {'type': 'string', 'empty': False}
 }, require_all=True)
 def does_email_exist():
     json = g.clean_json
@@ -84,10 +84,10 @@ def does_email_exist():
 @as_json
 @user_blueprint.route('/register', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
-    'email': {'type': 'string'},
-    'password': {'type': 'string', 'minlength': 1},
-    'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'minlength': 1, 'maxlength': 3},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'email': {'type': 'string', 'empty': False},
+    'password': {'type': 'string', 'empty': False},
+    'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'}
 }, require_all=True)
@@ -166,8 +166,8 @@ def confirm_email(token):
 @as_json
 @user_blueprint.route('/login', methods=['POST'])
 @validate_json(schema={
-    'email': {'type': 'string', 'minlength': 1},
-    'password': {'type': 'string', 'minlength': 1}
+    'email': {'type': 'string', 'empty': False},
+    'password': {'type': 'string', 'empty': False}
 }, require_all=True)
 def login():
     json = g.clean_json
@@ -196,7 +196,7 @@ def login():
 @as_json
 @user_blueprint.route('/request-reset', methods=['POST'])
 @validate_json(schema={
-    'email': {'type': 'string', 'minlength': 1}
+    'email': {'type': 'string', 'empty': False}
 }, require_all=True)
 def request_reset_password():
     json = g.clean_json

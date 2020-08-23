@@ -30,8 +30,8 @@ def fetch_profile():
 @as_json
 @admin_blueprint.route('/profile', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
-    'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'minlength': 1, 'maxlength': 3},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
     'about_us': {'type': 'string', 'maxlength': 500},
@@ -39,17 +39,17 @@ def fetch_profile():
     'social_media_links': {
         'type': 'dict',
         'schema': {
-            'contact_email': {'type': 'string'},
-            'website': {'type': 'string', 'nullable': True},
-            'facebook': {'type': 'string', 'nullable': True},
-            'instagram': {'type': 'string', 'nullable': True},
-            'linkedin': {'type': 'string', 'nullable': True},
-            'twitter': {'type': 'string', 'nullable': True},
-            'youtube': {'type': 'string', 'nullable': True},
-            'github': {'type': 'string', 'nullable': True},
-            'behance': {'type': 'string', 'nullable': True},
-            'medium': {'type': 'string', 'nullable': True},
-            'gcalendar': {'type': 'string', 'nullable': True}
+            'contact_email': {'type': 'string', 'empty': False},
+            'website': {'type': 'string', 'nullable': True, 'empty': True},
+            'facebook': {'type': 'string', 'nullable': True, 'empty': True},
+            'instagram': {'type': 'string', 'nullable': True, 'empty': True},
+            'linkedin': {'type': 'string', 'nullable': True, 'empty': True},
+            'twitter': {'type': 'string', 'nullable': True, 'empty': True},
+            'youtube': {'type': 'string', 'nullable': True, 'empty': True},
+            'github': {'type': 'string', 'nullable': True, 'empty': True},
+            'behance': {'type': 'string', 'nullable': True, 'empty': True},
+            'medium': {'type': 'string', 'nullable': True, 'empty': True},
+            'gcalendar': {'type': 'string', 'nullable': True, 'empty': True}
         }
     }
 })
@@ -100,8 +100,8 @@ def get_resources():
 @as_json
 @admin_blueprint.route('/resources', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
-    'link': {'type': 'string'}
+    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'link': {'type': 'string', 'empty': False}
 }, require_all=True)
 @jwt_required
 def add_resource():
@@ -131,8 +131,8 @@ def add_resource():
 @as_json
 @admin_blueprint.route('/resources/<resource_id>', methods=['PUT'])
 @validate_json(schema={
-    'name': {'type': 'string', 'minlength': 1, 'maxlength': 100},
-    'link': {'type': 'string'}
+    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'link': {'type': 'string', 'empty': False}
 })
 @jwt_required
 def update_resource(resource_id):
@@ -179,8 +179,8 @@ def get_events():
 @as_json
 @admin_blueprint.route('/events', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'maxlength': 60},
-    'link': {'type': 'string'},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 60},
+    'link': {'type': 'string', 'empty': False},
     'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'description': {'type': 'string', 'maxlength': 250}
@@ -219,8 +219,8 @@ def add_event():
 @as_json
 @admin_blueprint.route('/events/<event_id>', methods=['PUT'])
 @validate_json(schema={
-    'name': {'type': 'string', 'maxlength': 60},
-    'link': {'type': 'string'},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 60},
+    'link': {'type': 'string', 'empty': False},
     'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'description': {'type': 'string', 'maxlength': 250}
@@ -262,8 +262,8 @@ def delete_event(event_id):
 @as_json
 @admin_blueprint.route('/change-password', methods=['POST'])
 @validate_json(schema={
-    'old_password': {'type': 'string'},
-    'new_password': {'type': 'string'}
+    'old_password': {'type': 'string', 'empty': False},
+    'new_password': {'type': 'string', 'empty': False}
 }, require_all=True)
 @jwt_required
 def change_password():

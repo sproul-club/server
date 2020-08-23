@@ -5,16 +5,16 @@ from models.relaxed_url_field import RelaxedURLField
 from models.user import User
 
 class Event(gj.EmbeddedDocument):
-    id   = mongo.StringField(required=True, min_length=1, max_length=60)
-    name = mongo.StringField(required=True, min_length=1, max_length=60)
+    id   = mongo.StringField(required=True, max_length=60)
+    name = mongo.StringField(required=True, max_length=60)
     link = RelaxedURLField(null=True)
     event_start = mongo.DateTimeField(required=True)
     event_end   = mongo.DateTimeField(required=True)
     description = mongo.StringField(required=True, max_length=250)
 
 class Resource(gj.EmbeddedDocument):
-    id   = mongo.StringField(required=True, min_length=1, max_length=100)
-    name = mongo.StringField(required=True, min_length=1, max_length=100)
+    id   = mongo.StringField(required=True, max_length=100)
+    name = mongo.StringField(required=True, max_length=100)
     link = RelaxedURLField(required=True)
 
 class SocialMediaLinks(gj.EmbeddedDocument):
@@ -35,8 +35,8 @@ class Tag(gj.Document):
     name = mongo.StringField(required=True)
 
 class Club(gj.Document):
-    id    = mongo.StringField(required=True, min_length=1, primary_key=True)
-    name  = mongo.StringField(required=True, min_length=1, max_length=100)
+    id    = mongo.StringField(required=True, primary_key=True)
+    name  = mongo.StringField(required=True, max_length=100)
     owner = mongo.ReferenceField(User, required=True)
 
     tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
@@ -52,7 +52,7 @@ class Club(gj.Document):
     resources = mongo.EmbeddedDocumentListField(Resource, default=[])
     events    = mongo.EmbeddedDocumentListField(Event, default=[])
 
-    social_media_links = mongo.EmbeddedDocumentField(SocialMediaLinks, default=SocialMediaLinks())
+    social_media_links = mongo.EmbeddedDocumentField(SocialMediaLinks)
 
     meta = {
         'indexes': [

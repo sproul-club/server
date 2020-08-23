@@ -57,10 +57,10 @@ future_wks = gc.open_by_key(SPREADSHEET_ID).sheet1
 @as_json
 @app.route('/api/future-sign-up', methods=['POST'])
 @validate_json(schema={
-    'org-name': {'type': 'string'},
-    'org-email': {'type': 'string'},
-    'poc-name': {'type': 'string'},
-    'poc-email': {'type': 'string'}
+    'org-name': {'type': 'string', 'empty': False},
+    'org-email': {'type': 'string', 'empty': False},
+    'poc-name': {'type': 'string', 'empty': False},
+    'poc-email': {'type': 'string', 'empty': False}
 }, require_all=True)
 def sign_up_future():
     json = g.clean_json
