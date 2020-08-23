@@ -124,6 +124,7 @@ def register():
         tags=Tag.objects.filter(id__in=club_tag_ids),
         app_required=app_required,
         new_members=new_members,
+        social_media_links=SocialMediaLinks(contact_email=club_email)
     )
 
     new_user.save()
