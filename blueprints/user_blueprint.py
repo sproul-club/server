@@ -44,15 +44,8 @@ def custom_user_loader_error(identity):
 @flask_exts.jwt.token_in_blacklist_loader
 def is_token_in_blacklist(decrypted_token):
     jti = decrypted_token['jti']
-    try:
-        access_jti = AccessJTI.objects.get(token_id=jti)
-    except AccessJTI.DoesNotExist:
-        access_jti = None
-
-    try:
-        refresh_jti = RefreshJTI.objects.get(token_id=jti)
-    except RefreshJTI.DoesNotExist:
-        refresh_jti = None
+    access_jti = AccessJTI.objects(token_id=jti).first()
+    refresh_jti = RefreshJTI.objects(token_id=jti).first()
 
     if access_jti is None and refresh_jti is None:
         return False
@@ -94,7 +87,7 @@ def does_email_exist():
     'name': {'type': 'string'},
     'email': {'type': 'string'},
     'password': {'type': 'string'},
-    'tags': {'type': 'list', 'schema': {'type': 'integer'}},
+    'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'minlength': 1, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'}
 }, require_all=True)
@@ -151,7 +144,7 @@ def register():
 
 @user_blueprint.route('/confirm/<token>', methods=['GET'])
 def confirm_email(token):
-    club_email = flask_exts.email_verifier.confirm_token(token, 'confirm')
+    club_email = flask_exts.email_verifier.confirm_token(token, 'confirm-email')
     if club_email is None:
         raise JsonError(status='error', reason='The confirmation link is invalid!', status_=404)
 

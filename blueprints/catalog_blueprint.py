@@ -3,7 +3,6 @@ import re
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
 from flask_utils import validate_json
-from init_app import flask_exts
 
 import mongoengine as mongo
 from models import Tag, Club

@@ -5,7 +5,7 @@ import dateutil
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 
-from init_app import app, flask_exts
+from init_app import flask_exts
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
 from flask_utils import validate_json, id_creator
@@ -31,7 +31,7 @@ def fetch_profile():
 @admin_blueprint.route('/profile', methods=['POST'])
 @validate_json(schema={
     'name': {'type': 'string'},
-    'tags': {'type': 'list', 'schema': {'type': 'integer'}},
+    'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'minlength': 1, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
     'about_us': {'type': 'string'},
