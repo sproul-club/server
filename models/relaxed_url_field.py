@@ -1,5 +1,5 @@
 import re
-from mongoengine import StringField
+from mongoengine import StringField, URLField
 
 class RelaxedURLField(StringField):
     # This is for allowing the protocol and 'www' to be optional
@@ -12,5 +12,5 @@ class RelaxedURLField(StringField):
 
     def validate(self, value):
         # Only check full URL
-        if not self.url_regex.match(value):
+        if not self.null and not self.url_regex.match(value):
             self.error("Invalid URL: {}".format(value))
