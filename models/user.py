@@ -2,7 +2,7 @@ import datetime
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
-from init_app import app
+from app_config import FlaskConfig
 
 class FutureUser(gj.Document):
     org_name = mongo.StringField(min_length=1)
