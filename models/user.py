@@ -5,7 +5,10 @@ import mongoengine_goodjson as gj
 from app_config import CurrentConfig
 
 def create_expire_index(field, datetime_obj):
-    return { 'fields': [field], 'expireAfterSeconds': int(datetime_obj.total_seconds()) }
+    return {
+        'fields': [field],
+        'expireAfterSeconds': round(datetime_obj.total_seconds())
+    }
 
 class User(gj.Document):
     email    = mongo.EmailField(primary_key=True)

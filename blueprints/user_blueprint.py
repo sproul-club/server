@@ -180,11 +180,14 @@ def resend_confirm_email():
 def confirm_email(token):
     club_email = flask_exts.email_verifier.confirm_token(token, 'confirm-email')
     if club_email is None:
-        raise JsonError(status='error', reason='The confirmation link is invalid!', status_=404)
+        raise JsonError(status='error', reason='The confirmation link is invalid.', status_=404)
 
     matching_user = User.objects(email=club_email).first()
     if matching_user is None:
-        raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
+        raise JsonError(status='error', reason='The user matching the email does not exist.', status_=404)
+
+    # The club object is supposed to be linked to the user, so it shouldn't be null at this point
+    matching_club = Club.objects(owner=matching_user).first()
 
     # First, revoke the given email token
     flask_exts.email_verifier.revoke_token(token, 'confirm-email')
@@ -192,7 +195,17 @@ def confirm_email(token):
     if matching_user.confirmed:
         return redirect(LOGIN_URL)
 
-    # Then, set the user to 'confirmed' if it's not done already
+    confirmed_on = datetime.datetime.now()
+    if confirmed_on - matching_user.registered_on > CurrentConfig.CONFIRM_EMAIL_EXPIRY:
+        # Delete the user and club here
+        # HACK: This was supposed to simulate the auto-deletion of the user and club after the first confirmation email expires,
+        # but MongoDB TTL doesn't support deleting referenced or back-referenced documents (user -> club).
+        matching_club.delete()
+        matching_user.delete()
+
+        raise JsonError(status='error', reason='The account associated with the email has expired. Please re-register the club again.')
+
+    # Then, set the user and club to 'confirmed' if it's not done already
     matching_user.confirmed = True
     matching_user.confirmed_on = datetime.datetime.now()
     matching_user.save()
