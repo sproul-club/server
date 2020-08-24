@@ -3,6 +3,8 @@ from flask import Flask
 from flask_mail import Mail
 from flask_json import JsonError
 
+import smtplib
+
 from models import ConfirmEmailToken, ResetPasswordToken
 
 TokenTypes = {
@@ -50,7 +52,7 @@ class EmailVerifier:
 
         return token
 
-    # This will generate a temporary token based on the type and the given email and save it to the database.
+    # This will verify the given email token, if it exists
     def confirm_token(self, token, token_type):
         if token_type not in self.token_salts:
             raise JsonError(status='error', reason='Invalid token type provided', status_=500)
@@ -67,10 +69,19 @@ class EmailVerifier:
         except:
             return None
 
-        email_token.used = True
-        email_token.save()
-
         return email
+
+    # This will revoke the given email token, if it exists
+    def revoke_token(self, token, token_type):
+        if token_type not in self.token_salts:
+            raise JsonError(status='error', reason='Invalid token type provided', status_=500)
+
+        # First check if the token exists or is used already
+        MongoEmailToken = TokenTypes[token_type]
+        email_token = MongoEmailToken.objects(token=token).first()
+        if email_token is not None and not email_token.used:
+            email_token.used = True
+            email_token.save()
 
 
 """
@@ -92,9 +103,12 @@ class EmailSender:
 
     # A simple method to send an HTML email to a list of recipients with a subject
     def send(self, recipients, subject, body):
-        self.mail.send_message(
-            subject=subject,
-            recipients=recipients,
-            html=body,
-            sender=self.sender
-        )
+        try:
+            self.mail.send_message(
+                subject=subject,
+                recipients=recipients,
+                html=body,
+                sender=self.sender
+            )
+        except smtplib.SMTPAuthenticationError as ex:
+            raise JsonError(status='error', reason='The GMail login failed. Please see the logs', status_=500)

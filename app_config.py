@@ -1,7 +1,7 @@
 import datetime
 import os
 
-DEV_MODE = not True
+DEV_MODE = True
 
 if DEV_MODE:
     ENV_FILE = '.env.dev'
@@ -24,7 +24,7 @@ class BaseConfig(object):
     # Email token settings
     CONFIRM_EMAIL_SALT = os.getenv('CONFIRM_EMAIL_SALT')
     RESET_PASSWORD_SALT = os.getenv('RESET_PASSWORD_SALT')
-    CONFIRM_EMAIL_EXPIRY = datetime.timedelta(minutes=30)
+    CONFIRM_EMAIL_EXPIRY = datetime.timedelta(days=3)
     RESET_PASSWORD_EXPIRY = datetime.timedelta(minutes=30)
 
     # JWT settings
@@ -53,11 +53,13 @@ class BaseConfig(object):
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
     ENV = 'development'
+    BASE_URL = 'https://sc-backend-dev.herokuapp.com'
 
 # Production config object for Flask app
 class ProductionConfig(BaseConfig):
     DEBUG = False
     ENV = 'production'
+    BASE_URL = 'https://sc-backend-prod.herokuapp.com'
 
 if DEV_MODE:
     CurrentConfig = DevelopmentConfig

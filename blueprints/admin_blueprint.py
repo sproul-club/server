@@ -273,11 +273,20 @@ def change_password():
     old_password = json['old_password']
     new_password = json['new_password']
 
-    if hash_manager.verify(old_password, owner.password):
-        # Only set the new password if the old password is verified
-        owner.password = hash_manager.hash(new_password)
-        owner.save()
-
-        return {'status': 'success'}
-    else:
+    if not hash_manager.verify(old_password, owner.password):
         raise JsonError(status='error', reason='The old password is incorrect.')
+
+    # Check if the password is the same
+    if old_password == new_password:
+        raise JsonError(status='error', reason='The old and new passwords are identical.')
+
+    # Check if the password is strong enough
+    is_password_strong = flask_exts.password_checker.check(new_password)
+    if not is_password_strong:
+        raise JsonError(status='error', reason='The new password is not strong enough')
+    
+    # Only set the new password if the old password is verified
+    owner.password = hash_manager.hash(new_password)
+    owner.save()
+
+    return {'status': 'success'}

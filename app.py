@@ -31,4 +31,4 @@ app.register_blueprint(catalog_blueprint)
 app.register_blueprint(admin_blueprint)
 
 if __name__ == '__main__':
-    app.run(load_dotenv=False)
+    app.run(load_dotenv=False, use_reloader=False)

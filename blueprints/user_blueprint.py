@@ -19,7 +19,6 @@ from init_app import flask_exts
 from app_config import CurrentConfig
 from models import *
 
-BASE_URL = 'https://sc-backend-v0.herokuapp.com'
 LOGIN_URL = 'https://www.sproul.club/signin'
 RECOVER_URL = 'https://www.sproul.club/resetpassword'
 
@@ -111,6 +110,11 @@ def register():
     if user_exists:
         raise JsonError(status='error', reason='A club under that email already exists!', status_=401)
 
+    # Check if the password is strong enough
+    is_password_strong = flask_exts.password_checker.check(club_password)
+    if not is_password_strong:
+        raise JsonError(status='error', reason='The password is not strong enough')
+
     new_user = User(
         email=club_email,
         password=hash_manager.hash(club_password)
@@ -131,7 +135,36 @@ def register():
     new_club.save()
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = BASE_URL + url_for('user.confirm_email', token=verification_token)
+    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
+    html = render_template('confirm-email.html', confirm_url=confirm_url)
+
+    flask_exts.email_sender.send(
+        subject='Please confirm your email',
+        recipients=[club_email],
+        body=html
+    )
+
+    return {'status': 'success'}
+
+
+@as_json
+@user_blueprint.route('/resend-confirm', methods=['POST'])
+@validate_json(schema={
+    'email': {'type': 'string', 'empty': False}
+}, require_all=True)
+def resend_confirm_email():
+    json = g.clean_json
+    club_email = json['email']
+
+    print('test')
+
+    # Check if email is already registered
+    user_exists = User.objects(email=club_email).first() is not None
+    if not user_exists:
+        raise JsonError(status='error', reason='No club under that email exists!', status_=404)
+
+    verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
+    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(
@@ -153,9 +186,13 @@ def confirm_email(token):
     if matching_user is None:
         raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
 
+    # First, revoke the given email token
+    flask_exts.email_verifier.revoke_token(token, 'confirm-email')
+
     if matching_user.confirmed:
         return redirect(LOGIN_URL)
 
+    # Then, set the user to 'confirmed' if it's not done already
     matching_user.confirmed = True
     matching_user.confirmed_on = datetime.datetime.now()
     matching_user.save()
@@ -228,7 +265,7 @@ def confirm_reset_password():
     json = g.clean_json
 
     token = json['token']
-    password = json['password']
+    club_password = json['password']
 
     club_email = flask_exts.email_verifier.confirm_token(token, 'reset-password')
     if club_email is None:
@@ -238,12 +275,20 @@ def confirm_reset_password():
     if owner is None:
         raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
 
-    # First delete all access and refresh tokens from the user
+    # Check if the password is strong enough
+    is_password_strong = flask_exts.password_checker.check(club_password)
+    if not is_password_strong:
+        raise JsonError(status='error', reason='The password is not strong enough')
+
+    # First, revoke the given email token
+    flask_exts.email_verifier.revoke_token(token, 'reset-password')
+
+    # Next, delete all access and refresh tokens from the user
     AccessJTI.objects(owner=owner).delete()
     RefreshJTI.objects(owner=owner).delete()
 
-    # Next, set the new password
-    owner.password = hash_manager.hash(password)
+    # Finally, set the new password
+    owner.password = hash_manager.hash(club_password)
     owner.save()
 
     return {'status': 'success'}
@@ -302,15 +347,3 @@ def revoke_refresh():
         'status': 'success',
         'message': 'Refresh token revoked!'
     }
-
-
-@as_json
-@user_blueprint.route('/delete/<email>', methods=['GET'])
-def TMP_delete_user(email):
-    user = User.objects(email=email).first()
-    if user is None:
-        raise JsonError(status='error', reason='The user does not exist!')
-
-    user.delete()
-
-    return {'status': 'success'}

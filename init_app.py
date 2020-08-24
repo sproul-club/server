@@ -14,7 +14,7 @@ from flask_cors import CORS
 from flask_talisman import Talisman
 
 from app_config import CurrentConfig
-from flask_utils import EmailVerifier, EmailSender, ImageManager
+from flask_utils import EmailVerifier, EmailSender, ImageManager, PasswordEnforcer
 
 # Setup Sentry SDK
 import sentry_sdk
@@ -40,6 +40,7 @@ class FlaskExtensions(object):
         self.email_verifier = EmailVerifier(app)
         self.json = FlaskJSON(app)
         self.img_manager = ImageManager(app)
+        self.password_checker = PasswordEnforcer()
 
         self.mongo = mongo
         self.mongo.connect(host=os.getenv('MONGO_URI'))
