@@ -4,6 +4,7 @@ load_dotenv()
 import os
 
 import mongoengine as mongo
+# import walrus
 
 from flask import Flask
 from flask_mail import Mail
@@ -42,5 +43,8 @@ class FlaskExtensions(object):
 
         self.mongo = mongo
         self.mongo.connect(host=os.getenv('MONGO_URI'))
+
+        # redis_url = urlparse.urlparse(os.environ.get('REDIS_URI'))
+        # self.redis = walrus.Database(host=redis_url.hostname, port=redis_url.port, password=redis_url.password, db=0, decode_responses=True)
 
 flask_exts = FlaskExtensions(app)
