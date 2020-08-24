@@ -1,6 +1,7 @@
 # API
 
-Base URL: https://sc-backend-v0.herokuapp.com
+Base URL (development): https://sc-backend-dev.herokuapp.com
+Base URL (production): https://sc-backend-prod.herokuapp.com
 
 ### Note about error responses
 All endpoints except for the email confirmation and confirming a password reset will return a JSON object of the following form:

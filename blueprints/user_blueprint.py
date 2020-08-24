@@ -19,7 +19,6 @@ from init_app import flask_exts
 from app_config import CurrentConfig
 from models import *
 
-BASE_URL = 'https://sc-backend-v0.herokuapp.com'
 LOGIN_URL = 'https://www.sproul.club/signin'
 RECOVER_URL = 'https://www.sproul.club/resetpassword'
 
@@ -136,7 +135,7 @@ def register():
     new_club.save()
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = BASE_URL + url_for('user.confirm_email', token=verification_token)
+    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(
@@ -165,7 +164,7 @@ def resend_confirm_email():
         raise JsonError(status='error', reason='No club under that email exists!', status_=404)
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = BASE_URL + url_for('user.confirm_email', token=verification_token)
+    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(

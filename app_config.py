@@ -53,11 +53,13 @@ class BaseConfig(object):
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
     ENV = 'development'
+    BASE_URL = 'https://sc-backend-dev.herokuapp.com'
 
 # Production config object for Flask app
 class ProductionConfig(BaseConfig):
     DEBUG = False
     ENV = 'production'
+    BASE_URL = 'https://sc-backend-prod.herokuapp.com'
 
 if DEV_MODE:
     CurrentConfig = DevelopmentConfig
