@@ -213,10 +213,13 @@ def login():
 
     user = User.objects(email=email).first()
     if user is None:
-        raise JsonError(status='error', reason='The user does not exist!')
+        raise JsonError(status='error', reason='The user does not exist.')
+
+    if not user.confirmed:
+        raise JsonError(status='error', reason='The user has not confirmed their email.')
 
     if not hash_manager.verify(password, user.password):
-        raise JsonError(status='error', reason='The password is incorrect!')
+        raise JsonError(status='error', reason='The password is incorrect.')
 
     access_token = create_access_token(identity=email)
     refresh_token = create_refresh_token(identity=email)
