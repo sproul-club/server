@@ -111,6 +111,11 @@ def register():
     if user_exists:
         raise JsonError(status='error', reason='A club under that email already exists!', status_=401)
 
+    # Check if the password is strong enough
+    is_password_strong = flask_exts.password_checker.check(club_password)
+    if not is_password_strong:
+        raise JsonError(status='error', reason='The password is not strong enough')
+
     new_user = User(
         email=club_email,
         password=hash_manager.hash(club_password)
@@ -266,6 +271,11 @@ def confirm_reset_password():
     owner = User.objects(email=club_email).first()
     if owner is None:
         raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
+
+    # Check if the password is strong enough
+    is_password_strong = flask_exts.password_checker.check(club_password)
+    if not is_password_strong:
+        raise JsonError(status='error', reason='The password is not strong enough')
 
     # First delete all access and refresh tokens from the user
     AccessJTI.objects(owner=owner).delete()
