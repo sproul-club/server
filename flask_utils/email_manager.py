@@ -3,6 +3,8 @@ from flask import Flask
 from flask_mail import Mail
 from flask_json import JsonError
 
+import smtplib
+
 from models import ConfirmEmailToken, ResetPasswordToken
 
 TokenTypes = {
@@ -92,9 +94,12 @@ class EmailSender:
 
     # A simple method to send an HTML email to a list of recipients with a subject
     def send(self, recipients, subject, body):
-        self.mail.send_message(
-            subject=subject,
-            recipients=recipients,
-            html=body,
-            sender=self.sender
-        )
+        try:
+            self.mail.send_message(
+                subject=subject,
+                recipients=recipients,
+                html=body,
+                sender=self.sender
+            )
+        except smtplib.SMTPAuthenticationError as ex:
+            raise JsonError(status='error', reason='The GMail login failed. Please see the logs', status_=500)
