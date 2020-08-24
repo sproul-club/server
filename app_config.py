@@ -2,11 +2,7 @@ import datetime
 import os
 
 DEV_MODE = True
-
-if DEV_MODE:
-    ENV_FILE = '.env.dev'
-else:
-    ENV_FILE = '.env.prod'
+ENV_FILE = '.env.dev' if DEV_MODE else '.env.prod'
 
 from dotenv import load_dotenv
 load_dotenv(dotenv_path=ENV_FILE)
@@ -24,7 +20,7 @@ class BaseConfig(object):
     # Email token settings
     CONFIRM_EMAIL_SALT = os.getenv('CONFIRM_EMAIL_SALT')
     RESET_PASSWORD_SALT = os.getenv('RESET_PASSWORD_SALT')
-    CONFIRM_EMAIL_EXPIRY = datetime.timedelta(days=3)
+    CONFIRM_EMAIL_EXPIRY = datetime.timedelta(days=1)
     RESET_PASSWORD_EXPIRY = datetime.timedelta(minutes=30)
 
     # JWT settings
