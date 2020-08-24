@@ -277,7 +277,6 @@ def change_password():
         raise JsonError(status='error', reason='The old password is incorrect.')
 
     # Check if the password is the same
-
     if old_password == new_password:
         raise JsonError(status='error', reason='The old and new passwords are identical.')
 
