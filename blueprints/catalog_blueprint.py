@@ -64,6 +64,8 @@ def search_orgs():
         regex_search_query = re.compile(search_text, re.IGNORECASE)
         query = query.search_text(search_text) \
                     .order_by('$text_score')
+    else:
+        query = query.order_by('name')
 
     for tag in club_tags:
         query = query.filter(tags=tag)
