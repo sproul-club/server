@@ -26,8 +26,11 @@ def get_organizations():
     limit = json['limit']
     skip = json['skip']
 
+    confirmed_users = User.objects(confirmed=True)
+
     return Club \
         .objects[skip:skip + limit] \
+        .filter(owner__in=confirmed_users)
         .only('id', 'name', 'tags', 'app_required',
               'new_members', 'logo_url', 'banner_url') \
         .order_by('name') \
@@ -54,8 +57,11 @@ def search_orgs():
 
     limit = json['limit']
     skip = json['skip']
+
+    confirmed_users = User.objects(confirmed=True)
     
     query = Club.objects \
+        .filter(owner__in=confirmed_users)
         .only('id', 'name', 'tags', 'app_required',
               'new_members', 'logo_url', 'banner_url')
 
