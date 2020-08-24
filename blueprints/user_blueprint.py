@@ -16,6 +16,7 @@ from flask_jwt_extended import (
 from flask_utils import validate_json, id_creator
 
 from init_app import flask_exts
+from app_config import FlaskConfig
 from models import *
 
 BASE_URL_LOCAL = 'http://127.0.0.1:5000'
@@ -190,7 +191,12 @@ def login():
     AccessJTI(owner=user, token_id=access_jti).save()
     RefreshJTI(owner=user, token_id=refresh_jti).save()
 
-    return {'access': access_token, 'refresh': refresh_token}
+    return {
+        'access': access_token,
+        'access_expires_in': int(FlaskConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
+        'refresh': refresh_token,
+        'refresh_expires_in': int(FlaskConfig.JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
+    }
 
 
 @as_json
@@ -255,7 +261,10 @@ def refresh():
     access_jti = get_jti(access_token)
 
     AccessJTI(owner=owner, token_id=access_jti).save()
-    return {'access': access_token}
+    return {
+        'access': access_token,
+        'access_expires_in': int(FlaskConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
+    }
 
 
 @as_json
