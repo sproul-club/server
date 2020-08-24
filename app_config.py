@@ -24,7 +24,7 @@ class BaseConfig(object):
     # Email token settings
     CONFIRM_EMAIL_SALT = os.getenv('CONFIRM_EMAIL_SALT')
     RESET_PASSWORD_SALT = os.getenv('RESET_PASSWORD_SALT')
-    CONFIRM_EMAIL_EXPIRY = datetime.timedelta(minutes=30)
+    CONFIRM_EMAIL_EXPIRY = datetime.timedelta(days=3)
     RESET_PASSWORD_EXPIRY = datetime.timedelta(minutes=30)
 
     # JWT settings
