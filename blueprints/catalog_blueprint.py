@@ -4,7 +4,6 @@ from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
 from flask_utils import validate_json
 
-import mongoengine as mongo
 from models import Tag, Club
 
 catalog_blueprint = Blueprint('catalog', __name__, url_prefix='/api/catalog')

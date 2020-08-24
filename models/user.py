@@ -8,13 +8,6 @@ def create_expire_index(field, expire_after_key):
     datetime_obj = FlaskConfig.__dict__[expire_after_key]
     return { 'fields': [field], 'expireAfterSeconds': int(datetime_obj.total_seconds()) }
 
-class FutureUser(gj.Document):
-    org_name = mongo.StringField(required=True)
-    org_email = mongo.EmailField(required=True)
-
-    poc_name = mongo.StringField(required=True)
-    poc_email = mongo.EmailField(required=True)
-
 class User(gj.Document):
     email    = mongo.EmailField(primary_key=True)
     password = mongo.StringField(required=True)

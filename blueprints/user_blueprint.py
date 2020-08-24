@@ -19,8 +19,7 @@ from init_app import flask_exts
 from app_config import FlaskConfig
 from models import *
 
-BASE_URL_LOCAL = 'http://127.0.0.1:5000'
-BASE_URL_REMOTE = 'https://sc-backend-v0.herokuapp.com'
+BASE_URL = 'https://sc-backend-v0.herokuapp.com'
 LOGIN_URL = 'https://www.sproul.club/signin'
 RECOVER_URL = 'https://www.sproul.club/resetpassword'
 
@@ -132,7 +131,7 @@ def register():
     new_club.save()
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = BASE_URL_REMOTE + url_for('user.confirm_email', token=verification_token)
+    confirm_url = BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(
