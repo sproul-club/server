@@ -1,7 +1,7 @@
 import datetime
 import os
 
-DEV_MODE = not True
+DEV_MODE = True
 
 if DEV_MODE:
     ENV_FILE = '.env.dev'

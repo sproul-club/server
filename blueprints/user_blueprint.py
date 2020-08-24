@@ -143,6 +143,35 @@ def register():
     return {'status': 'success'}
 
 
+@as_json
+@user_blueprint.route('/resend-confirm', methods=['POST'])
+@validate_json(schema={
+    'email': {'type': 'string', 'empty': False}
+}, require_all=True)
+def resend_confirm_email():
+    json = g.clean_json
+    club_email = json['email']
+
+    print('test')
+
+    # Check if email is already registered
+    user_exists = User.objects(email=club_email).first() is not None
+    if not user_exists:
+        raise JsonError(status='error', reason='No club under that email exists!', status_=404)
+
+    verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
+    confirm_url = BASE_URL + url_for('user.confirm_email', token=verification_token)
+    html = render_template('confirm-email.html', confirm_url=confirm_url)
+
+    flask_exts.email_sender.send(
+        subject='Please confirm your email',
+        recipients=[club_email],
+        body=html
+    )
+
+    return {'status': 'success'}
+
+
 @user_blueprint.route('/confirm/<token>', methods=['GET'])
 def confirm_email(token):
     club_email = flask_exts.email_verifier.confirm_token(token, 'confirm-email')

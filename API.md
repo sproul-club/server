@@ -55,6 +55,22 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 }
 ```
 
+### Resend confirmation email
+* Description: Resends a new confirmation email if the user exists
+* Path: `POST /api/user/resend-confirm`
+* Sample body input:
+```json
+{
+    "email": "example@gmail.com",
+}
+```
+* Sample body output:
+```json
+{
+    "status": "success"
+}
+```
+
 ### Confirm new user
 * Description: Confirms the new user and club pair (this endpoint is normally within an email)
 * Path: `GET /api/user/confirm/<confirm_token>`
