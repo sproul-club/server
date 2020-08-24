@@ -46,7 +46,8 @@ class ImageManager:
             if abs(img_aspect_ratio - req_aspect_ratio) > error_rate:
                 raise JsonError(status='error', reason=f'The provided {img_type} has a aspect ratio that deviates too far from the required ratio.')
             
-            img_filename = f'{club_id}-{img_type}.png'
+            random_bits = os.urandom(16).hex()
+            img_filename = f'{club_id}-{img_type}-{random_bits}.png'
             img_file_location = os.path.join(self.upload_folder, img_filename)
             pil_image.save(img_file_location, 'PNG')
 
@@ -57,7 +58,7 @@ class ImageManager:
 
                 if os.path.exists(img_file_location):
                     os.remove(img_file_location)
-                
-                return self.get_s3_url(img_type, club_id)
+
+                return f'{self.public_url}/{img_type}/{club_id}-{img_type}-{random_bits}.png'
             except Exception as ex:
                 raise JsonError(status='error', reason=f'Unable to upload {img_type} image: ' + str(ex))
