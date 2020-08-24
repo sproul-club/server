@@ -16,7 +16,7 @@ from flask_jwt_extended import (
 from flask_utils import validate_json, id_creator
 
 from init_app import flask_exts
-from app_config import FlaskConfig
+from app_config import CurrentConfig
 from models import *
 
 BASE_URL = 'https://sc-backend-v0.herokuapp.com'
@@ -192,9 +192,9 @@ def login():
 
     return {
         'access': access_token,
-        'access_expires_in': int(FlaskConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
+        'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
         'refresh': refresh_token,
-        'refresh_expires_in': int(FlaskConfig.JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
+        'refresh_expires_in': int(CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
     }
 
 
@@ -262,7 +262,7 @@ def refresh():
     AccessJTI(owner=owner, token_id=access_jti).save()
     return {
         'access': access_token,
-        'access_expires_in': int(FlaskConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
+        'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
     }
 
 

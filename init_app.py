@@ -3,6 +3,8 @@ load_dotenv()
 
 import os
 
+import mongoengine as mongo
+
 from flask import Flask
 from flask_mail import Mail
 from flask_jwt_extended import JWTManager
@@ -10,15 +12,21 @@ from flask_json import FlaskJSON
 from flask_cors import CORS
 from flask_talisman import Talisman
 
-from app_config import FlaskConfig
+from app_config import CurrentConfig
 from flask_utils import EmailVerifier, EmailSender, ImageManager
 
+# Setup Sentry SDK
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-import mongoengine as mongo
+sentry_sdk.init(
+    dsn=os.getenv('SENTRY_URL'),
+    integrations=[FlaskIntegration()]
+)
+
 app = Flask('app', template_folder='templates')
-app.config.from_object(__name__ + '.FlaskConfig')
+app.config.from_object(CurrentConfig)
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok = True)
 
 # Flask extension libraries
@@ -34,9 +42,5 @@ class FlaskExtensions(object):
 
         self.mongo = mongo
         self.mongo.connect(host=os.getenv('MONGO_URI'))
-flask_exts = FlaskExtensions(app)
 
-sentry_sdk.init(
-    dsn=os.getenv('SENTRY_URL'),
-    integrations=[FlaskIntegration()]
-)
+flask_exts = FlaskExtensions(app)

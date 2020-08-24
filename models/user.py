@@ -2,10 +2,9 @@ import datetime
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
-from app_config import FlaskConfig
+from app_config import CurrentConfig
 
-def create_expire_index(field, expire_after_key):
-    datetime_obj = FlaskConfig.__dict__[expire_after_key]
+def create_expire_index(field, datetime_obj):
     return { 'fields': [field], 'expireAfterSeconds': int(datetime_obj.total_seconds()) }
 
 class User(gj.Document):
@@ -27,7 +26,7 @@ class AccessJTI(gj.Document):
 
     meta = {
         'collection': 'access_jti',
-        'indexes': [create_expire_index('expiry_time', 'JWT_ACCESS_TOKEN_EXPIRES')]
+        'indexes': [create_expire_index('expiry_time', CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES)]
     }
 
 class RefreshJTI(gj.Document):
@@ -38,7 +37,7 @@ class RefreshJTI(gj.Document):
 
     meta = {
         'collection': 'refresh_jti',
-        'indexes': [create_expire_index('expiry_time', 'JWT_REFRESH_TOKEN_EXPIRES')]
+        'indexes': [create_expire_index('expiry_time', CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES)]
     }
 
 class ConfirmEmailToken(gj.Document):
@@ -47,7 +46,7 @@ class ConfirmEmailToken(gj.Document):
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
     meta = {
-        'indexes': [create_expire_index('expiry_time', 'CONFIRM_EMAIL_EXPIRY')]
+        'indexes': [create_expire_index('expiry_time', CurrentConfig.CONFIRM_EMAIL_EXPIRY)]
     }
 
 class ResetPasswordToken(gj.Document):
@@ -56,5 +55,5 @@ class ResetPasswordToken(gj.Document):
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
     meta = {
-        'indexes': [create_expire_index('expiry_time', 'RESET_PASSWORD_EXPIRY')]
+        'indexes': [create_expire_index('expiry_time', CurrentConfig.RESET_PASSWORD_EXPIRY)]
     }

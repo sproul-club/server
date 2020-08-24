@@ -1,10 +1,18 @@
 import datetime
 import os
 
-# Configuration object for Flask app
-class FlaskConfig(object):
+DEV_MODE = not True
+
+if DEV_MODE:
+    ENV_FILE = '.env.dev'
+else:
+    ENV_FILE = '.env.prod'
+
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=ENV_FILE)
+
+class BaseConfig(object):
     # Flask settings
-    DEBUG = True
     SECRET_KEY = os.getenv('SECRET_KEY')
     FLASK_SECRET = os.getenv('SECRET_KEY')
     JSON_ADD_STATUS = False
@@ -23,7 +31,7 @@ class FlaskConfig(object):
     JWT_SECRET_KEY = os.getenv('SECRET_KEY')
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(hours=1)
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=15)
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=15)
 
     # Mail SMTP server settings
@@ -36,7 +44,22 @@ class FlaskConfig(object):
     MAIL_DEFAULT_SENDER = f'"sproul.club" <{os.getenv("MAIL_USERNAME")}>'
 
     # AWS S3 settings
-    S3_REGION     = os.getenv('S3_REGION_TEST')
-    S3_BUCKET     = os.getenv('S3_BUCKET_TEST')
-    S3_ACCESS_KEY = os.getenv('S3_KEY_TEST')
-    S3_SECRET_KEY = os.getenv('S3_SECRET_TEST')
+    S3_REGION     = os.getenv('S3_REGION')
+    S3_BUCKET     = os.getenv('S3_BUCKET')
+    S3_ACCESS_KEY = os.getenv('S3_KEY')
+    S3_SECRET_KEY = os.getenv('S3_SECRET')
+
+# Development config object for Flask app
+class DevelopmentConfig(BaseConfig):
+    DEBUG = True
+    ENV = 'development'
+
+# Production config object for Flask app
+class ProductionConfig(BaseConfig):
+    DEBUG = False
+    ENV = 'production'
+
+if DEV_MODE:
+    CurrentConfig = DevelopmentConfig
+else:
+    CurrentConfig = ProductionConfig
