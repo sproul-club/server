@@ -13,6 +13,7 @@ Flask-JSON==0.3.4
 Flask-JWT-Extended==3.24.1
 Flask-Mail==0.9.1
 flask-talisman==0.7.0
+gunicorn==20.0.4
 itsdangerous==1.1.0
 Jinja2==2.11.2
 jmespath==0.10.0
