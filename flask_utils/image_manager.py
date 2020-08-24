@@ -40,11 +40,11 @@ class ImageManager:
             try:
                 pil_image = Image.open(flask_file)
             except UnidentifiedImageError as ex:
-                raise JsonError(status='error', reason=f'The provided {img_type} is not an image.')
+                raise JsonError(status='error', reason=f'The provided {img_type} is not an image.', data={'image_type': img_type})
 
             img_aspect_ratio = pil_image.width / pil_image.height
             if abs(img_aspect_ratio - req_aspect_ratio) > error_rate:
-                raise JsonError(status='error', reason=f'The provided {img_type} has a aspect ratio that deviates too far from the required ratio.')
+                raise JsonError(status='error', reason=f'The provided {img_type}\'s aspect ratio deviates too far from the required ratio.', data={'image_type': img_type})
             
             random_bits = os.urandom(16).hex()
             img_filename = f'{club_id}-{img_type}-{random_bits}.png'
@@ -52,13 +52,9 @@ class ImageManager:
             pil_image.save(img_file_location, 'PNG')
 
             s3_file_location = f'{img_type}/{img_filename}'
+            self.s3_client.upload_file(img_file_location, self.bucket, s3_file_location, ExtraArgs={'ACL':'public-read'})
 
-            try:
-                self.s3_client.upload_file(img_file_location, self.bucket, s3_file_location, ExtraArgs={'ACL':'public-read'})
+            if os.path.exists(img_file_location):
+                os.remove(img_file_location)
 
-                if os.path.exists(img_file_location):
-                    os.remove(img_file_location)
-
-                return f'{self.public_url}/{img_type}/{club_id}-{img_type}-{random_bits}.png'
-            except Exception as ex:
-                raise JsonError(status='error', reason=f'Unable to upload {img_type} image: ' + str(ex))
+            return f'{self.public_url}/{img_type}/{club_id}-{img_type}-{random_bits}.png'
