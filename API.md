@@ -74,9 +74,12 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```json
 {
     "access": "<access_token>",
-    "refresh": "<refresh_token>"
+    "access_expires_in": 900,
+    "refresh": "<refresh_token>",
+    "refresh_expires_in": 86400
 }
 ```
+* Note: `expires_in` values are just example values
 
 ### Request password reset
 * Description: Sends a password confirmation email to the user.
@@ -119,9 +122,11 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Sample body output:
 ```json
 {
-    "access": "<access_token>"
+    "access": "<access_token>",
+    "access_expires_in": 900
 }
 ```
+* Note: `expires_in` values are just example values
 
 ### Revoke access token
 * Description: Revokes an issued access token, preventing further use of it
