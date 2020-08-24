@@ -52,7 +52,7 @@ class EmailVerifier:
 
         return token
 
-    # This will generate a temporary token based on the type and the given email and save it to the database.
+    # This will verify the given email token, if it exists
     def confirm_token(self, token, token_type):
         if token_type not in self.token_salts:
             raise JsonError(status='error', reason='Invalid token type provided', status_=500)
@@ -69,10 +69,19 @@ class EmailVerifier:
         except:
             return None
 
-        email_token.used = True
-        email_token.save()
-
         return email
+
+    # This will revoke the given email token, if it exists
+    def revoke_token(self, token, token_type):
+        if token_type not in self.token_salts:
+            raise JsonError(status='error', reason='Invalid token type provided', status_=500)
+
+        # First check if the token exists or is used already
+        MongoEmailToken = TokenTypes[token_type]
+        email_token = MongoEmailToken.objects(token=token).first()
+        if email_token is not None and not email_token.used:
+            email_token.used = True
+            email_token.save()
 
 
 """

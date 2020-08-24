@@ -186,9 +186,13 @@ def confirm_email(token):
     if matching_user is None:
         raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
 
+    # First, revoke the given email token
+    flask_exts.email_verifier.revoke_token(token, 'confirm-email')
+
     if matching_user.confirmed:
         return redirect(LOGIN_URL)
 
+    # Then, set the user to 'confirmed' if it's not done already
     matching_user.confirmed = True
     matching_user.confirmed_on = datetime.datetime.now()
     matching_user.save()
@@ -261,7 +265,7 @@ def confirm_reset_password():
     json = g.clean_json
 
     token = json['token']
-    password = json['password']
+    club_password = json['password']
 
     club_email = flask_exts.email_verifier.confirm_token(token, 'reset-password')
     if club_email is None:
@@ -276,12 +280,15 @@ def confirm_reset_password():
     if not is_password_strong:
         raise JsonError(status='error', reason='The password is not strong enough')
 
-    # First delete all access and refresh tokens from the user
+    # First, revoke the given email token
+    flask_exts.email_verifier.revoke_token(token, 'reset-password')
+
+    # Next, delete all access and refresh tokens from the user
     AccessJTI.objects(owner=owner).delete()
     RefreshJTI.objects(owner=owner).delete()
 
-    # Next, set the new password
-    owner.password = hash_manager.hash(password)
+    # Finally, set the new password
+    owner.password = hash_manager.hash(club_password)
     owner.save()
 
     return {'status': 'success'}
