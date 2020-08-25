@@ -363,3 +363,18 @@ def revoke_refresh():
         'status': 'success',
         'message': 'Refresh token revoked!'
     }
+
+
+@as_json
+@user_blueprint.route('/delete/<email>', methods=['GET'])
+def TMP_delete_user(email):
+    user = User.objects(email=email).first()
+    if user is None:
+        raise JsonError(status='error', reason='The user does not exist!')
+
+    user.delete()
+    
+    club = Club.objects(owner=user).first()
+    club.delete()
+
+    return {'status': 'success'}
