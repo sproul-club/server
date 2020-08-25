@@ -135,7 +135,7 @@ def register():
         id=id_creator(club_name),
         name=club_name,
         owner=new_user,
-        
+
         tags=Tag.objects.filter(id__in=club_tag_ids),
         app_required=app_required,
         new_members=new_members,
@@ -247,7 +247,7 @@ def login():
 
     access_token = create_access_token(identity=email)
     refresh_token = create_refresh_token(identity=email)
-    
+
     access_jti = get_jti(encoded_token=access_token)
     refresh_jti = get_jti(encoded_token=refresh_token)
 
@@ -327,7 +327,7 @@ def confirm_reset_password():
 def refresh():
     owner = current_user['user']
     owner_email = owner.email
-    
+
     access_token = create_access_token(identity=owner_email)
     access_jti = get_jti(access_token)
 
@@ -362,7 +362,7 @@ def revoke_access():
 @jwt_refresh_token_required
 def revoke_refresh():
     jti = get_raw_jwt()['jti']
-    
+
     refresh_jti = RefreshJTI.objects(token_id=jti).first()
     if refresh_jti is None:
         raise JsonError(status='error', reason='Refresh token does not exist!', status_=404)
@@ -374,3 +374,16 @@ def revoke_refresh():
         'status': 'success',
         'message': 'Refresh token revoked!'
     }
+
+@as_json
+@user_blueprint.route('/delete/<email>', methods=['GET'])
+def TMP_delete_user(email):
+    user = User.objects(email=email).first()
+    if user is None:
+        raise JsonError(status='error', reason='The user does not exist!')
+
+    club = Club.objects(owner=user).first()
+    club.delete()
+    user.delete()
+
+    return {'status': 'success'}
