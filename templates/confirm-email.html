@@ -2,7 +2,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> 
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -64,6 +64,17 @@
 
         .footer {
             display: flex;
+            justify-content: space-between;
+        }
+        
+        .contact-links {
+            display: inline-flex;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .icon {
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -76,11 +87,9 @@
 
         <hr class="top-hr">
 
-        <h1>Verify Your Email Address</h1>
+        <h1>Start using sproul.club</h1>
 
-        <p>Hi there! Thanks for making an account with sproul.club.</p>
-
-        <p> To activate your account, please click the button below to confirm your email address.</p>
+        <p> To complete the sign up process, click "Verify Email":</p>
 
         <a href="{{ confirm_url }}" class="verify-link">
         <p class="verify-button">
@@ -90,11 +99,22 @@
 
         <p class="alt-link-text">Can't see the button? <a href="{{ confirm_url }}">Click here</a>.</p>
 
+        <p> Please do not click the verify button if you did not make an account.</p>
+
         <hr class="bottom-hr">
         <div class="footer">
             <p>
-                Questions? Comments? Email us at <a href="mailto:sproul.club@gmail.com">sproul.club@gmail.com</a>.
+                If you did not make an account with us, please contact us immediately at <a href="mailto:sproul.club@gmail.com">sproul.club@gmail.com</a>.
             </p>
+            <div class="contact-links">
+                <p>
+                    <a target="_blank" href="https://sproul.club" class="icon"><i class="fa fa-1x fa-globe"></i></a> 
+                    <a target="_blank" href="https://www.facebook.com/sproul.club" class="icon"><i class="fa fa-1x fa-facebook"></i></a>
+                    <a target="_blank" href="https://www.instagram.com/sproul.club" class="icon"><i class="fa fa-1x fa-instagram"></i></a> 
+                </p> 
+                
+                
+            </div>
         </div>
        
     </div>
