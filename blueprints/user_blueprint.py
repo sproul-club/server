@@ -76,8 +76,19 @@ def does_email_exist():
     json = g.clean_json
     email = json['email']
 
-    email_exists = PreVerifiedEmail.objects(email=email).first() is not None
-    return {'exists': email_exists}
+    return {'exists': PreVerifiedEmail.objects(email=email).first() is not None}
+
+
+@as_json
+@user_blueprint.route('/password-strength', methods=['POST'])
+@validate_json(schema={
+    'password': {'type': 'string', 'empty': False}
+}, require_all=True)
+def is_password_strong_enough():
+    json = g.clean_json
+    password = json['password']
+
+    return {'strong': flask_exts.password_checker.check(password)}
 
 
 @as_json

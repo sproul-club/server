@@ -20,7 +20,7 @@ All endpoints except for the email confirmation and confirming a password reset 
 We use JWTs to manage authentication, mainly for allowing the user to edit their club's information.
 
 ### Does email exist? (before sign up)
-* Description: Given an email for a potential sign up, check if it exists within to list of scrapped CalLink emails?
+* Description: Given an email for a potential sign up, check if it exists within to list of scraped CalLink emails?
 * Path: `POST /api/user/email-exists`
 * Sample body input:
 ```json
@@ -32,6 +32,22 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```json
 {
     "exists": true
+}
+```
+
+### Is password strong enough? (before sign up)
+* Description: Given a password for a potential sign up, check if it's strong enough
+* Path: `POST /api/user/password-strength`
+* Sample body input:
+```json
+{
+    "password": "p@ssw0rd!",
+}
+```
+* Sample body output:
+```json
+{
+    "strong": true
 }
 ```
 
