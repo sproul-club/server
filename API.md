@@ -20,7 +20,7 @@ All endpoints except for the email confirmation and confirming a password reset 
 We use JWTs to manage authentication, mainly for allowing the user to edit their club's information.
 
 ### Does email exist? (before sign up)
-* Description: Given an email for a potential sign up, check if it exists within to list of scrapped CalLink emails?
+* Description: Given an email for a potential sign up, check if it exists within to list of scraped CalLink emails?
 * Path: `POST /api/user/email-exists`
 * Sample body input:
 ```json
@@ -32,6 +32,22 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```json
 {
     "exists": true
+}
+```
+
+### Is password strong enough? (before sign up)
+* Description: Given a password for a potential sign up, check if it's strong enough
+* Path: `POST /api/user/password-strength`
+* Sample body input:
+```json
+{
+    "password": "p@ssw0rd!",
+}
+```
+* Sample body output:
+```json
+{
+    "strong": true
 }
 ```
 
@@ -395,6 +411,38 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
     "logo_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
     "status": "success"
+}
+```
+
+### Upload logo
+* Description: Uploads the logo. Logos must respect a 1:1 aspect ratio. A 16 MB limit is imposed as well
+* Path: `POST /api/admin/upload-images`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+    * multipart/form-data
+        * `logo` - logo image
+* Sample body output
+```json
+{
+    "status": "success",
+    "logo_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png"
+}
+```
+
+### Upload banner
+* Description: Uploads the banner. banners must respect a 8:3 aspect ratio. A 16 MB limit is imposed as well
+* Path: `POST /api/admin/upload-images`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+    * multipart/form-data
+        * `banner` - banner image
+* Sample body output
+```json
+{
+    "status": "success",
+    "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png"
 }
 ```
 
