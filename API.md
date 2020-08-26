@@ -396,24 +396,6 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 }
 ```
 
-### Upload logo/banner images
-* Description: Uploads the logo and banner images. Logos must respect a 1:1 aspect ratio and 16:9 for banners. A 16 MB limit is imposed as well
-* Path: `POST /api/admin/upload-images`
-* Headers:
-    - `Authorization: Bearer <access_token>`
-* Sample body input:
-    * multipart/form-data
-        * `logo` - logo image
-        * `banner` - banner image
-* Sample body output
-```json
-{
-    "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
-    "logo_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
-    "status": "success"
-}
-```
-
 ### Upload logo
 * Description: Uploads the logo. Logos must respect a 1:1 aspect ratio. A 16 MB limit is imposed as well
 * Path: `POST /api/admin/upload-logo`

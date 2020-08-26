@@ -64,32 +64,6 @@ def edit_profile():
 
 
 @as_json
-@admin_blueprint.route('/upload-images', methods=['POST'])
-@jwt_required
-def upload_images():
-    club = current_user['club']
-    club_id = club.id
-
-    response = {}
-
-    logo_file = request.files.get('logo', None)
-    if logo_file is not None:
-        logo_url = flask_exts.img_manager.upload_img_asset_s3(club.id, logo_file, 'logo', 1.0)
-        club.logo_url = logo_url
-        response['logo-url'] = club.logo_url
-
-    banner_file = request.files.get('banner', None)
-    if banner_file is not None:
-        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.id, banner_file, 'banner', 16 / 6)
-        club.banner_url = banner_url
-        response['banner-url'] = club.banner_url
-
-    club.save()
-    response['status'] = 'success'
-    return response
-
-
-@as_json
 @admin_blueprint.route('/upload-logo', methods=['POST'])
 @jwt_required
 def upload_logo():
