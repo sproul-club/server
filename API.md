@@ -416,7 +416,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 
 ### Upload logo
 * Description: Uploads the logo. Logos must respect a 1:1 aspect ratio. A 16 MB limit is imposed as well
-* Path: `POST /api/admin/upload-images`
+* Path: `POST /api/admin/upload-logo`
 * Headers:
     - `Authorization: Bearer <access_token>`
 * Sample body input:
@@ -432,7 +432,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 
 ### Upload banner
 * Description: Uploads the banner. banners must respect a 8:3 aspect ratio. A 16 MB limit is imposed as well
-* Path: `POST /api/admin/upload-images`
+* Path: `POST /api/admin/upload-banner`
 * Headers:
     - `Authorization: Bearer <access_token>`
 * Sample body input:
