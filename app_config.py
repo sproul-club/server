@@ -1,7 +1,9 @@
 import datetime
 import os
 
-DEV_MODE = True
+DEV_MODE = os.getenv('DEV_MODE')
+if DEV_MODE is None:
+    DEV_MODE = True
 ENV_FILE = '.env.dev' if DEV_MODE else '.env.prod'
 
 from dotenv import load_dotenv
