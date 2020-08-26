@@ -66,7 +66,7 @@ def edit_profile():
 @as_json
 @admin_blueprint.route('/upload-images', methods=['POST'])
 @jwt_required
-def upload_logo():
+def upload_images():
     club = current_user['club']
     club_id = club.id
 
@@ -87,6 +87,36 @@ def upload_logo():
     club.save()
     response['status'] = 'success'
     return response
+
+
+@as_json
+@admin_blueprint.route('/upload-logo', methods=['POST'])
+@jwt_required
+def upload_logo():
+    club = current_user['club']
+    logo_file = request.files.get('logo', None)
+
+    if logo_file is not None:
+        logo_url = flask_exts.img_manager.upload_img_asset_s3(club.id, logo_file, 'logo', 1.0)
+        club.update(logo_url=logo_url)
+        return {'status': 'success', 'logo-url': club.logo_url}
+    else:
+        raise JsonError(status='error', reason='A logo was not provided for uploading.')
+
+
+@as_json
+@admin_blueprint.route('/upload-banner', methods=['POST'])
+@jwt_required
+def upload_banner():
+    club = current_user['club']
+    banner_file = request.files.get('banner', None)
+
+    if banner_file is not None:
+        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.id, banner_file, 'banner', 8 / 3)
+        club.update(banner_url=banner_url)
+        return {'status': 'success', 'banner-url': club.banner_url}
+    else:
+        raise JsonError(status='error', reason='A banner was not provided for uploading.')
 
 
 @as_json
@@ -157,10 +187,10 @@ def update_resource(resource_id):
 def delete_resource(resource_id):
     club = current_user['club']
     prev_len = len(club.resources)
-    
+
     club.resources = [resource for resource in club.resources if resource.id != resource_id]
     club.save()
-    
+
     new_len = len(club.resources)
     if new_len != prev_len:
         return _get_list_resources(club)
@@ -248,10 +278,10 @@ def update_event(event_id):
 def delete_event(event_id):
     club = current_user['club']
     prev_len = len(club.events)
-    
+
     club.events = [event for event in club.events if event.id != event_id]
     club.save()
-    
+
     new_len = len(club.events)
     if new_len != prev_len:
         return _get_list_events(club)
@@ -269,7 +299,7 @@ def delete_event(event_id):
 def change_password():
     json = g.clean_json
     owner = current_user['user']
-    
+
     old_password = json['old_password']
     new_password = json['new_password']
 
@@ -284,7 +314,7 @@ def change_password():
     is_password_strong = flask_exts.password_checker.check(new_password)
     if not is_password_strong:
         raise JsonError(status='error', reason='The new password is not strong enough')
-    
+
     # Only set the new password if the old password is verified
     owner.password = hash_manager.hash(new_password)
     owner.save()
