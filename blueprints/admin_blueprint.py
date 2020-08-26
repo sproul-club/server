@@ -34,8 +34,8 @@ def fetch_profile():
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
-    'about_us': {'type': 'string', 'maxlength': 500},
-    'get_involved': {'type': 'string', 'maxlength': 500},
+    'about_us': {'type': 'string', 'maxlength': 1500},
+    'get_involved': {'type': 'string', 'maxlength': 1000},
     'social_media_links': {
         'type': 'dict',
         'schema': {
@@ -183,11 +183,11 @@ def get_events():
 @as_json
 @admin_blueprint.route('/events', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'empty': False, 'maxlength': 60},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
     'link': {'type': 'string', 'empty': False},
     'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 250}
+    'description': {'type': 'string', 'maxlength': 1000}
 }, require_all=True)
 @jwt_required
 def add_event():
@@ -227,7 +227,7 @@ def add_event():
     'link': {'type': 'string', 'empty': False},
     'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 250}
+    'description': {'type': 'string', 'maxlength': 1000}
 })
 @jwt_required
 def update_event(event_id):

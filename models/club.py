@@ -10,7 +10,7 @@ class Event(gj.EmbeddedDocument):
     link = RelaxedURLField(null=True)
     event_start = mongo.DateTimeField(required=True)
     event_end   = mongo.DateTimeField(required=True)
-    description = mongo.StringField(required=True, max_length=500)
+    description = mongo.StringField(required=True, max_length=1000)
 
 class Resource(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
@@ -42,12 +42,12 @@ class Club(gj.Document):
     tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
     app_required = mongo.BooleanField(required=True)
     new_members  = mongo.BooleanField(required=True)
-    
+
     logo_url   = RelaxedURLField(null=True, default=None)
     banner_url = RelaxedURLField(null=True, default=None)
 
-    about_us     = mongo.StringField(default='', max_length=500)
-    get_involved = mongo.StringField(default='', max_length=500)
+    about_us     = mongo.StringField(default='', max_length=1500)
+    get_involved = mongo.StringField(default='', max_length=1000)
 
     resources = mongo.EmbeddedDocumentListField(Resource, default=[])
     events    = mongo.EmbeddedDocumentListField(Event, default=[])
