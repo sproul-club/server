@@ -33,10 +33,10 @@ class BaseConfig(object):
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=15)
 
     # Mail SMTP server settings
-    MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 465
-    MAIL_USE_SSL = True
-    MAIL_USE_TLS = False
+    MAIL_SERVER = os.getenv('MAIL_SERVER')
+    MAIL_PORT = int(os.getenv('MAIL_PORT'))
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL') == 'true'
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') == 'true'
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = f'"sproul.club" <{os.getenv("MAIL_SENDER")}>'
