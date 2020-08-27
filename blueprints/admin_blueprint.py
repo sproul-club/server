@@ -34,8 +34,8 @@ def fetch_profile():
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
-    'about_us': {'type': 'string', 'maxlength': 1500},
-    'get_involved': {'type': 'string', 'maxlength': 1000},
+    'about_us': {'type': 'string', 'maxlength': 750},
+    'get_involved': {'type': 'string', 'maxlength': 500},
     'social_media_links': {
         'type': 'dict',
         'schema': {
