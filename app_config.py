@@ -39,7 +39,7 @@ class BaseConfig(object):
     MAIL_USE_TLS = False
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = f'"sproul.club" <{os.getenv("MAIL_USERNAME")}>'
+    MAIL_DEFAULT_SENDER = f'"sproul.club" <{os.getenv("MAIL_SENDER")}>'
 
     # AWS S3 settings
     S3_REGION     = os.getenv('S3_REGION')
