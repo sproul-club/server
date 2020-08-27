@@ -1,7 +1,7 @@
 import datetime
 import os
 
-DEV_MODE = os.getenv('DEV_MODE')
+DEV_MODE = os.getenv('DEV_MODE') == 'true'
 if DEV_MODE is None:
     DEV_MODE = True
 ENV_FILE = '.env.dev' if DEV_MODE else '.env.prod'
@@ -34,9 +34,9 @@ class BaseConfig(object):
 
     # Mail SMTP server settings
     MAIL_SERVER = os.getenv('MAIL_SERVER')
-    MAIL_PORT = os.getenv('MAIL_PORT')
-    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL')
-    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS')
+    MAIL_PORT = int(os.getenv('MAIL_PORT'))
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL') == 'true'
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS') == 'true'
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = f'"sproul.club" <{os.getenv("MAIL_USERNAME")}>'
