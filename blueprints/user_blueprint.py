@@ -270,6 +270,11 @@ def login():
 def request_reset_password():
     json = g.clean_json
     club_email = json['email']
+
+    user = User.objects(email=club_email).first()
+    if user is None:
+        raise JsonError(status='error', reason='The user does not exist.')
+
     recover_token = flask_exts.email_verifier.generate_token(club_email, 'reset-password')
     html = render_template('reset-password.html', reset_pass_url=f'{RECOVER_URL}?token={recover_token}')
 
