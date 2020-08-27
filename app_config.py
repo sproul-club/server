@@ -1,7 +1,7 @@
 import datetime
 import os
 
-DEV_MODE = os.getenv('DEV_MODE')
+DEV_MODE = os.getenv('DEV_MODE') == 'true'
 if DEV_MODE is None:
     DEV_MODE = True
 ENV_FILE = '.env.dev' if DEV_MODE else '.env.prod'
