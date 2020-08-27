@@ -183,12 +183,12 @@ def get_events():
 @as_json
 @admin_blueprint.route('/events', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
-    'link': {'type': 'string', 'empty': False},
-    'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 1000}
-}, require_all=True)
+    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'link': {'type': 'string'},
+    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'description': {'type': 'string', 'maxlength': 500}
+})
 @jwt_required
 def add_event():
     json = g.clean_json
@@ -223,11 +223,11 @@ def add_event():
 @as_json
 @admin_blueprint.route('/events/<event_id>', methods=['PUT'])
 @validate_json(schema={
-    'name': {'type': 'string', 'empty': False, 'maxlength': 60},
-    'link': {'type': 'string', 'empty': False},
-    'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 1000}
+    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'link': {'type': 'string'},
+    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'description': {'type': 'string', 'maxlength': 500}
 })
 @jwt_required
 def update_event(event_id):
