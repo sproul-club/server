@@ -76,9 +76,12 @@ def search_orgs():
               'new_members', 'logo_url', 'banner_url')
 
     if len(search_text) > 0:
-        regex_search_query = re.compile(search_text, re.IGNORECASE)
-        query = query.search_text(search_text) \
-                    .order_by('$text_score')
+        query = query.filter(name__icontains=search_text).order_by('name')
+
+        # regex_search_query = re.compile(search_text, re.IGNORECASE)
+        # query = query.filter(name=regex_search_query)
+        # query = query.search_text(search_text) \
+        #             .order_by('$text_score')
     else:
         query = query.order_by('name')
 
