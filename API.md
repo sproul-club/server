@@ -219,17 +219,20 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```
 * Sample body output:
 ```json
-[
-    {
-        "id": "example-club",
-        "name": "Example Club",
-        "logo": "<logo-pic-url>",
-        "banner": "<banner-pic-url>",
-        "tags": [1, 3, 4],
-        "app_required": true,
-        "new_members": false,
-    }
-]
+{
+    "results": [
+        {
+            "id": "example-club",
+            "name": "Example Club",
+            "logo": "<logo-pic-url>",
+            "banner": "<banner-pic-url>",
+            "tags": [1, 3, 4],
+            "app_required": true,
+            "new_members": false,
+        }
+    ],
+    "num_results": 1
+}
 ```
 
 ### Fetch organizations (filtered)
@@ -248,17 +251,20 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```
 * Sample body output:
 ```json
-[
-    {
-        "id": "example-club",
-        "name": "Example Club",
-        "tags": [1, 3, 4],
-        "logo": "<logo-pic-url>",
-        "banner": "<banner-pic-url>",
-        "app_required": true,
-        "new_members": false,
-    }
-]
+{
+    "results": [
+        {
+            "id": "example-club",
+            "name": "Example Club",
+            "logo": "<logo-pic-url>",
+            "banner": "<banner-pic-url>",
+            "tags": [1, 3, 4],
+            "app_required": true,
+            "new_members": false,
+        }
+    ],
+    "num_results": 1
+}
 ```
 
 ### Fetch single organization

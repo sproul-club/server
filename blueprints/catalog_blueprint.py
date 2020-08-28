@@ -1,4 +1,5 @@
 import re
+import json as json_module
 
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
@@ -28,13 +29,22 @@ def get_organizations():
 
     confirmed_users = User.objects(confirmed=True)
 
-    return Club \
-        .objects[skip:skip + limit] \
+    query = Club.objects \
         .filter(owner__in=confirmed_users) \
         .only('id', 'name', 'tags', 'app_required',
               'new_members', 'logo_url', 'banner_url') \
-        .order_by('name') \
-        .to_json()
+        .order_by('name')
+
+    num_clubs = len(query)
+
+    query = query \
+        .limit(limit) \
+        .skip(skip) \
+
+    return {
+        'results': json_module.loads(query.to_json()),
+        'num_results': num_clubs
+    }
 
 
 @as_json
@@ -49,7 +59,7 @@ def get_organizations():
 })
 def search_orgs():
     json = g.clean_json
-    
+
     search_text = json['search']
     club_tags = json['tags']
     app_required = json['app_required']
@@ -59,7 +69,7 @@ def search_orgs():
     skip = json['skip']
 
     confirmed_users = User.objects(confirmed=True)
-    
+
     query = Club.objects \
         .filter(owner__in=confirmed_users) \
         .only('id', 'name', 'tags', 'app_required',
@@ -81,10 +91,16 @@ def search_orgs():
     if new_members is not None:
         query = query.filter(new_members=new_members)
 
-    return query \
+    num_clubs = len(query)
+
+    query = query \
         .limit(limit) \
         .skip(skip) \
-        .to_json()
+
+    return {
+        'results': json_module.loads(query.to_json()),
+        'num_results': num_clubs
+    }
 
 
 @as_json
@@ -95,4 +111,3 @@ def get_org_by_id(org_id):
         raise JsonError(status='error', reason='The requested club does not exist!', status_=404)
 
     return club.to_json()
-    
