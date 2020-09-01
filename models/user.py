@@ -2,14 +2,6 @@ import datetime
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
-from app_config import CurrentConfig
-
-def create_expire_index(field, datetime_obj):
-    return {
-        'fields': [field],
-        'expireAfterSeconds': round(datetime_obj.total_seconds())
-    }
-
 class User(gj.Document):
     email    = mongo.EmailField(primary_key=True)
     password = mongo.StringField(required=True)
@@ -18,8 +10,12 @@ class User(gj.Document):
     confirmed     = mongo.BooleanField(default=False)
     confirmed_on  = mongo.DateTimeField(default=None)
 
+    meta = {'auto_create_index': False}
+
 class PreVerifiedEmail(gj.Document):
     email = mongo.EmailField(unique=True)
+
+    meta = {'auto_create_index': False}
 
 class AccessJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
@@ -27,10 +23,7 @@ class AccessJTI(gj.Document):
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
-    meta = {
-        'collection': 'access_jti',
-        'indexes': [create_expire_index('expiry_time', CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES)]
-    }
+    meta = {'auto_create_index': False}
 
 class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
@@ -38,25 +31,18 @@ class RefreshJTI(gj.Document):
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
 
-    meta = {
-        'collection': 'refresh_jti',
-        'indexes': [create_expire_index('expiry_time', CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES)]
-    }
+    meta = {'auto_create_index': False}
 
 class ConfirmEmailToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
-    meta = {
-        'indexes': [create_expire_index('expiry_time', CurrentConfig.CONFIRM_EMAIL_EXPIRY)]
-    }
+    meta = {'auto_create_index': False}
 
 class ResetPasswordToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
-    meta = {
-        'indexes': [create_expire_index('expiry_time', CurrentConfig.RESET_PASSWORD_EXPIRY)]
-    }
+    meta = {'auto_create_index': False}

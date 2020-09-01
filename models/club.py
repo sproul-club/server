@@ -28,11 +28,13 @@ class SocialMediaLinks(gj.EmbeddedDocument):
     github      = RelaxedURLField(null=True)
     behance     = RelaxedURLField(null=True)
     medium      = RelaxedURLField(null=True)
-    gcalendar   = RelaxedURLField(null=True) # TODO: ask if we're still integrating this
+    gcalendar   = RelaxedURLField(null=True)
 
 class Tag(gj.Document):
     id   = mongo.IntField(required=True, primary_key=True)
     name = mongo.StringField(required=True)
+
+    meta = {'auto_create_index': False}
 
 class Club(gj.Document):
     id    = mongo.StringField(required=True, primary_key=True)
@@ -54,12 +56,4 @@ class Club(gj.Document):
 
     social_media_links = mongo.EmbeddedDocumentField(SocialMediaLinks)
 
-    meta = {
-        'indexes': [
-            {
-                'fields': ['$name', '$about_us'],
-                'default_language': 'english',
-                'weights': {'name': 8, 'about_us': 4}
-            }
-        ]
-    }
+    meta = {'auto_create_index': False}
