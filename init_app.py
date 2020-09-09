@@ -13,6 +13,7 @@ from flask_json import FlaskJSON
 from flask_cors import CORS
 from flask_talisman import Talisman
 from scout_apm.flask import ScoutApm
+from flask_compress import Compress
 
 from app_config import CurrentConfig
 from flask_utils import EmailVerifier, EmailSender, ImageManager, PasswordEnforcer
@@ -43,6 +44,7 @@ class FlaskExtensions(object):
         self.img_manager = ImageManager(app)
         self.password_checker = PasswordEnforcer()
         self.scout_apm = ScoutApm(app)
+        self.compressor = Compress(app)
 
         self.mongo = mongo
         self.mongo.connect(host=os.getenv('MONGO_URI'))
