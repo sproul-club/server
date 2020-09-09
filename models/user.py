@@ -23,7 +23,7 @@ class AccessJTI(gj.Document):
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
 
-    meta = {'auto_create_index': False}
+    meta = {'collection': 'access_jti', 'auto_create_index': False}
 
 class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(User, required=True)
@@ -31,7 +31,7 @@ class RefreshJTI(gj.Document):
     expired = mongo.BooleanField(default=False)
     expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
 
-    meta = {'auto_create_index': False}
+    meta = {'collection': 'refresh_jti', 'auto_create_index': False}
 
 class ConfirmEmailToken(gj.Document):
     token = mongo.StringField(required=True)
