@@ -19,6 +19,7 @@ from init_app import flask_exts
 from app_config import CurrentConfig
 from models import *
 
+LOGIN_CONFIRMED_EXT = '?confirmed=true'
 LOGIN_URL = 'https://www.sproul.club/signin'
 RECOVER_URL = 'https://www.sproul.club/resetpassword'
 
@@ -205,7 +206,7 @@ def confirm_email(token):
     flask_exts.email_verifier.revoke_token(token, 'confirm-email')
 
     if matching_user.confirmed:
-        return redirect(LOGIN_URL)
+        return redirect(LOGIN_URL + LOGIN_CONFIRMED_EXT)
 
     confirmed_on = datetime.datetime.now()
     if confirmed_on - matching_user.registered_on > CurrentConfig.CONFIRM_EMAIL_EXPIRY:
@@ -222,7 +223,7 @@ def confirm_email(token):
     matching_user.confirmed_on = datetime.datetime.now()
     matching_user.save()
 
-    return redirect(LOGIN_URL)
+    return redirect(LOGIN_URL + LOGIN_CONFIRMED_EXT)
 
 
 @as_json
