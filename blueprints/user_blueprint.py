@@ -167,12 +167,13 @@ def resend_confirm_email():
     json = g.clean_json
     club_email = json['email']
 
-    print('test')
-
     # Check if email is already registered
-    user_exists = User.objects(email=club_email).first() is not None
-    if not user_exists:
+    user = User.objects(email=club_email).first()
+    if user is None:
         raise JsonError(status='error', reason='No club under that email exists!', status_=404)
+
+    if user.confirmed:
+        raise JsonError(status='error', reason='The user is already confirmed.')
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
     confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
