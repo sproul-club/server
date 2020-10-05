@@ -237,7 +237,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 
 ### Fetch organizations (filtered)
 * Description: Fetches the list of organizations with filters, sorted by match relevency
-* Path: `POST /api/catalog/organizations` (TBD)
+* Path: `POST /api/catalog/search` (TBD)
 * Sample body input:
 ```json
 {

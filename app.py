@@ -5,7 +5,7 @@ from flask import request
 from flask_json import JsonError
 
 from init_app import app, flask_exts
-from blueprints import user_blueprint, catalog_blueprint, admin_blueprint
+from blueprints import user_blueprint, catalog_blueprint, admin_blueprint, monitor_blueprint
 
 @flask_exts.json.invalid_json_error
 def handler(e):
@@ -29,6 +29,7 @@ def handle_mongo_validation_error(ex):
 app.register_blueprint(user_blueprint)
 app.register_blueprint(catalog_blueprint)
 app.register_blueprint(admin_blueprint)
+app.register_blueprint(monitor_blueprint)
 
 if __name__ == '__main__':
     app.run(load_dotenv=False, use_reloader=False)
