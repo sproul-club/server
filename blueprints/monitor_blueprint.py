@@ -10,7 +10,7 @@ from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
 from flask_utils import validate_json, id_creator
-from flask_utils import fetch_aggregated_rso_list, fetch_aggregated_club_list, fetch_aggregated_tag_list
+from flask_utils import mongo_aggregations
 from flask_jwt_extended import jwt_required, get_jwt_identity, current_user
 
 from models import *
@@ -81,13 +81,13 @@ def fetch_performance_stats():
 @as_json
 @monitor_blueprint.route('/rso/list', methods=['GET'])
 def list_rso_users():
-    rso_list = fetch_aggregated_rso_list()
+    rso_list = mongo_aggregations.fetch_aggregated_rso_list()
     return json.dumps(rso_list)
 
 
 @monitor_blueprint.route('/rso/download', methods=['GET'])
 def download_rso_users():
-    rso_list = fetch_aggregated_rso_list()
+    rso_list = mongo_aggregations.fetch_aggregated_rso_list()
     for rso_email in rso_list:
         rso_email['registered'] = 'Yes' if rso_email['registered'] else 'No'
         rso_email['confirmed']  = 'Yes' if rso_email['confirmed'] else 'No'
@@ -96,10 +96,9 @@ def download_rso_users():
 
 
 @as_json
-@monitor_blueprint.route('/rso/add', methods=['POST'])
+@monitor_blueprint.route('/rso', methods=['POST'])
 def add_rso_user():
-    json = g.clean_json
-    email = json['email']
+    email = g.clean_json['email']
 
     rso_email = PreVerifiedEmail.objects(email=email).first()
     if rso_email is None:
@@ -110,11 +109,8 @@ def add_rso_user():
 
 
 @as_json
-@monitor_blueprint.route('/rso/remove', methods=['DELETE'])
-def remove_rso_user():
-    json = g.clean_json
-    email = json['email']
-
+@monitor_blueprint.route('/rso/<email>', methods=['DELETE'])
+def remove_rso_user(email):
     rso_email = PreVerifiedEmail.objects(email=email).first()
     if rso_email is None:
         raise JsonError(status='error', reason='RSO Email does not exist!')
@@ -130,13 +126,13 @@ def remove_rso_user():
 @as_json
 @monitor_blueprint.route('/club/list', methods=['GET'])
 def list_clubs():
-    club_list = fetch_aggregated_club_list()
+    club_list = mongo_aggregations.fetch_aggregated_club_list()
     return json.dumps(club_list)
 
 
 @monitor_blueprint.route('/club/download', methods=['GET'])
 def download_clubs():
-    club_list = fetch_aggregated_club_list()
+    club_list = mongo_aggregations.fetch_aggregated_club_list()
     for club in club_list:
         del club['_id']
         club['confirmed'] = 'Yes' if club['confirmed'] else 'No'
@@ -145,11 +141,8 @@ def download_clubs():
 
 
 @as_json
-@monitor_blueprint.route('/club/delete', methods=['DELETE'])
-def delete_club():
-    json = g.clean_json
-    email = json['email']
-
+@monitor_blueprint.route('/club/<email>', methods=['DELETE'])
+def delete_club(email):
     user = User.objects(email=email).first()
     if user is None:
         raise JsonError(status='error', reason='The user does not exist!')
@@ -169,21 +162,20 @@ def delete_club():
 @monitor_blueprint.route('/tags/list', methods=['GET'])
 def list_tags_with_usage():
     # This pipeline will associate the tags with the number of clubs that have said tag
-    tags_with_usage = fetch_aggregated_tag_list()
+    tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
     return json.dumps(tags_with_usage)
 
 
 @monitor_blueprint.route('/tags/download', methods=['GET'])
 def download_tags_with_usage():
-    tags_with_usage = fetch_aggregated_tag_list()
+    tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
     return send_csv(tags_with_usage, 'tags.csv', ['name', 'num_clubs'], cache_timeout=0)
 
 
 @as_json
-@monitor_blueprint.route('/tags/add', methods=['POST'])
-def add_tags():
-    json = g.clean_json
-    tag_name = json['name']
+@monitor_blueprint.route('/tags', methods=['POST'])
+def add_tag():
+    tag_name = g.clean_json['name']
 
     tag = Tag.objects(name=tag_name).first()
     if tag is None:
@@ -194,13 +186,11 @@ def add_tags():
 
 
 @as_json
-@monitor_blueprint.route('/tags/edit', methods=['PUT'])
-def edit_tags():
-    json = g.clean_json
-    old_tag_name = json['old_tag']
-    new_tag_name = json['new_tag']
+@monitor_blueprint.route('/tags/<tag_id>', methods=['PUT'])
+def edit_tag(tag_id):
+    new_tag_name = g.clean_json['tag_name']
 
-    old_tag = Tag.objects(name=old_tag_name).first()
+    old_tag = Tag.objects(id=tag_id).first()
     if old_tag is None:
         raise JsonError(status='error', reason='Old tag does not exist!')
 
@@ -213,12 +203,9 @@ def edit_tags():
 
 
 @as_json
-@monitor_blueprint.route('/tags/remove', methods=['DELETE'])
-def remove_tags():
-    json = g.clean_json
-    tag_name = json['name']
-
-    tag = Tag.objects(name=tag_name).first()
+@monitor_blueprint.route('/tags/<tag_id>', methods=['DELETE'])
+def remove_tag(tag_id):
+    tag = Tag.objects(id=tag_id).first()
     if tag is not None:
         tag.delete()
         return {'status': 'success'}
