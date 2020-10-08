@@ -211,3 +211,24 @@ def remove_tag(tag_id):
         return {'status': 'success'}
     else:
         raise JsonError(status='error', reason='Tag does not exist!')
+
+
+@as_json
+@monitor_blueprint.route('/more-stats/social-media', methods=['GET'])
+def fetch_social_media_stats():
+    smedia_stats = mongo_aggregations.fetch_aggregated_social_media_usage()
+    return json.dumps(smedia_stats)
+
+
+@as_json
+@monitor_blueprint.route('/more-stats/club-reqs', methods=['GET'])
+def fetch_club_req_stats():
+    club_req_stats = mongo_aggregations.fetch_aggregated_club_requirement_stats()
+    return json.dumps(club_req_stats)
+
+
+@as_json
+@monitor_blueprint.route('/more-stats/pic-stats', methods=['GET'])
+def fetch_picture_stats():
+    pic_stats = mongo_aggregations.fetch_aggregated_picture_stats()
+    return json.dumps(pic_stats)

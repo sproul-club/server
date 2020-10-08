@@ -84,3 +84,192 @@ def fetch_aggregated_tag_list():
             }
         }
     ]))
+
+
+def fetch_aggregated_social_media_usage():
+    # This pipeline will count up the number of various social media links from all clubs available
+    return list(Club.objects.aggregate([
+        {
+            '$lookup': {
+                'from': 'user',
+                'localField': 'owner',
+                'foreignField': '_id',
+                'as': 'user'
+            }
+        }, {
+            '$unwind': {
+                'path': '$user',
+                'preserveNullAndEmptyArrays': False
+            }
+        }, {
+            '$match': {
+                'user.confirmed': True
+            }
+        }, {
+            '$replaceRoot': {
+                'newRoot': '$social_media_links'
+            }
+        }, {
+            '$group': {
+                '_id': 1,
+                'website': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$website', '']}, 1, 0]
+                    }
+                },
+                'facebook': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$facebook', '']}, 1, 0]
+                    }
+                },
+                'instagram': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$instagram', '']}, 1, 0]
+                    }
+                },
+                'linkedin': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$linkedin', '']}, 1, 0]
+                    }
+                },
+                'twitter': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$twitter', '']}, 1, 0]
+                    }
+                },
+                'youtube': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$youtube', '']}, 1, 0]
+                    }
+                },
+                'github': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$github', '']}, 1, 0]
+                    }
+                },
+                'behance': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$behance', '']}, 1, 0]
+                    }
+                },
+                'medium': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$medium', '']}, 1, 0]
+                    }
+                }
+            }
+        }, {
+            '$project': {
+                '_id': 0
+            }
+        }
+    ]));
+
+
+def fetch_aggregated_club_requirement_stats():
+    # This pipeline will count up the number of club requirements various social media links from all clubs available
+    return list(Club.objects.aggregate([
+        {
+            '$lookup': {
+                'from': 'user',
+                'localField': 'owner',
+                'foreignField': '_id',
+                'as': 'user'
+            }
+        }, {
+            '$unwind': {
+                'path': '$user',
+                'preserveNullAndEmptyArrays': False
+            }
+        }, {
+            '$match': {
+                'user.confirmed': True
+            }
+        }, {
+            '$group': {
+                '_id': 1,
+                'app_required': {
+                    '$sum': {
+                        '$cond': ['$app_required', 1, 0]
+                    }
+                },
+                'no_app_required': {
+                    '$sum': {
+                        '$cond': ['$app_required', 0, 1]
+                    }
+                },
+                'new_members': {
+                    '$sum': {
+                        '$cond': ['$new_members', 1, 0]
+                    }
+                },
+                'no_new_members': {
+                    '$sum': {
+                        '$cond': ['$new_members', 0, 1]
+                    }
+                }
+            }
+        }, {
+            '$project': {
+                '_id': 0
+            }
+        }
+    ]));
+
+def fetch_aggregated_picture_stats():
+    # This pipeline will count up the number of clubs having logo/banner pictures from all clubs available
+    return list(Club.objects.aggregate([
+        {
+            '$lookup': {
+                'from': 'user',
+                'localField': 'owner',
+                'foreignField': '_id',
+                'as': 'user'
+            }
+        }, {
+            '$unwind': {
+                'path': '$user',
+                'preserveNullAndEmptyArrays': False
+            }
+        }, {
+            '$match': {
+                'user.confirmed': True
+            }
+        }, {
+            '$group': {
+                '_id': 1,
+                'logo_pic': {
+                    '$sum': {
+                        '$cond': [
+                            '$logo_url', 1, 0
+                        ]
+                    }
+                },
+                'no_logo_pic': {
+                    '$sum': {
+                        '$cond': [
+                            '$logo_url', 0, 1
+                        ]
+                    }
+                },
+                'banner_pic': {
+                    '$sum': {
+                        '$cond': [
+                            '$banner_url', 1, 0
+                        ]
+                    }
+                },
+                'no_banner_pic': {
+                    '$sum': {
+                        '$cond': [
+                            '$banner_url', 0, 1
+                        ]
+                    }
+                }
+            }
+        }, {
+            '$project': {
+                '_id': 0
+            }
+        }
+    ]))
