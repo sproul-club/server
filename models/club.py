@@ -29,6 +29,7 @@ class SocialMediaLinks(gj.EmbeddedDocument):
     behance     = RelaxedURLField(null=True)
     medium      = RelaxedURLField(null=True)
     gcalendar   = RelaxedURLField(null=True)
+    discord     = RelaxedURLField(null=True)
 
 class Tag(gj.Document):
     id   = mongo.IntField(required=True, primary_key=True)
