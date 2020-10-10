@@ -12,6 +12,8 @@ click==7.1.2
 colorhash==1.0.2
 configparser==5.0.0
 cryptography==3.1
+csvalidate==1.1.1
+dateutils==0.6.11
 decorator==4.4.2
 deepdiff==5.0.2
 dnspython==2.0.0
@@ -19,6 +21,7 @@ docutils==0.15.2
 Flask==1.1.2
 Flask-Compress==1.5.0
 Flask-Cors==3.0.8
+Flask-CSV==1.2.0
 Flask-JSON==0.3.4
 Flask-JWT-Extended==3.24.1
 Flask-Mail==0.9.1
@@ -30,6 +33,7 @@ itsdangerous==1.1.0
 Jinja2==2.11.1
 jmespath==0.10.0
 MarkupSafe==1.1.1
+marshmallow==3.8.0
 mmh3==2.5.1
 mongoengine==0.20.0
 mongoengine-goodjson==1.1.8
