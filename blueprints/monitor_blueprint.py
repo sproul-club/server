@@ -18,34 +18,80 @@ from models import *
 monitor_blueprint = Blueprint('monitor', __name__, url_prefix='/api/monitor')
 
 
-# @as_json
-# @monitor_blueprint.route('/login', methods=['POST'])
-# def login_monitor_dashboard():
-#     pass
+@as_json
+@monitor_blueprint.route('/login', methods=['POST'])
+@validate_json(schema={
+    'email': {'type': 'string', 'empty': False},
+    'password': {'type': 'string', 'empty': False}
+}, require_all=True)
+def login():
+    json = g.clean_json
+    email = json['email']
+    password = json['password']
+
+    user = OfficerUser.objects(email=email).first()
+    if user is None:
+        raise JsonError(status='error', reason='The user does not exist.')
+
+    if not user.confirmed:
+        raise JsonError(status='error', reason='The user has not confirmed their email.')
+
+    if not hash_manager.verify(password, user.password):
+        raise JsonError(status='error', reason='The password is incorrect.')
+
+    access_token = create_access_token(identity=email)
+    refresh_token = create_refresh_token(identity=email)
+
+    access_jti = get_jti(encoded_token=access_token)
+    refresh_jti = get_jti(encoded_token=refresh_token)
+
+    AccessJTI(owner=user, token_id=access_jti).save()
+    RefreshJTI(owner=user, token_id=refresh_jti).save()
+
+    return {
+        'access': access_token,
+        'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
+        'refresh': refresh_token,
+        'refresh_expires_in': int(CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
+    }
 
 
 @as_json
 @monitor_blueprint.route('/overview/stats/sign-up', methods=['GET'])
 def fetch_sign_up_stats():
     one_day_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
+    officer_users = OfficerUser.objects
+    student_users = StudentUser.objects
 
-    num_registered_clubs = len(User.objects)
-    recent_num_registered_clubs = len(User.objects(registered_on__gte=one_day_ago))
+    # Officer stats
+    num_registered_clubs = len(officer_users)
+    recent_num_registered_clubs = len(officer_users.filter(registered_on__gte=one_day_ago))
 
-    num_confirmed_clubs = len(User.objects(confirmed=True))
-    recent_num_confirmed_clubs = len(User.objects(confirmed=True, registered_on__gte=one_day_ago))
+    num_confirmed_clubs = len(officer_users.filter(confirmed=True))
+    recent_num_confirmed_clubs = len(officer_users.filter(confirmed=True, registered_on__gte=one_day_ago))
 
     num_clubs_rso_list = len(PreVerifiedEmail.objects)
+
+    # Student stats
+    num_students_signed_up = len(student_users)
+    recent_num_students_signed_up = len(student_users.filter(registered_on__gte=one_day_ago))
+
+    num_confirmed_students = len(student_users.filter(confirmed=True))
+    recent_num_confirmed_students = len(student_users.filter(confirmed=True, registered_on__gte=one_day_ago))
 
     return {
         'main': {
             'clubs_registered': num_registered_clubs,
             'clubs_confirmed': num_confirmed_clubs,
-            'clubs_rso_list': num_clubs_rso_list
+            'clubs_rso_list': num_clubs_rso_list,
+            'students_signed_up': num_students_signed_up,
+            'students_confirmed': num_confirmed_students,
         },
         'changed': {
             'clubs_registered': recent_num_registered_clubs,
-            'clubs_confirmed': recent_num_confirmed_clubs
+            'clubs_confirmed': recent_num_confirmed_clubs,
+            'students_signed_up': recent_num_students_signed_up,
+            'students_confirmed': recent_num_confirmed_students
         }
     }
 
@@ -53,28 +99,18 @@ def fetch_sign_up_stats():
 @as_json
 @monitor_blueprint.route('/overview/stats/activity', methods=['GET'])
 def fetch_activity_stats():
-    num_active_admins = len(AccessJTI.objects)
-    num_active_users = 'N/A'
+    # HACK: I should probably be using aggregations here!
+    officer_users = [jti.owner.role == 'officer' for jti in AccessJTI.objects]
+    student_users = [jti.owner.role == 'student' for jti in AccessJTI.objects]
+
+    num_active_admins = len(officer_users)
+    num_active_users = len(student_users)
     num_catalog_searches = 'N/A'
 
     return {
         'active_admins': num_active_admins,
         'active_users': num_active_users,
         'catalog_searches': num_catalog_searches
-    }
-
-
-@as_json
-@monitor_blueprint.route('/overview/stats/performance', methods=['GET'])
-def fetch_performance_stats():
-    uptime_percent = 'N/A'
-    num_api_calls = 'N/A'
-    amt_data_stored = 'N/A'
-
-    return {
-        'uptime_percent': uptime_percent,
-        'api_calls': num_api_calls,
-        'data_stored': amt_data_stored
     }
 
 
@@ -97,6 +133,9 @@ def download_rso_users():
 
 @as_json
 @monitor_blueprint.route('/rso', methods=['POST'])
+@validate_json(schema={
+    'email': {'type': 'string', 'empty': False}
+}, require_all=True)
 def add_rso_user():
     email = g.clean_json['email']
 
@@ -105,7 +144,7 @@ def add_rso_user():
         PreVerifiedEmail(email=email).save()
         return {'status': 'success'}
     else:
-        raise JsonError(status='error', reason='RSO Email already exists!')
+        raise JsonError(status='error', reason='Specified RSO Email already exists!')
 
 
 @as_json
@@ -113,7 +152,7 @@ def add_rso_user():
 def remove_rso_user(email):
     rso_email = PreVerifiedEmail.objects(email=email).first()
     if rso_email is None:
-        raise JsonError(status='error', reason='RSO Email does not exist!')
+        raise JsonError(status='error', reason='Specified RSO Email does not exist!')
 
     user = User.objects(email=email).first()
     if user is not None:
@@ -149,8 +188,7 @@ def delete_club(email):
 
     club = Club.objects(owner=user).first()
 
-    # NOTE: Each club should always have an associated user, so there really shouldn't be
-    # a case where there's a club without it's owner
+    # NOTE: Each club may have an associated user, unless it's a student account
     if club is not None:
         club.delete()
 
@@ -174,21 +212,44 @@ def download_tags_with_usage():
 
 @as_json
 @monitor_blueprint.route('/tags', methods=['POST'])
+@validate_json(schema={
+    'name': {'type': 'string', 'empty': False}
+}, require_all=True)
 def add_tag():
     tag_name = g.clean_json['name']
 
+    # Auto-determine new tag ID by filling in nearest
+    # missing number starting from 0
+    # Ex. [1, 2, 3] => [0, 1, 2, 3]
+    # Ex. [0, 1, 5, 6] => [0, 1, 2, 5, 6]
+    # Ex. [0, 1, 2] => [0, 1, 2, 3]
+    all_tag_ids = [tag.id for tag in Tag.objects]
+
+    new_tag_id = None
+    for (i, tag_id) in enumerate(sorted(all_tag_ids)):
+        if tag_id != i:
+            # we found a tag id to fill in
+            new_tag_id = i
+            break
+
+    if new_tag_id is None:
+        new_tag_id = i + 1
+
     tag = Tag.objects(name=tag_name).first()
     if tag is None:
-        Tag(name=tag_name).save()
+        Tag(id=new_tag_id, name=tag_name).save()
         return {'status': 'success'}
     else:
-        raise JsonError(status='error', reason='Tag already exists!')
+        raise JsonError(status='error', reason='Specified tag already exists!')
 
 
 @as_json
 @monitor_blueprint.route('/tags/<tag_id>', methods=['PUT'])
+@validate_json(schema={
+    'name': {'type': 'string', 'empty': False}
+}, require_all=True)
 def edit_tag(tag_id):
-    new_tag_name = g.clean_json['tag_name']
+    new_tag_name = g.clean_json['name']
 
     old_tag = Tag.objects(id=tag_id).first()
     if old_tag is None:
@@ -205,12 +266,21 @@ def edit_tag(tag_id):
 @as_json
 @monitor_blueprint.route('/tags/<tag_id>', methods=['DELETE'])
 def remove_tag(tag_id):
-    tag = Tag.objects(id=tag_id).first()
-    if tag is not None:
+    tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
+
+    selected_tag = None
+    for tag in tags_with_usage:
+        if tag['_id'] == int(tag_id):
+            selected_tag = tag
+
+    if selected_tag is None:
+        raise JsonError(status='error', reason='Specified tag does not exist!')
+    elif selected_tag['num_clubs'] > 0:
+        raise JsonError(status='error', reason=f"At least {selected_tag['num_clubs']} clubs are using this tag!")
+    else:
+        tag = Tag.objects(id=int(tag_id)).first()
         tag.delete()
         return {'status': 'success'}
-    else:
-        raise JsonError(status='error', reason='Tag does not exist!')
 
 
 @as_json
