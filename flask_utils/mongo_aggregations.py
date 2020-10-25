@@ -226,7 +226,7 @@ def fetch_aggregated_picture_stats():
     ]))
 
 def fetch_active_users_stats():
-    return list(AccessJTI.objects.aggregate([
+    active_stats = list(AccessJTI.objects.aggregate([
         {
             '$lookup': {
                 'from': 'new_base_user',
@@ -251,25 +251,56 @@ def fetch_active_users_stats():
             }
         }, {
             '$group': {
+                '_id': 0,
+                'uniqueUser': {
+                    '$addToSet': {
+                        'email': '$email',
+                        'role': '$role'
+                    }
+                }
+            }
+        }, {
+            '$project': {
+                '_id': 0
+            }
+        }, {
+            '$unwind': {
+                'path': '$uniqueUser',
+                'preserveNullAndEmptyArrays': False
+            }
+        }, {
+            '$group': {
                 '_id': 1,
                 'student': {
                     '$sum': {
                         '$cond': [
-                            {'$eq': ['$role', 'student']}, 1, 0
+                            {
+                                '$eq': [
+                                    '$uniqueUser.role', 'student'
+                                ]
+                            }, 1, 0
                         ]
                     }
                 },
                 'officer': {
                     '$sum': {
                         '$cond': [
-                            {'$eq': ['$role', 'officer']}, 1, 0
+                            {
+                                '$eq': [
+                                    '$uniqueUser.role', 'officer'
+                                ]
+                            }, 1, 0
                         ]
                     }
                 },
                 'admin': {
                     '$sum': {
                         '$cond': [
-                            {'$eq': ['$role', 'admin']}, 1, 0
+                            {
+                                '$eq': [
+                                    '$uniqueUser.role', 'admin'
+                                ]
+                            }, 1, 0
                         ]
                     }
                 }
@@ -279,4 +310,13 @@ def fetch_active_users_stats():
                 '_id': 0
             }
         }
-    ]))[0]
+    ]))
+
+    if len(active_stats) > 0:
+        return active_stats[0]
+    else:
+        return {
+            'student': 0,
+            'officer': 0,
+            'admin': 0,
+        }
