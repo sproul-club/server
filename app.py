@@ -21,6 +21,7 @@ def before_request_func():
         if request.method == 'OPTIONS':
             return 'OK'
 
+
 @app.errorhandler(flask_exts.mongo.errors.ValidationError)
 def handle_mongo_validation_error(ex):
     return {
@@ -30,15 +31,20 @@ def handle_mongo_validation_error(ex):
     }, 500
 
 # JWT custom handlers
-@flask_exts.jwt.user_claims_loader
-def add_claims_to_access_token(identity):
-    user = NewBaseUser.objects(email=identity).first()
-    return {'role': user.role}
+@flask_exts.jwt.user_identity_loader
+def user_identity_lookup(user):
+    return {
+        'email': user.email,
+        'role': user.role,
+    }
+
 
 @flask_exts.jwt.user_loader_callback_loader
 def user_loader_callback(identity):
-    user = NewBaseUser.objects(email=identity).first()
-    return user
+    return NewBaseUser.objects(
+        email=identity['email'],
+        role=identity['role']
+    ).first()
 
 
 @flask_exts.jwt.user_loader_error_loader
@@ -58,7 +64,7 @@ def is_token_in_blacklist(decrypted_token):
         return refresh_jti.expired
     else:
         # If a token is not in the blacklist, it's already expired according to MongoDB
-        # and thus is available for another user to take that same value, theoretically
+        # and thus is available for another user to take that same value
         return False
 
 

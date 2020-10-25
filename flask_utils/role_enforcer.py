@@ -1,13 +1,13 @@
 from decorator import decorator
 
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_claims
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
 @decorator
 def role_required(func, roles=[], *args, **kw):
-    verify_jwt_in_request()
-    claims = get_jwt_claims()
+    # verify_jwt_in_request()
+    identity = get_jwt_identity()
 
-    user_roles = set(claims['role'])
+    user_roles = set([identity['role']])
     required_roles = set(roles)
 
     matched_roles = user_roles.intersection(required_roles)
