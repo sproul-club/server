@@ -1,4 +1,4 @@
-from models import PreVerifiedEmail, Club, Tag, NewClub
+from models import PreVerifiedEmail, Tag, NewBaseUser
 
 def fetch_aggregated_rso_list():
     # This pipeline will fill in the 'registered' and 'confirmed' fields into the RSO list
@@ -38,35 +38,6 @@ def fetch_aggregated_rso_list():
     ]))
 
 
-def fetch_aggregated_club_list():
-    # This pipeline will attach the 'confirmed' field with the list of clubs registered
-    return list(Club.objects.aggregate([
-        {
-            '$lookup': {
-                'from': 'user',
-                'localField': 'owner',
-                'foreignField': '_id',
-                'as': 'user'
-            }
-        }, {
-            '$unwind': {
-                'path': '$user',
-                'preserveNullAndEmptyArrays': True
-            }
-        }, {
-            '$project': {
-                'name': 1,
-                'owner': 1,
-                'confirmed': '$user.confirmed'
-            }
-        }, {
-            '$sort': {
-                'name': 1
-            }
-        }
-    ]))
-
-
 def fetch_aggregated_tag_list():
     # This pipeline will associate the tags with the number of clubs that have said tag
     return list(Tag.objects.aggregate([
@@ -88,26 +59,14 @@ def fetch_aggregated_tag_list():
 
 def fetch_aggregated_social_media_usage():
     # This pipeline will count up the number of various social media links from all clubs available
-    return list(Club.objects.aggregate([
+    return list(NewBaseUser.objects.aggregate([
         {
-            '$lookup': {
-                'from': 'user',
-                'localField': 'owner',
-                'foreignField': '_id',
-                'as': 'user'
-            }
-        }, {
-            '$unwind': {
-                'path': '$user',
-                'preserveNullAndEmptyArrays': False
-            }
-        }, {
             '$match': {
-                'user.confirmed': True
+                'confirmed': True
             }
         }, {
             '$replaceRoot': {
-                'newRoot': '$social_media_links'
+                'newRoot': '$club.social_media_links'
             }
         }, {
             '$group': {
