@@ -1,9 +1,13 @@
 __all__ = [
-	'RelaxedURLField',
-	'User', 'PreVerifiedEmail', 'AccessJTI', 'RefreshJTI', 'ConfirmEmailToken', 'ResetPasswordToken',
-	'Event', 'Resource', 'SocialMediaLinks', 'Tag', 'Club'
+    'RelaxedURLField',
+    'NewBaseUser', 'NewStudentUser', 'NewOfficerUser', 'NewAdminUser',
+    'PreVerifiedEmail', 'AccessJTI', 'RefreshJTI', 'ConfirmEmailToken', 'ResetPasswordToken',
+    'Event', 'Resource', 'SocialMediaLinks', 'Tag', 'Club', 'NewClub'
 ]
 
 from models.relaxed_url_field import RelaxedURLField
-from models.user import User, PreVerifiedEmail, AccessJTI, RefreshJTI, ConfirmEmailToken, ResetPasswordToken
-from models.club import Event, Resource, SocialMediaLinks, Tag, Club
+
+from models.user import NewBaseUser, NewStudentUser, NewOfficerUser, NewAdminUser
+
+from models.user import PreVerifiedEmail, AccessJTI, RefreshJTI, ConfirmEmailToken, ResetPasswordToken
+from models.club import Event, Resource, SocialMediaLinks, Tag, Club, NewClub

@@ -1,18 +1,18 @@
-from models import PreVerifiedEmail, Club, Tag
+from models import PreVerifiedEmail, Club, Tag, NewClub
 
 def fetch_aggregated_rso_list():
     # This pipeline will fill in the 'registered' and 'confirmed' fields into the RSO list
     return list(PreVerifiedEmail.objects.aggregate([
         {
             '$lookup': {
-                'from': 'user',
+                'from': 'new_base_user',
                 'localField': 'email',
-                'foreignField': '_id',
-                'as': 'matching'
+                'foreignField': 'email',
+                'as': 'user'
             }
         }, {
             '$unwind': {
-                'path': '$matching',
+                'path': '$user',
                 'preserveNullAndEmptyArrays': True
             }
         }, {
@@ -21,13 +21,13 @@ def fetch_aggregated_rso_list():
                 'email': 1,
                 'registered': {
                     '$cond': [
-                        { '$ifNull': [ '$matching.registered_on', False] },
+                        { '$ifNull': [ '$user.registered_on', False] },
                         True,
                         False
                     ]
                 },
                 'confirmed': {
-                    '$ifNull': [ '$matching.confirmed', False ]
+                    '$ifNull': [ '$user.confirmed', False ]
                 }
             }
         }, {

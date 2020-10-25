@@ -2,7 +2,6 @@ import mongoengine as mongo
 import mongoengine_goodjson as gj
 
 from models.relaxed_url_field import RelaxedURLField
-from models.user import User
 
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
@@ -37,10 +36,9 @@ class Tag(gj.Document):
 
     meta = {'auto_create_index': False}
 
-class Club(gj.Document):
-    id    = mongo.StringField(required=True, primary_key=True)
+class NewClub(gj.EmbeddedDocument):
     name  = mongo.StringField(required=True, max_length=100)
-    owner = mongo.ReferenceField(User, required=True)
+    link_name = mongo.StringField(required=True)
 
     tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
     app_required = mongo.BooleanField(required=True)
