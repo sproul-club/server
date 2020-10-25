@@ -1,4 +1,3 @@
-from flask_json import JsonError
 from password_strength import PasswordPolicy
 
 class PasswordEnforcer:

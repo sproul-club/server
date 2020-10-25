@@ -19,7 +19,6 @@ _get_list_resources = lambda club: json.dumps([json.loads(resource.to_json()) fo
 _get_list_events    = lambda club: json.dumps([json.loads(event.to_json()) for event in club.events])
 
 
-@as_json
 @admin_blueprint.route('/profile', methods=['GET'])
 @jwt_required
 def fetch_profile():
@@ -27,7 +26,6 @@ def fetch_profile():
     return club.to_json()
 
 
-@as_json
 @admin_blueprint.route('/profile', methods=['POST'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False, 'maxlength': 100},
@@ -63,7 +61,6 @@ def edit_profile():
     return {'status': 'success'}
 
 
-@as_json
 @admin_blueprint.route('/upload-logo', methods=['POST'])
 @jwt_required
 def upload_logo():
@@ -78,7 +75,6 @@ def upload_logo():
         raise JsonError(status='error', reason='A logo was not provided for uploading.')
 
 
-@as_json
 @admin_blueprint.route('/upload-banner', methods=['POST'])
 @jwt_required
 def upload_banner():
@@ -93,21 +89,21 @@ def upload_banner():
         raise JsonError(status='error', reason='A banner was not provided for uploading.')
 
 
-@as_json
 @admin_blueprint.route('/resources', methods=['GET'])
 @jwt_required
+@as_json
 def get_resources():
     club = current_user['club']
     return _get_list_resources(club)
 
 
-@as_json
 @admin_blueprint.route('/resources', methods=['POST'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False, 'maxlength': 100},
     'link': {'type': 'string', 'empty': False}
 }, require_all=True)
 @jwt_required
+@as_json
 def add_resource():
     json = g.clean_json
     club = current_user['club']
@@ -132,13 +128,13 @@ def add_resource():
     return _get_list_resources(club)
 
 
-@as_json
 @admin_blueprint.route('/resources/<resource_id>', methods=['PUT'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False, 'maxlength': 100},
     'link': {'type': 'string', 'empty': False}
 })
 @jwt_required
+@as_json
 def update_resource(resource_id):
     json = g.clean_json
     club = current_user['club']
@@ -155,9 +151,9 @@ def update_resource(resource_id):
     raise JsonError(status='error', reason='Requested resource does not exist', status_=404)
 
 
-@as_json
 @admin_blueprint.route('/resources/<resource_id>', methods=['DELETE'])
 @jwt_required
+@as_json
 def delete_resource(resource_id):
     club = current_user['club']
     prev_len = len(club.resources)
@@ -172,15 +168,14 @@ def delete_resource(resource_id):
         raise JsonError(status='error', reason='Requested resource does not exist', status_=404)
 
 
-@as_json
 @admin_blueprint.route('/events', methods=['GET'])
 @jwt_required
+@as_json
 def get_events():
     club = current_user['club']
     return _get_list_events(club)
 
 
-@as_json
 @admin_blueprint.route('/events', methods=['POST'])
 @validate_json(schema={
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
@@ -220,7 +215,6 @@ def add_event():
     return _get_list_events(club)
 
 
-@as_json
 @admin_blueprint.route('/events/<event_id>', methods=['PUT'])
 @validate_json(schema={
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
@@ -230,6 +224,7 @@ def add_event():
     'description': {'type': 'string', 'maxlength': 500}
 })
 @jwt_required
+@as_json
 def update_event(event_id):
     json = g.clean_json
     club = current_user['club']
@@ -246,9 +241,9 @@ def update_event(event_id):
     raise JsonError(status='error', reason='Requested event does not exist', status_=404)
 
 
-@as_json
 @admin_blueprint.route('/events/<event_id>', methods=['DELETE'])
 @jwt_required
+@as_json
 def delete_event(event_id):
     club = current_user['club']
     prev_len = len(club.events)
@@ -263,7 +258,6 @@ def delete_event(event_id):
         raise JsonError(status='error', reason='Requested event does not exist', status_=404)
 
 
-@as_json
 @admin_blueprint.route('/change-password', methods=['POST'])
 @validate_json(schema={
     'old_password': {'type': 'string', 'empty': False},

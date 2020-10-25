@@ -1,13 +1,12 @@
+import os
+
 from dotenv import load_dotenv
 load_dotenv()
-
-import os
 
 import mongoengine as mongo
 # import walrus
 
 from flask import Flask
-from flask_mail import Mail
 from flask_jwt_extended import JWTManager
 from flask_json import FlaskJSON
 from flask_cors import CORS

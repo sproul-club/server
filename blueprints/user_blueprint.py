@@ -37,7 +37,6 @@ def does_email_exist():
     return {'exists': PreVerifiedEmail.objects(email=email).first() is not None}
 
 
-@as_json
 @user_blueprint.route('/password-strength', methods=['POST'])
 @validate_json(schema={
     'password': {'type': 'string', 'empty': False}
@@ -49,7 +48,6 @@ def is_password_strong_enough():
     return {'strong': flask_exts.password_checker.check(password)}
 
 
-@as_json
 @user_blueprint.route('/register', methods=['POST'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False, 'maxlength': 100},
@@ -72,7 +70,7 @@ def register():
     # Check if email is part of pre-verified list of emails
     email_exists = PreVerifiedEmail.objects(email=club_email).first() is not None
     if not email_exists:
-        raise JsonError(status='error', reason='The provided email is not part of the pre-verified list of emails!', status_=404)
+        raise JsonError(status='error', reason='The provided email is not part of the RSO list!', status_=404)
 
     # Check if email is already registered
     user_exists = User.objects(email=club_email).first() is not None
@@ -116,7 +114,6 @@ def register():
     return {'status': 'success'}
 
 
-@as_json
 @user_blueprint.route('/resend-confirm', methods=['POST'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False}
@@ -183,7 +180,6 @@ def confirm_email(token):
     return redirect(LOGIN_URL + LOGIN_CONFIRMED_EXT)
 
 
-@as_json
 @user_blueprint.route('/login', methods=['POST'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False},
@@ -221,7 +217,6 @@ def login():
     }
 
 
-@as_json
 @user_blueprint.route('/request-reset', methods=['POST'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False}
@@ -246,7 +241,6 @@ def request_reset_password():
     return {'status': 'success'}
 
 
-@as_json
 @user_blueprint.route('/confirm-reset', methods=['POST'])
 @validate_json(schema={
     'token': {'type': 'string'},
@@ -285,7 +279,6 @@ def confirm_reset_password():
     return {'status': 'success'}
 
 
-@as_json
 @user_blueprint.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
@@ -296,13 +289,13 @@ def refresh():
     access_jti = get_jti(access_token)
 
     AccessJTI(owner=owner, token_id=access_jti).save()
+
     return {
         'access': access_token,
         'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
     }
 
 
-@as_json
 @user_blueprint.route('/revoke-access', methods=['DELETE'])
 @jwt_required
 def revoke_access():
@@ -321,7 +314,6 @@ def revoke_access():
     }
 
 
-@as_json
 @user_blueprint.route('/revoke-refresh', methods=['DELETE'])
 @jwt_refresh_token_required
 def revoke_refresh():

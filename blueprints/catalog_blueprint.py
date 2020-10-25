@@ -9,13 +9,12 @@ from models import *
 
 catalog_blueprint = Blueprint('catalog', __name__, url_prefix='/api/catalog')
 
-@as_json
 @catalog_blueprint.route('/tags', methods=['GET'])
+@as_json
 def get_tags():
     return Tag.objects.to_json()
 
 
-@as_json
 @catalog_blueprint.route('/organizations', methods=['POST'])
 @validate_json(schema={
     'limit': {'type': 'integer', 'default': 50},
@@ -47,7 +46,6 @@ def get_organizations():
     }
 
 
-@as_json
 @catalog_blueprint.route('/search', methods=['POST'])
 @validate_json(schema={
     'search': {'type': 'string', 'default': ''},
@@ -106,7 +104,6 @@ def search_orgs():
     }
 
 
-@as_json
 @catalog_blueprint.route('/organizations/<org_id>', methods=['GET'])
 def get_org_by_id(org_id):
     club = Club.objects(id=org_id).first()
