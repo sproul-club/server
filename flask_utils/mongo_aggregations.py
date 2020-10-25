@@ -1,4 +1,4 @@
-from models import PreVerifiedEmail, Tag, NewBaseUser
+from models import PreVerifiedEmail, Tag, NewBaseUser, AccessJTI
 
 def fetch_aggregated_rso_list():
     # This pipeline will fill in the 'registered' and 'confirmed' fields into the RSO list
@@ -199,30 +199,22 @@ def fetch_aggregated_picture_stats():
                 '_id': 1,
                 'logo_pic': {
                     '$sum': {
-                        '$cond': [
-                            '$logo_url', 1, 0
-                        ]
+                        '$cond': ['$logo_url', 1, 0]
                     }
                 },
                 'no_logo_pic': {
                     '$sum': {
-                        '$cond': [
-                            '$logo_url', 0, 1
-                        ]
+                        '$cond': ['$logo_url', 0, 1]
                     }
                 },
                 'banner_pic': {
                     '$sum': {
-                        '$cond': [
-                            '$banner_url', 1, 0
-                        ]
+                        '$cond': ['$banner_url', 1, 0]
                     }
                 },
                 'no_banner_pic': {
                     '$sum': {
-                        '$cond': [
-                            '$banner_url', 0, 1
-                        ]
+                        '$cond': ['$banner_url', 0, 1]
                     }
                 }
             }
@@ -232,3 +224,59 @@ def fetch_aggregated_picture_stats():
             }
         }
     ]))
+
+def fetch_active_users_stats():
+    return list(AccessJTI.objects.aggregate([
+        {
+            '$lookup': {
+                'from': 'new_base_user',
+                'localField': 'owner',
+                'foreignField': '_id',
+                'as': 'user'
+            }
+        }, {
+            '$unwind': {
+                'path': '$user',
+                'preserveNullAndEmptyArrays': False
+            }
+        }, {
+            '$match': {
+                'user.confirmed': True
+            }
+        }, {
+            '$project': {
+                '_id': 0,
+                'email': '$user.email',
+                'role': '$user.role'
+            }
+        }, {
+            '$group': {
+                '_id': 1,
+                'student': {
+                    '$sum': {
+                        '$cond': [
+                            {'$eq': ['$role', 'student']}, 1, 0
+                        ]
+                    }
+                },
+                'officer': {
+                    '$sum': {
+                        '$cond': [
+                            {'$eq': ['$role', 'officer']}, 1, 0
+                        ]
+                    }
+                },
+                'admin': {
+                    '$sum': {
+                        '$cond': [
+                            {'$eq': ['$role', 'admin']}, 1, 0
+                        ]
+                    }
+                }
+            }
+        }, {
+            '$project': {
+                '_id': 0
+            }
+        }
+    ]))[0]

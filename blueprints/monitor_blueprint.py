@@ -115,19 +115,12 @@ def fetch_sign_up_stats():
 @jwt_required
 @role_required(roles=['admin'])
 def fetch_activity_stats():
-    # HACK: I should probably be using aggregations here!
-
-    officer_users = [jti.owner.role == 'officer' for jti in AccessJTI.objects]
-    student_users = [jti.owner.role == 'student' for jti in AccessJTI.objects]
-
-    num_active_admins = len(officer_users)
-    num_active_users = len(student_users)
-    num_catalog_searches = 'N/A'
+    active_user_stats = mongo_aggregations.fetch_active_users_stats()
 
     return {
-        'active_admins': num_active_admins,
-        'active_users': num_active_users,
-        'catalog_searches': num_catalog_searches
+        'active_admins': active_user_stats['officer'],
+        'active_users': active_user_stats['student'],
+        'catalog_searches': 'N/A'
     }
 
 
