@@ -103,6 +103,4 @@ def get_org_by_id(org_link_name):
     if user is None:
         raise JsonError(status='error', reason='The requested club does not exist!', status_=404)
 
-    print(query_to_objects(user))
-
     return query_to_objects(user.club)

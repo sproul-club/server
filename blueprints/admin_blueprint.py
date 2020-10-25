@@ -6,7 +6,7 @@ from slugify import slugify
 from init_app import flask_exts
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
-from flask_utils import validate_json, query_to_objects
+from flask_utils import validate_json, query_to_objects, role_required
 from flask_jwt_extended import jwt_required, get_current_user
 
 from models import *
