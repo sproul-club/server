@@ -26,49 +26,6 @@ RECOVER_URL = 'https://www.sproul.club/resetpassword'
 user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
 
 
-@flask_exts.jwt.user_loader_callback_loader
-def user_loader_callback(identity):
-    try:
-        user = User.objects.get(email=identity)
-        club = Club.objects.get(owner=user)
-        return {'user': user, 'club': club}
-    except (User.DoesNotExist, Club.DoesNotExist):
-        return None
-
-
-@flask_exts.jwt.user_loader_error_loader
-def custom_user_loader_error(identity):
-    return {'status': 'error', 'reason': 'User not found'}, 404
-
-
-@flask_exts.jwt.token_in_blacklist_loader
-def is_token_in_blacklist(decrypted_token):
-    jti = decrypted_token['jti']
-    access_jti = AccessJTI.objects(token_id=jti).first()
-    refresh_jti = RefreshJTI.objects(token_id=jti).first()
-
-    if access_jti is None and refresh_jti is None:
-        return False
-    elif access_jti is not None:
-        return access_jti.expired
-    else:
-        return refresh_jti.expired
-
-
-@flask_exts.jwt.expired_token_loader
-def expired_jwt_handler(exp_token):
-    return {'status': 'error', 'reason': 'Token has expired'}, 401
-
-@flask_exts.jwt.unauthorized_loader
-@flask_exts.jwt.invalid_token_loader
-def unauth_or_invalid_jwt_handler(reason):
-    return {'status': 'error', 'reason': reason}, 401
-
-@flask_exts.jwt.revoked_token_loader
-def revoked_jwt_handler():
-    return {'status': 'error', 'reason': 'Token has been revoked'}, 401
-
-@as_json
 @user_blueprint.route('/email-exists', methods=['POST'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False}
