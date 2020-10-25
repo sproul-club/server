@@ -30,6 +30,11 @@ def handle_mongo_validation_error(ex):
     }, 500
 
 # JWT custom handlers
+@flask_exts.jwt.user_claims_loader
+def add_claims_to_access_token(identity):
+    user = NewBaseUser.objects(email=identity).first()
+    return {'role': user.role}
+
 @flask_exts.jwt.user_loader_callback_loader
 def user_loader_callback(identity):
     user = NewBaseUser.objects(email=identity).first()
