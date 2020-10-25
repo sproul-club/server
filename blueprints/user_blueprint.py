@@ -1,19 +1,19 @@
-import os
-import json
 import datetime
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 
-from flask import render_template, Blueprint, url_for, request, redirect, g
-from flask_json import as_json, JsonError
+from flask import render_template, Blueprint, url_for, redirect, g
+from flask_json import JsonError
 
 from flask_jwt_extended import (
     jwt_required, jwt_refresh_token_required,
     create_access_token, create_refresh_token,
-    get_raw_jwt, get_jti, current_user
+    get_raw_jwt, get_jti, get_current_user
 )
 
-from flask_utils import validate_json, id_creator
+from flask_utils import validate_json, role_required
+
+from slugify import slugify
 
 from init_app import flask_exts
 from app_config import CurrentConfig
@@ -73,8 +73,8 @@ def register():
         raise JsonError(status='error', reason='The provided email is not part of the RSO list!', status_=404)
 
     # Check if email is already registered
-    user_exists = User.objects(email=club_email).first() is not None
-    if user_exists:
+    potential_user = NewOfficerUser.objects(email=club_email).first()
+    if potential_user is not None:
         raise JsonError(status='error', reason='A club under that email already exists!', status_=401)
 
     # Check if the password is strong enough
@@ -82,15 +82,9 @@ def register():
     if not is_password_strong:
         raise JsonError(status='error', reason='The password is not strong enough')
 
-    new_user = User(
-        email=club_email,
-        password=hash_manager.hash(club_password)
-    )
-
-    new_club = Club(
-        id=id_creator(club_name),
+    new_club = NewClub(
         name=club_name,
-        owner=new_user,
+        link_name=slugify(club_name, max_length=100),
 
         tags=Tag.objects.filter(id__in=club_tag_ids),
         app_required=app_required,
@@ -98,8 +92,13 @@ def register():
         social_media_links=SocialMediaLinks(contact_email=club_email)
     )
 
+    new_user = NewOfficerUser(
+        email=club_email,
+        password=hash_manager.hash(club_password),
+        club=new_club
+    )
+
     new_user.save()
-    new_club.save()
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
     confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
@@ -123,11 +122,11 @@ def resend_confirm_email():
     club_email = json['email']
 
     # Check if email is already registered
-    user = User.objects(email=club_email).first()
-    if user is None:
+    potential_user = NewOfficerUser.objects(email=club_email).first()
+    if potential_user is None:
         raise JsonError(status='error', reason='No club under that email exists!', status_=404)
 
-    if user.confirmed:
+    if potential_user.confirmed:
         raise JsonError(status='error', reason='The user is already confirmed.')
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
@@ -149,33 +148,29 @@ def confirm_email(token):
     if club_email is None:
         raise JsonError(status='error', reason='The confirmation link is invalid.', status_=404)
 
-    matching_user = User.objects(email=club_email).first()
-    if matching_user is None:
+    potential_user = NewOfficerUser.objects(email=club_email).first()
+    if potential_user is None:
         raise JsonError(status='error', reason='The user matching the email does not exist.', status_=404)
-
-    # The club object is supposed to be linked to the user, so it shouldn't be null at this point
-    matching_club = Club.objects(owner=matching_user).first()
 
     # First, revoke the given email token
     flask_exts.email_verifier.revoke_token(token, 'confirm-email')
 
-    if matching_user.confirmed:
+    if potential_user.confirmed:
         return redirect(LOGIN_URL + LOGIN_CONFIRMED_EXT)
 
     confirmed_on = datetime.datetime.now()
-    if confirmed_on - matching_user.registered_on > CurrentConfig.CONFIRM_EMAIL_EXPIRY:
-        # Delete the user and club here
+    if confirmed_on - potential_user.registered_on > CurrentConfig.CONFIRM_EMAIL_EXPIRY:
+        # Delete the user with the associated club here
         # HACK: This was supposed to simulate the auto-deletion of the user and club after the first confirmation email expires,
         # but MongoDB TTL doesn't support deleting referenced or back-referenced documents (user -> club).
-        matching_club.delete()
-        matching_user.delete()
+        potential_user.delete()
 
         raise JsonError(status='error', reason='The account associated with the email has expired. Please re-register the club again.')
 
     # Then, set the user and club to 'confirmed' if it's not done already
-    matching_user.confirmed = True
-    matching_user.confirmed_on = datetime.datetime.now()
-    matching_user.save()
+    potential_user.confirmed = True
+    potential_user.confirmed_on = datetime.datetime.now()
+    potential_user.save()
 
     return redirect(LOGIN_URL + LOGIN_CONFIRMED_EXT)
 
@@ -190,24 +185,27 @@ def login():
     email = json['email']
     password = json['password']
 
-    user = User.objects(email=email).first()
-    if user is None:
+    potential_user = NewOfficerUser.objects(email=email).first()
+    if potential_user is None:
         raise JsonError(status='error', reason='The user does not exist.')
 
-    if not user.confirmed:
+    if not potential_user.confirmed:
         raise JsonError(status='error', reason='The user has not confirmed their email.')
 
-    if not hash_manager.verify(password, user.password):
+    if not hash_manager.verify(password, potential_user.password):
         raise JsonError(status='error', reason='The password is incorrect.')
 
-    access_token = create_access_token(identity=email)
-    refresh_token = create_refresh_token(identity=email)
+    if potential_user.role == 'student':
+        raise JsonError(status='error', reason='Student sign-in is not supported!')
+
+    access_token = create_access_token(identity=potential_user)
+    refresh_token = create_refresh_token(identity=potential_user)
 
     access_jti = get_jti(encoded_token=access_token)
     refresh_jti = get_jti(encoded_token=refresh_token)
 
-    AccessJTI(owner=user, token_id=access_jti).save()
-    RefreshJTI(owner=user, token_id=refresh_jti).save()
+    AccessJTI(owner=potential_user, token_id=access_jti).save()
+    RefreshJTI(owner=potential_user, token_id=refresh_jti).save()
 
     return {
         'access': access_token,
@@ -225,8 +223,8 @@ def request_reset_password():
     json = g.clean_json
     club_email = json['email']
 
-    user = User.objects(email=club_email).first()
-    if user is None:
+    potential_user = NewOfficerUser.objects(email=club_email).first()
+    if potential_user is None:
         raise JsonError(status='error', reason='The user does not exist.')
 
     recover_token = flask_exts.email_verifier.generate_token(club_email, 'reset-password')
@@ -256,8 +254,8 @@ def confirm_reset_password():
     if club_email is None:
         raise JsonError(status='error', reason='The recovery token is invalid!', status_=404)
 
-    owner = User.objects(email=club_email).first()
-    if owner is None:
+    potential_user = NewOfficerUser.objects(email=club_email).first()
+    if potential_user is None:
         raise JsonError(status='error', reason='The user matching the email does not exist!', status_=404)
 
     # Check if the password is strong enough
@@ -269,12 +267,12 @@ def confirm_reset_password():
     flask_exts.email_verifier.revoke_token(token, 'reset-password')
 
     # Next, delete all access and refresh tokens from the user
-    AccessJTI.objects(owner=owner).delete()
-    RefreshJTI.objects(owner=owner).delete()
+    AccessJTI.objects(owner=potential_user).delete()
+    RefreshJTI.objects(owner=potential_user).delete()
 
     # Finally, set the new password
-    owner.password = hash_manager.hash(club_password)
-    owner.save()
+    potential_user.password = hash_manager.hash(club_password)
+    potential_user.save()
 
     return {'status': 'success'}
 
@@ -282,13 +280,11 @@ def confirm_reset_password():
 @user_blueprint.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
-    owner = current_user['user']
-    owner_email = owner.email
-
-    access_token = create_access_token(identity=owner_email)
+    user = get_current_user()
+    access_token = create_access_token(identity=user)
     access_jti = get_jti(access_token)
 
-    AccessJTI(owner=owner, token_id=access_jti).save()
+    AccessJTI(owner=user, token_id=access_jti).save()
 
     return {
         'access': access_token,

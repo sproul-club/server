@@ -1,24 +1,38 @@
-import os
-import json
 import datetime
-import dateutil
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 
-from init_app import flask_exts
-from flask import Blueprint, request, g
+from flask import Blueprint, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
-from flask_utils import validate_json, id_creator
+from flask_utils import validate_json, query_to_objects, role_required
 from flask_utils import mongo_aggregations
-from flask_jwt_extended import jwt_required, get_jwt_identity, current_user
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jti
+
+from app_config import CurrentConfig
 
 from models import *
 
 monitor_blueprint = Blueprint('monitor', __name__, url_prefix='/api/monitor')
 
 
-@as_json
+def fetch_clubs():
+    club_list_query = NewOfficerUser.objects.scalar('club.name', 'confirmed', 'email')
+    raw_club_list = query_to_objects(club_list_query)
+    club_list = []
+
+    for club in raw_club_list:
+        del club['id']
+        del club['_cls']
+        club_list.append({
+            'name': club['club']['name'],
+            'email': club['email'],
+            'confirmed': club['confirmed'],
+        })
+
+    return club_list
+
+
 @monitor_blueprint.route('/login', methods=['POST'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False},
@@ -29,24 +43,24 @@ def login():
     email = json['email']
     password = json['password']
 
-    user = OfficerUser.objects(email=email).first()
-    if user is None:
+    potential_user = NewAdminUser.objects(email=email).first()
+    if potential_user is None:
         raise JsonError(status='error', reason='The user does not exist.')
 
-    if not user.confirmed:
+    if not potential_user.confirmed:
         raise JsonError(status='error', reason='The user has not confirmed their email.')
 
-    if not hash_manager.verify(password, user.password):
+    if not hash_manager.verify(password, potential_user.password):
         raise JsonError(status='error', reason='The password is incorrect.')
 
-    access_token = create_access_token(identity=email)
-    refresh_token = create_refresh_token(identity=email)
+    access_token = create_access_token(identity=potential_user)
+    refresh_token = create_refresh_token(identity=potential_user)
 
     access_jti = get_jti(encoded_token=access_token)
     refresh_jti = get_jti(encoded_token=refresh_token)
 
-    AccessJTI(owner=user, token_id=access_jti).save()
-    RefreshJTI(owner=user, token_id=refresh_jti).save()
+    AccessJTI(owner=potential_user, token_id=access_jti).save()
+    RefreshJTI(owner=potential_user, token_id=refresh_jti).save()
 
     return {
         'access': access_token,
@@ -56,28 +70,29 @@ def login():
     }
 
 
-@as_json
 @monitor_blueprint.route('/overview/stats/sign-up', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
 def fetch_sign_up_stats():
     one_day_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
-    officer_users = OfficerUser.objects
-    student_users = StudentUser.objects
+    officer_users = NewOfficerUser.objects
+    student_users = NewStudentUser.objects
 
     # Officer stats
-    num_registered_clubs = len(officer_users)
-    recent_num_registered_clubs = len(officer_users.filter(registered_on__gte=one_day_ago))
+    num_registered_clubs = officer_users.count()
+    recent_num_registered_clubs = officer_users.filter(registered_on__gte=one_day_ago).count()
 
-    num_confirmed_clubs = len(officer_users.filter(confirmed=True))
-    recent_num_confirmed_clubs = len(officer_users.filter(confirmed=True, registered_on__gte=one_day_ago))
+    num_confirmed_clubs = officer_users.filter(confirmed=True).count()
+    recent_num_confirmed_clubs = officer_users.filter(confirmed=True, registered_on__gte=one_day_ago).count()
 
-    num_clubs_rso_list = len(PreVerifiedEmail.objects)
+    num_clubs_rso_list = PreVerifiedEmail.objects.count()
 
     # Student stats
-    num_students_signed_up = len(student_users)
-    recent_num_students_signed_up = len(student_users.filter(registered_on__gte=one_day_ago))
+    num_students_signed_up = student_users.count()
+    recent_num_students_signed_up = student_users.filter(registered_on__gte=one_day_ago).count()
 
-    num_confirmed_students = len(student_users.filter(confirmed=True))
-    recent_num_confirmed_students = len(student_users.filter(confirmed=True, registered_on__gte=one_day_ago))
+    num_confirmed_students = student_users.filter(confirmed=True).count()
+    recent_num_confirmed_students = student_users.filter(confirmed=True, registered_on__gte=one_day_ago).count()
 
     return {
         'main': {
@@ -96,10 +111,12 @@ def fetch_sign_up_stats():
     }
 
 
-@as_json
 @monitor_blueprint.route('/overview/stats/activity', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
 def fetch_activity_stats():
     # HACK: I should probably be using aggregations here!
+
     officer_users = [jti.owner.role == 'officer' for jti in AccessJTI.objects]
     student_users = [jti.owner.role == 'student' for jti in AccessJTI.objects]
 
@@ -114,14 +131,18 @@ def fetch_activity_stats():
     }
 
 
-@as_json
 @monitor_blueprint.route('/rso/list', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
 def list_rso_users():
     rso_list = mongo_aggregations.fetch_aggregated_rso_list()
-    return json.dumps(rso_list)
+    return rso_list
 
 
 @monitor_blueprint.route('/rso/download', methods=['GET'])
+@role_required(roles=['admin'])
+@jwt_required
 def download_rso_users():
     rso_list = mongo_aggregations.fetch_aggregated_rso_list()
     for rso_email in rso_list:
@@ -131,8 +152,9 @@ def download_rso_users():
     return send_csv(rso_list, 'rso_emails.csv', ['email', 'registered', 'confirmed'], cache_timeout=0)
 
 
-@as_json
 @monitor_blueprint.route('/rso', methods=['POST'])
+@jwt_required
+@role_required(roles=['admin'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False}
 }, require_all=True)
@@ -147,14 +169,15 @@ def add_rso_user():
         raise JsonError(status='error', reason='Specified RSO Email already exists!')
 
 
-@as_json
 @monitor_blueprint.route('/rso/<email>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['admin'])
 def remove_rso_user(email):
     rso_email = PreVerifiedEmail.objects(email=email).first()
     if rso_email is None:
         raise JsonError(status='error', reason='Specified RSO Email does not exist!')
 
-    user = User.objects(email=email).first()
+    user = NewOfficerUser.objects(email=email).first()
     if user is not None:
         raise JsonError(status='error', reason='A club already exists with that email! Please delete it first')
 
@@ -162,56 +185,59 @@ def remove_rso_user(email):
     return {'status': 'success'}
 
 
-@as_json
 @monitor_blueprint.route('/club/list', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
 def list_clubs():
-    club_list = mongo_aggregations.fetch_aggregated_club_list()
-    return json.dumps(club_list)
+    club_list = fetch_clubs()
+    return club_list
 
 
 @monitor_blueprint.route('/club/download', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
 def download_clubs():
-    club_list = mongo_aggregations.fetch_aggregated_club_list()
+    club_list = fetch_clubs()
     for club in club_list:
-        del club['_id']
         club['confirmed'] = 'Yes' if club['confirmed'] else 'No'
 
-    return send_csv(club_list, 'clubs.csv', ['name', 'owner', 'confirmed'], cache_timeout=0)
+    return send_csv(club_list, 'clubs.csv', ['name', 'email', 'confirmed'], cache_timeout=0)
 
 
-@as_json
 @monitor_blueprint.route('/club/<email>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['admin'])
 def delete_club(email):
-    user = User.objects(email=email).first()
+    user = NewOfficerUser.objects(email=email).first()
     if user is None:
         raise JsonError(status='error', reason='The user does not exist!')
-
-    club = Club.objects(owner=user).first()
-
-    # NOTE: Each club may have an associated user, unless it's a student account
-    if club is not None:
-        club.delete()
 
     user.delete()
     return {'status': 'success'}
 
 
-@as_json
 @monitor_blueprint.route('/tags/list', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
 def list_tags_with_usage():
     # This pipeline will associate the tags with the number of clubs that have said tag
     tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
-    return json.dumps(tags_with_usage)
+    return tags_with_usage
 
 
 @monitor_blueprint.route('/tags/download', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
 def download_tags_with_usage():
     tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
-    return send_csv(tags_with_usage, 'tags.csv', ['name', 'num_clubs'], cache_timeout=0)
+    return send_csv(tags_with_usage, 'tags.csv', ['_id', 'name', 'num_clubs'], cache_timeout=0)
 
 
-@as_json
 @monitor_blueprint.route('/tags', methods=['POST'])
+@jwt_required
+@role_required(roles=['admin'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False}
 }, require_all=True)
@@ -243,8 +269,9 @@ def add_tag():
         raise JsonError(status='error', reason='Specified tag already exists!')
 
 
-@as_json
 @monitor_blueprint.route('/tags/<tag_id>', methods=['PUT'])
+@jwt_required
+@role_required(roles=['admin'])
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False}
 }, require_all=True)
@@ -263,8 +290,9 @@ def edit_tag(tag_id):
     return {'status': 'success'}
 
 
-@as_json
 @monitor_blueprint.route('/tags/<tag_id>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['admin'])
 def remove_tag(tag_id):
     tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
 
@@ -283,22 +311,28 @@ def remove_tag(tag_id):
         return {'status': 'success'}
 
 
-@as_json
 @monitor_blueprint.route('/more-stats/social-media', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
 def fetch_social_media_stats():
     smedia_stats = mongo_aggregations.fetch_aggregated_social_media_usage()
-    return json.dumps(smedia_stats)
+    return smedia_stats
 
 
-@as_json
 @monitor_blueprint.route('/more-stats/club-reqs', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
 def fetch_club_req_stats():
     club_req_stats = mongo_aggregations.fetch_aggregated_club_requirement_stats()
-    return json.dumps(club_req_stats)
+    return club_req_stats
 
 
-@as_json
 @monitor_blueprint.route('/more-stats/pic-stats', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
 def fetch_picture_stats():
     pic_stats = mongo_aggregations.fetch_aggregated_picture_stats()
-    return json.dumps(pic_stats)
+    return pic_stats
