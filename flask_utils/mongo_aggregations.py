@@ -57,6 +57,10 @@ def fetch_aggregated_tag_list():
                 'name': 1,
                 'num_clubs': { '$size': '$associated_clubs' }
             }
+        }, {
+            '$sort': {
+                'name': 1
+            }
         }
     ]))
 
