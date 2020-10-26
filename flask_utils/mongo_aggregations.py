@@ -147,22 +147,22 @@ def fetch_aggregated_club_requirement_stats():
                 '_id': 1,
                 'app_required': {
                     '$sum': {
-                        '$cond': ['$app_required', 1, 0]
+                        '$cond': ['$club.app_required', 1, 0]
                     }
                 },
                 'no_app_required': {
                     '$sum': {
-                        '$cond': ['$app_required', 0, 1]
+                        '$cond': ['$club.app_required', 0, 1]
                     }
                 },
                 'new_members': {
                     '$sum': {
-                        '$cond': ['$new_members', 1, 0]
+                        '$cond': ['$club.new_members', 1, 0]
                     }
                 },
                 'no_new_members': {
                     '$sum': {
-                        '$cond': ['$new_members', 0, 1]
+                        '$cond': ['$club.new_members', 0, 1]
                     }
                 }
             }
