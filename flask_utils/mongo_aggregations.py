@@ -16,6 +16,10 @@ def fetch_aggregated_rso_list():
                 'preserveNullAndEmptyArrays': True
             }
         }, {
+            '$match': {
+                'user.role': 'officer'
+            }
+        }, {
             '$project': {
                 '_id': 0,
                 'email': 1,
@@ -43,9 +47,9 @@ def fetch_aggregated_tag_list():
     return list(Tag.objects.aggregate([
         {
             '$lookup': {
-                'from': 'club',
+                'from': 'new_base_user',
                 'localField': '_id',
-                'foreignField': 'tags',
+                'foreignField': 'club.tags',
                 'as': 'associated_clubs'
             }
         }, {
@@ -62,7 +66,8 @@ def fetch_aggregated_social_media_usage():
     return list(NewBaseUser.objects.aggregate([
         {
             '$match': {
-                'confirmed': True
+                'confirmed': True,
+                'role': 'officer'
             }
         }, {
             '$replaceRoot': {
@@ -127,22 +132,11 @@ def fetch_aggregated_social_media_usage():
 
 def fetch_aggregated_club_requirement_stats():
     # This pipeline will count up the number of club requirements various social media links from all clubs available
-    return list(Club.objects.aggregate([
+    return list(NewBaseUser.objects.aggregate([
         {
-            '$lookup': {
-                'from': 'user',
-                'localField': 'owner',
-                'foreignField': '_id',
-                'as': 'user'
-            }
-        }, {
-            '$unwind': {
-                'path': '$user',
-                'preserveNullAndEmptyArrays': False
-            }
-        }, {
             '$match': {
-                'user.confirmed': True
+                'confirmed': True,
+                'role': 'officer'
             }
         }, {
             '$group': {
@@ -177,44 +171,33 @@ def fetch_aggregated_club_requirement_stats():
 
 def fetch_aggregated_picture_stats():
     # This pipeline will count up the number of clubs having logo/banner pictures from all clubs available
-    return list(Club.objects.aggregate([
+    return list(NewBaseUser.objects.aggregate([
         {
-            '$lookup': {
-                'from': 'user',
-                'localField': 'owner',
-                'foreignField': '_id',
-                'as': 'user'
-            }
-        }, {
-            '$unwind': {
-                'path': '$user',
-                'preserveNullAndEmptyArrays': False
-            }
-        }, {
             '$match': {
-                'user.confirmed': True
+                'confirmed': True,
+                'role': 'officer'
             }
         }, {
             '$group': {
                 '_id': 1,
                 'logo_pic': {
                     '$sum': {
-                        '$cond': ['$logo_url', 1, 0]
+                        '$cond': ['$club.logo_url', 1, 0]
                     }
                 },
                 'no_logo_pic': {
                     '$sum': {
-                        '$cond': ['$logo_url', 0, 1]
+                        '$cond': ['$club.logo_url', 0, 1]
                     }
                 },
                 'banner_pic': {
                     '$sum': {
-                        '$cond': ['$banner_url', 1, 0]
+                        '$cond': ['$club.banner_url', 1, 0]
                     }
                 },
                 'no_banner_pic': {
                     '$sum': {
-                        '$cond': ['$banner_url', 0, 1]
+                        '$cond': ['$club.banner_url', 0, 1]
                     }
                 }
             }
