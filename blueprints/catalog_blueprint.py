@@ -67,7 +67,7 @@ def search_orgs():
         .only(*CATALOG_VIEW_FIELDS)
 
     if len(search_text) > 0:
-        query = query.filter(name__icontains=search_text).order_by('club.name')
+        query = query.filter(club__name__icontains=search_text).order_by('club.name')
 
         # regex_search_query = re.compile(search_text, re.IGNORECASE)
         # query = query.filter(name=regex_search_query)
