@@ -7,8 +7,8 @@ from models import Tag, NewOfficerUser
 catalog_blueprint = Blueprint('catalog', __name__, url_prefix='/api/catalog')
 
 CATALOG_VIEW_FIELDS = [
-    'club.name', 'club.link_name', 'club.tags', 'club.app_required',
-    'club.new_members', 'club.logo_url', 'club.banner_url'
+    'club.name', 'club.link_name', 'club.tags', 'club.app_status',
+    'club.logo_url', 'club.banner_url'
 ]
 
 

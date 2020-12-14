@@ -47,8 +47,9 @@ class NewClub(gj.EmbeddedDocument):
     link_name = mongo.StringField(required=True)
 
     tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
-    app_required = mongo.BooleanField(required=True)
-    new_members  = mongo.BooleanField(required=True)
+    # app_required = mongo.BooleanField(required=True)
+    # new_members  = mongo.BooleanField(required=True)
+    app_status   = mongo.StringField(required=True, choices=['all', 'required', 'none'])
 
     logo_url   = RelaxedURLField(null=True, default=None)
     banner_url = RelaxedURLField(null=True, default=None)
