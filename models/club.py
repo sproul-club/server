@@ -11,6 +11,12 @@ class Event(gj.EmbeddedDocument):
     event_end   = mongo.DateTimeField(required=True)
     description = mongo.StringField(required=True, max_length=1000)
 
+    meta = {'allow_inheritance': True}
+
+class RecruitingEvent(Event):
+    description = mongo.StringField(required=True, max_length=200)
+    virtual_link = RelaxedURLField(null=True)
+
 class Resource(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
     name = mongo.StringField(required=True, max_length=100)
@@ -52,6 +58,7 @@ class NewClub(gj.EmbeddedDocument):
 
     resources = mongo.EmbeddedDocumentListField(Resource, default=[])
     events    = mongo.EmbeddedDocumentListField(Event, default=[])
+    recruiting_events = mongo.EmbeddedDocumentListField(RecruitingEvent, default=[])
 
     social_media_links = mongo.EmbeddedDocumentField(SocialMediaLinks)
 

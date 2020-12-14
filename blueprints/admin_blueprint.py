@@ -15,6 +15,7 @@ admin_blueprint = Blueprint('admin', __name__, url_prefix='/api/admin')
 
 _fetch_resources_list = lambda user: [query_to_objects(res) for res in user.club.resources]
 _fetch_event_list = lambda user: [query_to_objects(event) for event in user.club.events]
+_fetch_recruiting_events_list = lambda user: [query_to_objects(r_event) for r_event in user.club.recruiting_events]
 
 
 @admin_blueprint.route('/profile', methods=['GET'])
@@ -295,6 +296,106 @@ def delete_event(event_id):
         return _fetch_event_list(user)
     else:
         raise JsonError(status='error', reason='Requested event does not exist', status_=404)
+
+
+@admin_blueprint.route('/recruiting-events', methods=['GET'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def get_recruiting_events():
+    user = get_current_user()
+    return _fetch_recruiting_events_list(user)
+
+
+@admin_blueprint.route('/recruiting-events', methods=['POST'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'link': {'type': 'string'},
+    'virtual_link': {'type': 'string'},
+    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'description': {'type': 'string', 'maxlength': 200}
+})
+@as_json
+def add_recruiting_event():
+    user = get_current_user()
+    club = user.club
+
+    json = g.clean_json
+    r_event_name = json['name']
+
+    new_event_id = slugify(r_event_name, max_length=100)
+    for r_event in club.recruiting_events:
+        if r_event.id == new_event_id:
+            raise JsonError(status='error', reason='Recruiting event already exists under that name')
+
+    new_r_event = RecruitingEvent(
+        id              = new_event_id,
+        name            = r_event_name,
+        link            = json['link'],
+        virtual_link    = json['virtual_link'],
+        event_start     = json['event_start'],
+        event_end       = json['event_end'],
+        description     = json['description'],
+    )
+
+    club.recruiting_events += [new_r_event]
+    user.save()
+
+    return _fetch_recruiting_events_list(user)
+
+
+@admin_blueprint.route('/recruiting-events/<r_event_id>', methods=['PUT'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'link': {'type': 'string'},
+    'virtual_link': {'type': 'string'},
+    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'description': {'type': 'string', 'maxlength': 200}
+})
+@as_json
+def update_recruiting_event(r_event_id):
+    user = get_current_user()
+    club = user.club
+
+    json = g.clean_json
+
+    for (i, r_event) in enumerate(club.recruiting_events):
+        if r_event.id == r_event_id:
+            for key in json.keys():
+                if json.get(key) is not None:
+                    club.recruiting_events[i][key] = json[key]
+            user.save()
+
+            return _fetch_recruiting_events_list(user)
+
+    raise JsonError(status='error', reason='Requested recruiting event does not exist', status_=404)
+
+
+@admin_blueprint.route('/recruiting-events/<r_event_id>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def delete_recruiting_event(r_event_id):
+    user = get_current_user()
+    club = user.club
+
+    prev_len = len(club.recruiting_events)
+
+    club.recruiting_events = [r_event for r_event in club.recruiting_events if r_event.id != r_event_id]
+    user.save()
+
+    new_len = len(club.recruiting_events)
+    if new_len != prev_len:
+        return _fetch_recruiting_events_list(user)
+    else:
+        raise JsonError(status='error', reason='Requested recruiting event does not exist', status_=404)
+
 
 
 @admin_blueprint.route('/change-password', methods=['POST'])
