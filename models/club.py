@@ -56,6 +56,9 @@ class NewClub(gj.EmbeddedDocument):
     about_us     = mongo.StringField(default='', max_length=1500)
     get_involved = mongo.StringField(default='', max_length=1000)
 
+    apply_link = RelaxedURLField(null=True, default=None)
+    apply_deadline = mongo.DateTimeField(null=True, default=None)
+
     resources = mongo.EmbeddedDocumentListField(Resource, default=[])
     events    = mongo.EmbeddedDocumentListField(Event, default=[])
     recruiting_events = mongo.EmbeddedDocumentListField(RecruitingEvent, default=[])

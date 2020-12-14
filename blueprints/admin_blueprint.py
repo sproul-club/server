@@ -40,6 +40,8 @@ def fetch_profile():
     'new_members': {'type': 'boolean'},
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
+    'apply_link': {'type': 'string', 'empty': False},
+    'apply_deadline': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'social_media_links': {
         'type': 'dict',
         'schema': {
