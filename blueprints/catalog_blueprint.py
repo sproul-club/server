@@ -36,8 +36,10 @@ def get_organizations():
         .limit(limit) \
         .skip(skip)
 
+    results = [obj['club'] for obj in query_to_objects(query)]
+
     return {
-        'results': query_to_objects(query),
+        'results': results,
         'num_results': query.count()
     }
 
