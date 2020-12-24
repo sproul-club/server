@@ -36,9 +36,8 @@ def fetch_profile():
 @validate_json(schema={
     'name': {'type': 'string', 'empty': False, 'maxlength': 100},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
-    # 'app_required': {'type': 'boolean'},
-    # 'new_members': {'type': 'boolean'},
-    'app_status': {'type': 'string', 'allowed': ['all', 'required', 'none']},
+    'app_required': {'type': 'boolean'},
+    'new_members': {'type': 'boolean'},
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
     'apply_link': {'type': 'string', 'empty': False},
