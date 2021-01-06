@@ -45,6 +45,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
     "tags": [3, 1, 4],
     "app_required": true,
     "new_members": true,
+    "num_users": 0
 }
 ```
 * Sample body output:
