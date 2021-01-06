@@ -1,6 +1,23 @@
 # User API
 We use JWTs to manage authentication, mainly for allowing the user to edit their club's information.
 
+<!-- MarkdownTOC autolink="true" -->
+
+- [Does email exist? \(before sign up\)](#does-email-exist-before-sign-up)
+- [Is password strong enough? \(before sign up\)](#is-password-strong-enough-before-sign-up)
+- [Register a new user](#register-a-new-user)
+- [Resend confirmation email](#resend-confirmation-email)
+- [Confirm new user](#confirm-new-user)
+- [Login user](#login-user)
+- [Request password reset](#request-password-reset)
+- [Confirm Reset Password](#confirm-reset-password)
+- [Refresh access token](#refresh-access-token)
+- [Revoke access token](#revoke-access-token)
+- [Revoke refresh token](#revoke-refresh-token)
+
+<!-- /MarkdownTOC -->
+
+
 ## Does email exist? (before sign up)
 * Description: Given an email for a potential sign up, check if it exists within to list of scraped CalLink emails?
 * Path: `POST /api/user/email-exists`

@@ -1,5 +1,24 @@
 # Admin API
 
+<!-- MarkdownTOC autolink="true" -->
+
+- [Fetch profile info](#fetch-profile-info)
+- [Edit profile info](#edit-profile-info)
+- [Upload logo](#upload-logo)
+- [Upload banner](#upload-banner)
+- [Get resources](#get-resources)
+- [Add resource](#add-resource)
+- [Update resource](#update-resource)
+- [Delete resource](#delete-resource)
+- [Get events](#get-events)
+- [Add event](#add-event)
+- [Update event](#update-event)
+- [Delete event](#delete-event)
+- [Change password](#change-password)
+
+<!-- /MarkdownTOC -->
+
+
 ## Fetch profile info
 * Description: Fetches the complete club profile information
 * Path: `GET /api/admin/profile`

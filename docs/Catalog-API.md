@@ -1,5 +1,15 @@
 # Catalog API
 
+<!-- MarkdownTOC autolink="true" -->
+
+- [Fetch set of tags](#fetch-set-of-tags)
+- [Fetch set of "# of users" tags](#fetch-set-of--of-users-tags)
+- [Fetch organizations](#fetch-organizations)
+- [Fetch specific organization](#fetch-specific-organization)
+
+<!-- /MarkdownTOC -->
+
+
 ## Fetch set of tags
 * Description: Fetches the set of club tags
 * Path: `GET /api/catalog/tags`
