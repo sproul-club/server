@@ -17,6 +17,7 @@ class RelaxedURLField(StringField):
         if self.required and not value:
             self.error('Field is required and cannot be empty')
 
-        if value and not self.url_regex.match(value):
+
+        if not self.null and not self.url_regex.match(value):
             # Only check full URL
             self.error("Invalid URL: {}".format(value))
