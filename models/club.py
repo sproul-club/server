@@ -24,17 +24,17 @@ class Resource(gj.EmbeddedDocument):
 
 class SocialMediaLinks(gj.EmbeddedDocument):
     contact_email = mongo.EmailField(required=True)
-    website     = RelaxedURLField(null=True)
-    facebook    = RelaxedURLField(null=True)
-    instagram   = RelaxedURLField(null=True)
-    linkedin    = RelaxedURLField(null=True)
-    twitter     = RelaxedURLField(null=True)
-    youtube     = RelaxedURLField(null=True)
-    github      = RelaxedURLField(null=True)
-    behance     = RelaxedURLField(null=True)
-    medium      = RelaxedURLField(null=True)
-    gcalendar   = RelaxedURLField(null=True)
-    discord     = RelaxedURLField(null=True)
+    website     = RelaxedURLField(null=True, default='')
+    facebook    = RelaxedURLField(null=True, default='')
+    instagram   = RelaxedURLField(null=True, default='')
+    linkedin    = RelaxedURLField(null=True, default='')
+    twitter     = RelaxedURLField(null=True, default='')
+    youtube     = RelaxedURLField(null=True, default='')
+    github      = RelaxedURLField(null=True, default='')
+    behance     = RelaxedURLField(null=True, default='')
+    medium      = RelaxedURLField(null=True, default='')
+    gcalendar   = RelaxedURLField(null=True, default='')
+    discord     = RelaxedURLField(null=True, default='')
 
 class Tag(gj.Document):
     id   = mongo.IntField(required=True, primary_key=True)
@@ -52,19 +52,19 @@ class NewClub(gj.EmbeddedDocument):
     name  = mongo.StringField(required=True, max_length=100)
     link_name = mongo.StringField(required=True)
 
-    tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
+    tags         = mongo.ListField(mongo.ReferenceField(Tag, required=True), required=True, max_length=3)
     app_required = mongo.BooleanField(required=True)
     new_members  = mongo.BooleanField(required=True)
     num_users    = mongo.ReferenceField(NumUsersTag, required=True)
 
-    logo_url   = RelaxedURLField(null=True, default=None)
-    banner_url = RelaxedURLField(null=True, default=None)
+    logo_url   = RelaxedURLField(null=True, default='')
+    banner_url = RelaxedURLField(null=True, default='')
 
     about_us     = mongo.StringField(default='', max_length=1500)
     get_involved = mongo.StringField(default='', max_length=1000)
 
-    apply_link = RelaxedURLField(null=True, default=None)
-    apply_deadline = mongo.DateTimeField(null=True, default=None)
+    apply_link = RelaxedURLField(null=True, default='')
+    apply_deadline = mongo.DateTimeField(null=True)
 
     resources = mongo.EmbeddedDocumentListField(Resource, default=[])
     events    = mongo.EmbeddedDocumentListField(Event, default=[])
