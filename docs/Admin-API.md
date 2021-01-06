@@ -6,14 +6,21 @@
 - [Edit profile info](#edit-profile-info)
 - [Upload logo](#upload-logo)
 - [Upload banner](#upload-banner)
-- [Get resources](#get-resources)
-- [Add resource](#add-resource)
-- [Update resource](#update-resource)
-- [Delete resource](#delete-resource)
-- [Get events](#get-events)
-- [Add event](#add-event)
-- [Update event](#update-event)
-- [Delete event](#delete-event)
+- [Resources](#resources)
+    - [Get resources](#get-resources)
+    - [Add resource](#add-resource)
+    - [Update resource](#update-resource)
+    - [Delete resource](#delete-resource)
+- [Events](#events)
+    - [Get events](#get-events)
+    - [Add event](#add-event)
+    - [Update event](#update-event)
+    - [Delete event](#delete-event)
+- [Recruiting Events](#recruiting-events)
+    - [Get recruiting events](#get-recruiting-events)
+    - [Add recruiting event](#add-recruiting-event)
+    - [Update recruiting nevent](#update-recruiting-nevent)
+    - [Delete recruiting event](#delete-recruiting-event)
 - [Change password](#change-password)
 
 <!-- /MarkdownTOC -->
@@ -136,7 +143,9 @@
 }
 ```
 
-## Get resources
+## Resources
+
+### Get resources
 * Description: Gets all resources from a club
 * Path: `GET /api/admin/resources`
 * Headers:
@@ -152,7 +161,7 @@
 ]
 ```
 
-## Add resource
+### Add resource
 * Description: Adds a resource to the club
 * Path: `POST /api/admin/resources`
 * Headers:
@@ -180,7 +189,7 @@
 ]
 ```
 
-## Update resource
+### Update resource
 * Description: Updates a resource from the club
 * Path: `PUT /api/admin/resources/<resource-id>`
 * Headers:
@@ -208,7 +217,7 @@
 ]
 ```
 
-## Delete resource
+### Delete resource
 * Description: Deletes a resource from the club
 * Path: `DELETE /api/admin/resources/<resource-id>`
 * Headers:
@@ -224,7 +233,9 @@
 ]
 ```
 
-## Get events
+## Events
+
+### Get events
 * Description: Gets all events from a club
 * Path: `GET /api/admin/events`
 * Headers:
@@ -243,7 +254,7 @@
 ]
 ```
 
-## Add event
+### Add event
 * Description: Adds a event to the club
 * Path: `POST /api/admin/events`
 * Headers:
@@ -280,7 +291,7 @@
 ]
 ```
 
-## Update event
+### Update event
 * Description: Updates a event from the club
 * Path: `PUT /api/admin/events/<event-id>`
 * Headers:
@@ -317,7 +328,7 @@
 ]
 ```
 
-## Delete event
+### Delete event
 * Description: Deletes a event from the club
 * Path: `DELETE /api/admin/events/<event-id>`
 * Headers:
@@ -329,6 +340,128 @@
         "id": "example-event-10",
         "name": "Example event 10",
         "link": "http://example.com/",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the new event."
+    }
+]
+```
+
+## Recruiting Events
+
+### Get recruiting events
+* Description: Gets all recruiting events from a club
+* Path: `GET /api/admin/recruiting-events`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body output:
+```json
+[
+    {
+        "id": "example-recruiting-event-1",
+        "name": "Example recruiting event 1",
+        "link": "http://example.com/",
+        "virtual_link": "https://zoom.com/example-link",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the event."
+    }
+]
+```
+
+### Add recruiting event
+* Description: Adds a recruiting event to the club
+* Path: `POST /api/admin/recruiting-events`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "name": "Example recruiting event 2",
+    "link": "http://example.com/",
+    "virtual_link": "https://zoom.com/example-link",
+    "event_start": "2020-04-01T07:00:00.000Z",
+    "event_end": "2020-08-01T07:00:00.000Z",
+    "description": "This is something about the event."
+}
+```
+* Sample body output:
+```json
+[
+    {
+        "id": "example-recruiting-event-1",
+        "name": "Example recruiting event 1",
+        "link": "http://example.com/",
+        "virtual_link": "https://zoom.com/example-link",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the event."
+    },
+    {
+        "id": "example-recruiting-event-2",
+        "name": "Example recruiting event 2",
+        "link": "http://example.com/",
+        "virtual_link": "https://zoom.com/example-link",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the event."
+    }
+]
+```
+
+### Update recruiting nevent
+* Description: Updates a recruiting nevent from the club
+* Path: `PUT /api/admin/recruiting-events/<event-id>`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "name": "Example recruiting event 10",
+    "link": "http://example.com/",
+    "virtual_link": "https://zoom.com/example-link",
+    "event_start": "2020-04-01T07:00:00.000Z",
+    "event_end": "2020-08-01T07:00:00.000Z",
+    "description": "This is something about the new event."
+}
+```
+* Sample body output:
+```json
+[
+    {
+        "id": "example-recruiting-event-1",
+        "name": "Example recruiting event 10",
+        "link": "http://example.com/",
+        "virtual_link": "https://zoom.com/example-link",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the new event."
+    },
+    {
+        "id": "example-recruiting-event-2",
+        "name": "Example recruiting event 2",
+        "link": "http://example.com/",
+        "virtual_link": "https://zoom.com/example-link",
+        "event_start": "2020-04-01T07:00:00.000Z",
+        "event_end": "2020-08-01T07:00:00.000Z",
+        "description": "This is something about the event."
+    }
+]
+```
+
+### Delete recruiting event
+* Description: Deletes a recruiting event from the club
+* Path: `DELETE /api/admin/recruiting-events/<event-id>`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body output:
+```json
+[
+    {
+        "id": "example-recruiting-event-10",
+        "name": "Example recruiting event 10",
+        "link": "http://example.com/",
+        "virtual_link": "https://zoom.com/example-link",
         "event_start": "2020-04-01T07:00:00.000Z",
         "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the new event."
