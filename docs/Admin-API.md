@@ -128,7 +128,7 @@
 ```
 
 ## Upload banner
-* Description: Uploads the banner. banners must respect a 8:3 aspect ratio. A 16 MB limit is imposed as well
+* Description: Uploads the banner. banners must respect a 10:3 aspect ratio. A 16 MB limit is imposed as well
 * Path: `POST /api/admin/upload-banner`
 * Headers:
     - `Authorization: Bearer <access_token>`

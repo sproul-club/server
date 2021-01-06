@@ -106,7 +106,7 @@ def upload_banner():
     banner_file = request.files.get('banner', None)
 
     if banner_file is not None:
-        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, banner_file, 'banner', 8 / 3)
+        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, banner_file, 'banner', 10 / 3)
         user.update(club__banner_url=banner_url)
         return {'status': 'success', 'banner-url': club.banner_url}
     else:
