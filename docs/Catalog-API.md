@@ -17,33 +17,9 @@
 ]
 ```
 
-## Fetch organizations (unfiltered)
+## Fetch organizations
 * Description: Fetches the list of organizations without filters, sorted alphabetically.
-* Path: `POST /api/catalog/organizations` (TBD)
-* Sample body input:
-```json
-{
-    "limit": 50,
-    "skip": 0
-}
-```
-* Sample body output:
-```json
-{
-    "results": [
-        {
-            "id": "example-club",
-            "name": "Example Club",
-            "logo": "<logo-pic-url>",
-            "banner": "<banner-pic-url>",
-            "tags": [1, 3, 4],
-            "app_required": true,
-            "new_members": false,
-        }
-    ],
-    "num_results": 1
-}
-```
+* Path: `GET /api/catalog/organizations?limit={limit}&skip={skip}`
 
 ## Fetch organizations (filtered)
 * Description: Fetches the list of organizations with filters, sorted by match relevency
