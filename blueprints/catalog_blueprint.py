@@ -1,4 +1,4 @@
-from flask import Blueprint, g
+from flask import Blueprint, g, request
 from flask_json import as_json, JsonError
 from flask_utils import validate_json, query_to_objects, role_required
 
@@ -50,4 +50,12 @@ def get_org_by_id(org_link_name):
     if user is None:
         raise JsonError(status='error', reason='The requested club does not exist!', status_=404)
 
-    return query_to_objects(user.club)
+    club_obj = query_to_objects(user.club)
+
+    for event in club_obj['events']:
+        del event['_cls']
+
+    for r_event in club_obj['recruiting_events']:
+        del r_event['_cls']
+
+    return club_obj
