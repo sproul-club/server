@@ -21,20 +21,6 @@
 * Description: Fetches the list of organizations without filters, sorted alphabetically.
 * Path: `GET /api/catalog/organizations?limit={limit}&skip={skip}`
 
-## Fetch organizations (filtered)
-* Description: Fetches the list of organizations with filters, sorted by match relevency
-* Path: `POST /api/catalog/search` (TBD)
-* Sample body input:
-```json
-{
-    "search": "example club",
-    "tags": [],
-    "app_required": true,
-    "new_members": false,
-    "limit": 50,
-    "skip": 0
-}
-```
 * Sample body output:
 ```json
 {
