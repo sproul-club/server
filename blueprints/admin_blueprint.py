@@ -38,6 +38,7 @@ def fetch_profile():
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
+    'num_users': {'type': 'integer'},
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
     'apply_link': {'type': 'string', 'empty': False},
@@ -67,6 +68,8 @@ def edit_profile():
     for key in json.keys():
         if key == 'tags':
             user.club['tags'] = Tag.objects.filter(id__in=json['tags'])
+        elif key = 'num_users':
+            user.club['num_users'] = NumUsersTag.objects.filter(id=num_users_id).first()
         elif key == 'social_media_links':
             user.update(club__social_media_links=json['social_media_links'])
         else:
