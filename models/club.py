@@ -42,6 +42,12 @@ class Tag(gj.Document):
 
     meta = {'auto_create_index': False}
 
+class NumUsersTag(gj.Document):
+    id   = mongo.IntField(required=True, primary_key=True)
+    value = mongo.StringField(required=True)
+
+    meta = {'auto_create_index': False}
+
 class NewClub(gj.EmbeddedDocument):
     name  = mongo.StringField(required=True, max_length=100)
     link_name = mongo.StringField(required=True)
@@ -49,6 +55,7 @@ class NewClub(gj.EmbeddedDocument):
     tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
     app_required = mongo.BooleanField(required=True)
     new_members  = mongo.BooleanField(required=True)
+    num_users    = mongo.ReferenceField(NumUsersTag, required=True)
 
     logo_url   = RelaxedURLField(null=True, default=None)
     banner_url = RelaxedURLField(null=True, default=None)

@@ -24,6 +24,12 @@ def get_tags():
     return query_to_objects(Tag.objects.all())
 
 
+@catalog_blueprint.route('/num-user-tags', methods=['GET'])
+@as_json
+def get_num_user_tags():
+    return query_to_objects(NumUsersTag.objects.all())
+
+
 @catalog_blueprint.route('/organizations', methods=['GET'])
 def get_organizations():
     limit = to_int_safe( request.args.get('limit'), 50)

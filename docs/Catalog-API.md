@@ -17,6 +17,23 @@
 ]
 ```
 
+## Fetch set of "# of users" tags
+* Description: Fetches the set of "number of users" tags
+* Path: `GET /api/catalog/num-user-tags`
+* Sample body output:
+```json
+[
+    {
+        "id": 42,
+        "value": "1-100"
+    },
+    {
+        "id": 84,
+        "name": "100+"
+    }
+]
+```
+
 ## Fetch organizations
 * Description: Fetches the list of organizations without filters, sorted alphabetically.
 * Path: `GET /api/catalog/organizations?limit={limit}&skip={skip}`

@@ -55,7 +55,8 @@ def is_password_strong_enough():
     'password': {'type': 'string', 'empty': False},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
-    'new_members': {'type': 'boolean'}
+    'new_members': {'type': 'boolean'},
+    'num_users': {'type': 'integer'},
 }, require_all=True)
 def register():
     json = g.clean_json
@@ -66,6 +67,7 @@ def register():
     club_tag_ids = json['tags']
     app_required = json['app_required']
     new_members = json['new_members']
+    num_users_id = json['num_users']
 
     # Check if email is part of pre-verified list of emails
     email_exists = PreVerifiedEmail.objects(email=club_email).first() is not None
@@ -89,6 +91,8 @@ def register():
         tags=Tag.objects.filter(id__in=club_tag_ids),
         app_required=app_required,
         new_members=new_members,
+        num_users=NumUsersTag.objects.filter(id=num_users_id).first()
+
         social_media_links=SocialMediaLinks(contact_email=club_email)
     )
 
