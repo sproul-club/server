@@ -2,7 +2,7 @@ from flask import Blueprint, g, request
 from flask_json import as_json, JsonError
 from flask_utils import validate_json, query_to_objects, role_required
 
-from models import Tag, NewOfficerUser
+from models import *
 
 catalog_blueprint = Blueprint('catalog', __name__, url_prefix='/api/catalog')
 
