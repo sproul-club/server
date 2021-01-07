@@ -68,7 +68,7 @@ def edit_profile():
     for key in json.keys():
         if key == 'tags':
             user.club['tags'] = Tag.objects.filter(id__in=json['tags'])
-        elif key = 'num_users':
+        elif key == 'num_users':
             user.club['num_users'] = NumUsersTag.objects.filter(id=num_users_id).first()
         elif key == 'social_media_links':
             user.update(club__social_media_links=json['social_media_links'])

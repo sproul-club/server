@@ -52,7 +52,7 @@ class NewClub(gj.EmbeddedDocument):
     name  = mongo.StringField(required=True, max_length=100)
     link_name = mongo.StringField(required=True)
 
-    tags         = mongo.ListField(mongo.ReferenceField(Tag, required=True), required=True, max_length=3)
+    tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
     app_required = mongo.BooleanField(required=True)
     new_members  = mongo.BooleanField(required=True)
     num_users    = mongo.ReferenceField(NumUsersTag, required=True)
