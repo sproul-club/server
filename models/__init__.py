@@ -1,16 +1,18 @@
 __all__ = [
     'RelaxedURLField',
-    'NewBaseUser', 'NewStudentUser', 'NewOfficerUser', 'NewAdminUser',
-    'PreVerifiedEmail', 'AccessJTI', 'RefreshJTI', 'ConfirmEmailToken', 'ResetPasswordToken',
-    'Event', 'Resource', 'SocialMediaLinks', 'NewClub',
     'Tag', 'NumUsersTag', 'Major', 'Minor'
+    'NewBaseUser', 'PreVerifiedEmail', 'AccessJTI', 'RefreshJTI', 'ConfirmEmailToken', 'ResetPasswordToken',
+    'StudentKanbanBoard', 'NewStudentUser',
+    'Event', 'RecruitingEvent', 'Resource', 'SocialMediaLinks', 'CaptionedPic', 'NewClub', 'NewOfficerUser',
+    'NewAdminUser',
 ]
 
 from models.relaxed_url_field import RelaxedURLField
 
 from models.metadata import Tag, NumUsersTag, Major, Minor
 
-from models.user import NewBaseUser, NewStudentUser, NewOfficerUser, NewAdminUser
-from models.user import PreVerifiedEmail, AccessJTI, RefreshJTI, ConfirmEmailToken, ResetPasswordToken
+from models.user import NewBaseUser, PreVerifiedEmail, AccessJTI, RefreshJTI, ConfirmEmailToken, ResetPasswordToken
 
-from models.club import Event, Resource, SocialMediaLinks, NewClub
+from models.officer import Event, RecruitingEvent, Resource, SocialMediaLinks, CaptionedPic, NewClub, NewOfficerUser
+from models.student import StudentKanbanBoard, NewStudentUser
+from models.admin import NewAdminUser
