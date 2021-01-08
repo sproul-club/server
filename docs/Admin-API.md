@@ -34,18 +34,22 @@
 * Sample body output:
 ```json
 {
-    "id": "example-club",
     "name": "Example Club",
+    "link_name": "example-club",
     "owner": "example@gmail.com",
-    "tags": [1, 3, 4],
-    "logo_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/logo/example-club-logo.png",
-    "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png",
-    "app_required": true,
-    "new_members": false,
     "about_us": "This is something about the club.",
     "get_involved": "This is something about getting involved.",
+    "banner_url": "<banner-pic-url>",
+    "logo_url": "<logo-pic-url>",
+    "app_required": true,
+    "new_members": false,
+    "num_users": 0,
+    "apply_deadline": "2020-05-20T12:00:00",
+    "apply_link": "https://www.apply-here-now.com",
+    "tags": [1, 3, 4],
     "resources": [
         {
+            "id": "example-resource",
             "name": "Example resource",
             "link": "https://www.resource.com"
         }
@@ -54,13 +58,23 @@
         {
             "name": "Example event",
             "link": "https://www.event.com",
-            "start_datetime": "<start-datetime>",
-            "end_datetime": "<end-datetime>",
+            "event_start": "2020-04-20T12:00:00",
+            "event_end": "2020-06-20T12:00:00",
+            "description": "This is a description about example event.",
+        }
+    ],
+    "recruiting_events": [
+        {
+            "name": "Example event",
+            "link": "https://www.event.com",
+            "virtual_link": "https://www.zoom.com/example-event",
+            "event_start": "2020-04-20T12:00:00",
+            "event_end": "2020-06-20T12:00:00",
             "description": "This is a description about example event.",
         }
     ],
     "social_media_links": {
-        "contact_email": "example-contact-email@gmail.com",
+        "contact_email": "example-email@gmail.com",
         "website": "http://example.com/",
         "facebook": "https://www.facebook.com/pages/example-club",
         "instagram": "https://www.instagram.com/example-club",
@@ -70,7 +84,8 @@
         "github": "https://github.com/example-club",
         "behance": "https://www.behance.net/example-club",
         "medium": "https://medium.com/@example-club",
-        "gcalendar": "<google-calendar-link>"
+        "gcalendar": "<google-calendar-link>",
+        "discord": "<discord-invite-link>"
     }
 }
 ```
@@ -84,13 +99,20 @@
 ```json
 {
     "name": "Example Club",
-    "tags": [1, 3, 4],
-    "app_required": true,
-    "new_members": false,
+    "link_name": "example-club",
+    "owner": "example@gmail.com",
     "about_us": "This is something about the club.",
     "get_involved": "This is something about getting involved.",
+    "banner_url": "<banner-pic-url>",
+    "logo_url": "<logo-pic-url>",
+    "app_required": true,
+    "new_members": false,
+    "num_users": 0,
+    "apply_deadline": "2020-05-20T12:00:00",
+    "apply_link": "https://www.apply-here-now.com",
+    "tags": [1, 3, 4],
     "social_media_links": {
-        "contact_email": "example-contact-email@gmail.com",
+        "contact_email": "example-email@gmail.com",
         "website": "http://example.com/",
         "facebook": "https://www.facebook.com/pages/example-club",
         "instagram": "https://www.instagram.com/example-club",
@@ -100,7 +122,8 @@
         "github": "https://github.com/example-club",
         "behance": "https://www.behance.net/example-club",
         "medium": "https://medium.com/@example-club",
-        "gcalendar": "<google-calendar-link>"
+        "gcalendar": "<google-calendar-link>",
+        "discord": "<discord-invite-link>"
     }
 }
 ```
