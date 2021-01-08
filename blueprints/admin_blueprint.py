@@ -75,7 +75,9 @@ def edit_profile():
         else:
             user.club[key] = json[key]
 
+    user.club.last_updated = datetime.datetime.now()
     user.save()
+
     return {'status': 'success'}
 
 
@@ -90,6 +92,8 @@ def upload_logo():
 
     if logo_file is not None:
         logo_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, logo_file, 'logo', 1.0)
+
+        user.club.last_updated = datetime.datetime.now()
         user.update(club__logo_url=logo_url)
         return {'status': 'success', 'logo-url': club.logo_url}
     else:
@@ -107,6 +111,8 @@ def upload_banner():
 
     if banner_file is not None:
         banner_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, banner_file, 'banner', 10 / 3)
+
+        user.club.last_updated = datetime.datetime.now()
         user.update(club__banner_url=banner_url)
         return {'status': 'success', 'banner-url': club.banner_url}
     else:
@@ -151,6 +157,8 @@ def add_resource():
     )
 
     club.resources += [resource]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     return _fetch_resources_list(user)
@@ -175,6 +183,8 @@ def update_resource(resource_id):
             for key in json.keys():
                 if json.get(key) is not None:
                     club.resources[i][key] = json[key]
+
+            user.club.last_updated = datetime.datetime.now()
             user.save()
 
             return _fetch_resources_list(user)
@@ -193,6 +203,8 @@ def delete_resource(resource_id):
     prev_len = len(club.resources)
 
     club.resources = [resource for resource in club.resources if resource.id != resource_id]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     new_len = len(club.resources)
@@ -249,6 +261,8 @@ def add_event():
     )
 
     club.events += [event]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     return _fetch_event_list(user)
@@ -276,6 +290,8 @@ def update_event(event_id):
             for key in json.keys():
                 if json.get(key) is not None:
                     club.events[i][key] = json[key]
+
+            user.club.last_updated = datetime.datetime.now()
             user.save()
 
             return _fetch_event_list(user)
@@ -294,6 +310,8 @@ def delete_event(event_id):
     prev_len = len(club.events)
 
     club.events = [event for event in club.events if event.id != event_id]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     new_len = len(club.events)
@@ -347,6 +365,8 @@ def add_recruiting_event():
     )
 
     club.recruiting_events += [new_r_event]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     return _fetch_recruiting_events_list(user)
@@ -375,6 +395,8 @@ def update_recruiting_event(r_event_id):
             for key in json.keys():
                 if json.get(key) is not None:
                     club.recruiting_events[i][key] = json[key]
+
+            user.club.last_updated = datetime.datetime.now()
             user.save()
 
             return _fetch_recruiting_events_list(user)
@@ -393,6 +415,8 @@ def delete_recruiting_event(r_event_id):
     prev_len = len(club.recruiting_events)
 
     club.recruiting_events = [r_event for r_event in club.recruiting_events if r_event.id != r_event_id]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     new_len = len(club.recruiting_events)

@@ -86,7 +86,8 @@
         "medium": "https://medium.com/@example-club",
         "gcalendar": "<google-calendar-link>",
         "discord": "<discord-invite-link>"
-    }
+    },
+    "last_updated": "2020-10-20T12:00:00"
 }
 ```
 
