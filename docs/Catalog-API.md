@@ -60,6 +60,7 @@
             "logo_url": "<logo-pic-url>",
             "app_required": true,
             "new_members": false,
+            "num_users": 0,
             "tags": [1, 3, 4],
         }
     ],
@@ -81,6 +82,7 @@
     "logo_url": "<logo-pic-url>",
     "app_required": true,
     "new_members": false,
+    "num_users": 0,
     "apply_deadline": "2020-05-20T12:00:00",
     "apply_link": "https://www.apply-here-now.com",
     "tags": [1, 3, 4],
