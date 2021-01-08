@@ -3,6 +3,8 @@ import mongoengine_goodjson as gj
 
 from models.relaxed_url_field import RelaxedURLField
 
+from models.metadata import Tag, NumUsersTag
+
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
     name = mongo.StringField(required=True, max_length=100)
@@ -36,15 +38,7 @@ class SocialMediaLinks(gj.EmbeddedDocument):
     gcalendar   = RelaxedURLField(null=True, default='')
     discord     = RelaxedURLField(null=True, default='')
 
-class Tag(gj.Document):
-    id   = mongo.IntField(required=True, primary_key=True)
-    name = mongo.StringField(required=True)
 
-    meta = {'auto_create_index': False}
-
-class NumUsersTag(gj.Document):
-    id   = mongo.IntField(required=True, primary_key=True)
-    value = mongo.StringField(required=True)
 
     meta = {'auto_create_index': False}
 

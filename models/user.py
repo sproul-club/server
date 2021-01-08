@@ -2,6 +2,7 @@ import datetime
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
+from models.metadata import Major, Minor, Tag
 from models.club import NewClub
 USER_ROLES = ['student', 'officer', 'admin']
 
