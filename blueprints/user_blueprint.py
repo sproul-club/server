@@ -199,9 +199,6 @@ def login():
     if not hash_manager.verify(password, potential_user.password):
         raise JsonError(status='error', reason='The password is incorrect.')
 
-    if potential_user.role == 'student':
-        raise JsonError(status='error', reason='Student sign-in is not supported!')
-
     access_token = create_access_token(identity=potential_user)
     refresh_token = create_refresh_token(identity=potential_user)
 

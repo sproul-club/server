@@ -132,3 +132,6 @@ dmypy.json
 
 # JSON data files
 *.json
+
+# Database management folder
+db_admin/

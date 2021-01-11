@@ -5,7 +5,7 @@ from flask import request
 from flask_json import JsonError
 
 from init_app import app, flask_exts
-from blueprints import user_blueprint, catalog_blueprint, admin_blueprint, monitor_blueprint
+from blueprints import *
 
 from models import *
 
@@ -88,6 +88,9 @@ app.register_blueprint(user_blueprint)
 app.register_blueprint(catalog_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(monitor_blueprint)
+app.register_blueprint(student_blueprint)
+
+app.register_blueprint(google_auth_blueprint, url_prefix='/google')
 
 if __name__ == '__main__':
     app.run(load_dotenv=False, use_reloader=False)

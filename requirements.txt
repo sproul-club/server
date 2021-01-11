@@ -23,6 +23,7 @@ Flask==1.1.2
 Flask-Compress==1.5.0
 Flask-Cors==3.0.8
 Flask-CSV==1.2.0
+Flask-Dance==3.2.0
 Flask-JSON==0.3.4
 Flask-JWT-Extended==3.24.1
 Flask-Mail==0.9.1
@@ -42,6 +43,7 @@ mmh3==2.5.1
 mongoengine==0.20.0
 mongoengine-goodjson==1.1.8
 numpy==1.19.1
+oauthlib==3.1.0
 ordered-set==4.0.2
 passlib==1.7.2
 password-strength==0.0.3.post2
@@ -56,6 +58,8 @@ python-dotenv==0.14.0
 python-slugify==4.0.1
 pytz==2020.1
 redis==3.5.3
+requests==2.25.1
+requests-oauthlib==1.3.0
 s3transfer==0.3.3
 scout-apm==2.15.2
 sentry-sdk==0.16.5
@@ -66,6 +70,7 @@ toml==0.10.1
 typed-ast==1.4.1
 tzlocal==2.1
 urllib3==1.25.10
+URLObject==2.4.3
 walrus==0.8.1
 Werkzeug==1.0.1
 wrapt==1.12.1

@@ -47,6 +47,10 @@ class BaseConfig(object):
     S3_ACCESS_KEY = os.getenv('S3_KEY')
     S3_SECRET_KEY = os.getenv('S3_SECRET')
 
+    # Google OAuth key and secret
+    GOOGLE_OAUTH_CLIENT_ID     = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+    GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
+
 # Development config object for Flask app
 class DevelopmentConfig(BaseConfig):
     DEBUG = True

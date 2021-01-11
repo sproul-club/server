@@ -1,6 +1,6 @@
 __all__ = [
     'RelaxedURLField',
-    'Tag', 'NumUsersTag', 'Major', 'Minor'
+    'Tag', 'NumUsersTag', 'Major', 'Minor',
     'NewBaseUser', 'PreVerifiedEmail', 'AccessJTI', 'RefreshJTI', 'ConfirmEmailToken', 'ResetPasswordToken',
     'StudentKanbanBoard', 'NewStudentUser',
     'Event', 'RecruitingEvent', 'Resource', 'SocialMediaLinks', 'CaptionedPic', 'NewClub', 'NewOfficerUser',
