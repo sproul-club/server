@@ -6,6 +6,11 @@ from models.relaxed_url_field import RelaxedURLField
 from models.user import NewBaseUser, USER_ROLES
 from models.metadata import Tag, NumUsersTag
 
+# TODO: Decouple embedded 'NewClub' from 'NewOfficerUser'
+# TODO: Decouple embedded 'Event' from 'NewOfficerUser'
+# TODO: Decouple embedded 'RecruitingEvent' from 'NewOfficerUser'
+
+
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
     name = mongo.StringField(required=True, max_length=100)

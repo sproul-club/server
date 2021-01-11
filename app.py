@@ -90,7 +90,5 @@ app.register_blueprint(admin_blueprint)
 app.register_blueprint(monitor_blueprint)
 app.register_blueprint(student_blueprint)
 
-app.register_blueprint(google_auth_blueprint, url_prefix='/google')
-
 if __name__ == '__main__':
     app.run(load_dotenv=False, use_reloader=False)
