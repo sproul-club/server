@@ -75,10 +75,7 @@ ALL_INDICES = [
     {
         'collection': 'new_base_user',
         'key': 'club.link_name',
-        'name': 'club-link-name',
-        'extra': {
-            'unique': True
-        }
+        'name': 'club-link-name'
     },
     {
         'collection': 'new_base_user',
