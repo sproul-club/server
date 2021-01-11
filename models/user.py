@@ -14,6 +14,8 @@ class NewBaseUser(gj.Document):
     confirmed     = mongo.BooleanField(default=False)
     confirmed_on  = mongo.DateTimeField(default=None)
 
+    has_usable_password = mongo.BooleanField(required=True)
+
     role = mongo.StringField(required=True, choices=USER_ROLES)
 
     meta = {'auto_create_index': False, 'allow_inheritance': True}

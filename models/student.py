@@ -14,6 +14,7 @@ class StudentKanbanBoard(gj.EmbeddedDocument):
 
 class NewStudentUser(NewBaseUser):
     role = mongo.StringField(default='student', choices=USER_ROLES)
+    has_usable_password = mongo.BooleanField(default=False)
 
     majors = mongo.ListField(mongo.ReferenceField(Major), required=True, max_length=3)
     minors = mongo.ListField(mongo.ReferenceField(Minor), required=True, max_length=3)

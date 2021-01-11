@@ -89,6 +89,8 @@ class NewClub(gj.EmbeddedDocument):
 
 class NewOfficerUser(NewBaseUser):
     role = mongo.StringField(default='officer', choices=USER_ROLES)
+    has_usable_password = mongo.BooleanField(default=True)
+
     club = mongo.EmbeddedDocumentField(NewClub, required=True)
 
     meta = {'auto_create_index': False}
