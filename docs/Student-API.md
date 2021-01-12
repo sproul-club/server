@@ -14,6 +14,7 @@
     - [Edit profile info](#edit-profile-info)
     - [Add favorite clubs](#add-favorite-clubs)
     - [Remove favorite clubs](#remove-favorite-clubs)
+    - [Edit club board](#edit-club-board)
 
 <!-- /MarkdownTOC -->
 
@@ -189,4 +190,26 @@ a partial account is made, in which the registeration is expected to finish when
     "example-club-4",
     "example-club-8"
 ]
+```
+
+### Edit club board
+* Description: Edits club Kanban board data from user. Clubs within each column are sorted alphabetically.
+* Path: `GET /api/student/club-board`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "interested_clubs": ["example-club-5"],
+    "applied_clubs": ["example-club-2", "example-club-3", "example-club-9"],
+    "interviewed_clubs": ["example-club-7"]
+}
+```
+* Sample body output:
+```json
+{
+    "interested_clubs": ["example-club-5"],
+    "applied_clubs": ["example-club-2", "example-club-3", "example-club-9"],
+    "interviewed_clubs": ["example-club-7"]
+}
 ```
