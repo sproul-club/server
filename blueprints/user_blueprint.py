@@ -280,6 +280,7 @@ def confirm_reset_password():
 
 @user_blueprint.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
+@role_required(roles=['officer'])
 def refresh():
     user = get_current_user()
     access_token = create_access_token(identity=user)
@@ -295,6 +296,7 @@ def refresh():
 
 @user_blueprint.route('/revoke-access', methods=['DELETE'])
 @jwt_required
+@role_required(roles=['officer'])
 def revoke_access():
     jti = get_raw_jwt()['jti']
 
@@ -313,6 +315,7 @@ def revoke_access():
 
 @user_blueprint.route('/revoke-refresh', methods=['DELETE'])
 @jwt_refresh_token_required
+@role_required(roles=['officer'])
 def revoke_refresh():
     jti = get_raw_jwt()['jti']
 
