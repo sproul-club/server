@@ -49,7 +49,7 @@ fa = FlaskAuthomatic(
 )
 
 
-@student_blueprint.route('/glogin', methods=['GET', 'POST'])
+@student_blueprint.route('/login', methods=['GET'])
 @fa.login('google')
 def glogin():
     if fa.result is not None:
@@ -129,6 +129,60 @@ def finish_register():
     potential_user.save()
 
     return {'status': 'success'}
+
+# TODO: Refactor to not be duplicated here
+@student_blueprint.route('/refresh', methods=['POST'])
+@jwt_refresh_token_required
+@role_required(roles=['student'])
+def refresh():
+    user = get_current_user()
+    access_token = create_access_token(identity=user)
+    access_jti = get_jti(access_token)
+
+    AccessJTI(owner=user, token_id=access_jti).save()
+
+    return {
+        'access': access_token,
+        'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
+    }
+
+# TODO: Refactor to not be duplicated here
+@student_blueprint.route('/revoke-access', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['student'])
+def revoke_access():
+    jti = get_raw_jwt()['jti']
+
+    access_jti = AccessJTI.objects(token_id=jti).first()
+    if access_jti is None:
+        raise JsonError(status='error', reason='Access token does not exist!', status_=404)
+
+    access_jti.expired = True
+    access_jti.save()
+
+    return {
+        'status': 'success',
+        'message': 'Access token revoked!'
+    }
+
+# TODO: Refactor to not be duplicated here
+@student_blueprint.route('/revoke-refresh', methods=['DELETE'])
+@jwt_refresh_token_required
+@role_required(roles=['student'])
+def revoke_refresh():
+    jti = get_raw_jwt()['jti']
+
+    refresh_jti = RefreshJTI.objects(token_id=jti).first()
+    if refresh_jti is None:
+        raise JsonError(status='error', reason='Refresh token does not exist!', status_=404)
+
+    refresh_jti.expired = True
+    refresh_jti.save()
+
+    return {
+        'status': 'success',
+        'message': 'Refresh token revoked!'
+    }
 
 
 @student_blueprint.route('/profile', methods=['GET'])
