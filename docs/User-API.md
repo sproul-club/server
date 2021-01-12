@@ -3,6 +3,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 
 <!-- MarkdownTOC autolink="true" -->
 
+- [Postman Collection](#postman-collection)
 - [Does email exist? \(before sign up\)](#does-email-exist-before-sign-up)
 - [Is password strong enough? \(before sign up\)](#is-password-strong-enough-before-sign-up)
 - [Register a new user](#register-a-new-user)
@@ -16,6 +17,9 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 - [Revoke refresh token](#revoke-refresh-token)
 
 <!-- /MarkdownTOC -->
+
+## Postman Collection
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/9313a243aa286cd566dd)
 
 
 ## Does email exist? (before sign up)

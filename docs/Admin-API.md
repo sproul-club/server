@@ -2,6 +2,7 @@
 
 <!-- MarkdownTOC autolink="true" -->
 
+- [Postman Collection](#postman-collection)
 - [Fetch profile info](#fetch-profile-info)
 - [Edit profile info](#edit-profile-info)
 - [Upload logo](#upload-logo)
@@ -25,6 +26,8 @@
 
 <!-- /MarkdownTOC -->
 
+## Postman Collection
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/d94f6e43c7f713013796)
 
 ## Fetch profile info
 * Description: Fetches the complete club profile information
@@ -104,8 +107,6 @@
     "owner": "example@gmail.com",
     "about_us": "This is something about the club.",
     "get_involved": "This is something about getting involved.",
-    "banner_url": "<banner-pic-url>",
-    "logo_url": "<logo-pic-url>",
     "app_required": true,
     "new_members": false,
     "num_users": 0,
