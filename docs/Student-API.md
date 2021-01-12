@@ -11,6 +11,7 @@
     - [Revoke refresh token](#revoke-refresh-token)
 - [Managing Data](#managing-data)
     - [Fetch profile info](#fetch-profile-info)
+    - [Edit profile info](#edit-profile-info)
 
 <!-- /MarkdownTOC -->
 
@@ -120,5 +121,26 @@ a partial account is made, in which the registeration is expected to finish when
         "interested_clubs": [],
         "interviewed_clubs": []
     }
+}
+```
+
+
+### Edit profile info
+* Description: Edits the student profile information
+* Path: `POST /api/student/profile`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "majors": [2, 3, 7],
+    "minors": [1, 3, 4],
+    "interests": [2, 6, 8]
+}
+```
+* Sample body output:
+```json
+{
+    "status": "success"
 }
 ```

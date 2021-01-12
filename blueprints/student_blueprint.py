@@ -213,22 +213,14 @@ def fetch_profile():
     'majors': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'minors': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'interests': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
-    'favorited_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
-    'club_board': {
-        'type': 'dict',
-        'schema': {
-            'interested_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
-            'applied_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
-            'interviewed_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
-        }
-    },
 })
 def edit_profile():
     user = get_current_user()
     json = g.clean_json
 
-    for key in json.keys():
-        user[key] = json[key]
+    user.majors = Major.objects.filter(id__in=json['majors'])
+    user.minors = Minor.objects.filter(id__in=json['minors'])
+    user.interests = Tag.objects.filter(id__in=json['interests'])
 
     user.save()
 
