@@ -7,9 +7,9 @@ from models.user import NewBaseUser, USER_ROLES
 from models.metadata import Major, Minor, Tag
 
 class StudentKanbanBoard(gj.EmbeddedDocument):
-    interested_clubs  = mongo.ListField(mongo.ReferenceField('NewOfficerUser'), default=[])
-    applied_clubs     = mongo.ListField(mongo.ReferenceField('NewOfficerUser'), default=[])
-    interviewed_clubs = mongo.ListField(mongo.ReferenceField('NewOfficerUser'), default=[])
+    interested_clubs  = mongo.ListField(mongo.StringField(), default=[])
+    applied_clubs     = mongo.ListField(mongo.StringField(), default=[])
+    interviewed_clubs = mongo.ListField(mongo.StringField(), default=[])
 
     meta = {'auto_create_index': False}
 
@@ -24,8 +24,8 @@ class NewStudentUser(NewBaseUser):
     minors = mongo.ListField(mongo.ReferenceField(Minor), max_length=3)
     interests = mongo.ListField(mongo.ReferenceField(Tag))
 
-    favorited_clubs = mongo.ListField(mongo.ReferenceField('NewOfficerUser'), default=[])
-    visited_clubs = mongo.ListField(mongo.ReferenceField('NewOfficerUser'), default=[])
+    favorited_clubs = mongo.ListField(mongo.StringField(), default=[])
+    visited_clubs = mongo.ListField(mongo.StringField(), default=[])
 
     club_board = mongo.EmbeddedDocumentField(StudentKanbanBoard)
 
