@@ -103,6 +103,8 @@ def login():
 
 
 @student_blueprint.route('/finish-register', methods=['POST'])
+@jwt_required
+@role_required(roles=['student'])
 @validate_json(schema={
     'email': {'type': 'string', 'empty': False},
     'majors': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},

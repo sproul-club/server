@@ -47,6 +47,8 @@ a partial account is made, in which the registeration is expected to finish when
 ### Finish registeration
 * Description:
 * Path: `POST /api/student/finish-register`
+* Headers:
+    - `Authorization: Bearer <refresh_token>`
 * Sample body input:
 ```json
 {
