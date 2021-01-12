@@ -88,7 +88,7 @@ app.register_blueprint(user_blueprint)
 app.register_blueprint(catalog_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(monitor_blueprint)
-app.register_blueprint(student_blueprint)
+# app.register_blueprint(student_blueprint)
 
 if __name__ == '__main__':
     app.run(load_dotenv=False, use_reloader=False)
