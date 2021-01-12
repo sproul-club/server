@@ -17,19 +17,15 @@ from flask_jwt_extended import (
     get_raw_jwt, get_jti, get_current_user
 )
 
-student_blueprint = Blueprint('student', __name__, url_prefix='/api/student')
-
-_fetch_resources_list = lambda user: [query_to_objects(res) for res in user.club.resources]
-_fetch_event_list = lambda user: [query_to_objects(event) for event in user.club.events]
-_fetch_recruiting_events_list = lambda user: [query_to_objects(r_event) for r_event in user.club.recruiting_events]
-
-
-PSEUDO_PASSWORD_PREFIX = 'UNUSABLE_PASSWORD'
-
 from authomatic.extras.flask import FlaskAuthomatic
 from authomatic.providers import oauth2
 
 from app_config import CurrentConfig
+
+PSEUDO_PASSWORD_PREFIX = 'UNUSABLE_PASSWORD'
+_fetch_fav_clubs_list = lambda user: [query_to_objects(club) for club in user.favorited_clubs]
+
+student_blueprint = Blueprint('student', __name__, url_prefix='/api/student')
 
 
 fa = FlaskAuthomatic(
@@ -226,3 +222,73 @@ def edit_profile():
 
     return {'status': 'success'}
 
+
+@student_blueprint.route('/favorite-clubs', methods=['GET'])
+@jwt_required
+@role_required(roles=['student'])
+def get_favorite_clubs():
+    user = get_current_user()
+    json = g.clean_json
+
+    return _fetch_fav_clubs_list(user)
+
+
+@student_blueprint.route('/favorite-clubs', methods=['POST'])
+@jwt_required
+@role_required(roles=['student'])
+@validate_json(schema={
+    'clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
+})
+def add_favorite_clubs():
+    user = get_current_user()
+    json = g.clean_json
+
+    # Ordering is important so not list(set(arr)) here
+    for club in json['clubs']:
+        if club not in user.favorited_clubs:
+            user.favorited_clubs += [club]
+
+    user.save()
+
+    return _fetch_fav_clubs_list(user)
+
+
+@student_blueprint.route('/favorite-clubs', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['student'])
+@validate_json(schema={
+    'clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
+})
+def remove_favorite_clubs():
+    user = get_current_user()
+    json = g.clean_json
+
+    # Ordering is important so not list(set(arr)) here
+    for club in user.favorited_clubs:
+        if club in json['clubs']:
+            user.favorited_clubs.remove(club)
+
+    user.save()
+
+    return _fetch_fav_clubs_list(user)
+
+
+@student_blueprint.route('/club-board', methods=['PUT'])
+@jwt_required
+@role_required(roles=['student'])
+@validate_json(schema={
+    'interested_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
+    'applied_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
+    'interviewed_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
+})
+def update_club_board():
+    user = get_current_user()
+    json = g.clean_json
+
+    user.club_board.interested_clubs  = json['interested_clubs']
+    user.club_board.applied_clubs     = json['applied_clubs']
+    user.club_board.interviewed_clubs = json['interviewed_clubs']
+
+    user.save()
+
+    return {'status': 'success'}

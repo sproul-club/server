@@ -12,6 +12,9 @@
 - [Managing Data](#managing-data)
     - [Fetch profile info](#fetch-profile-info)
     - [Edit profile info](#edit-profile-info)
+    - [Get favorite clubs](#get-favorite-clubs)
+    - [Add favorite clubs](#add-favorite-clubs)
+    - [Remove favorite clubs](#remove-favorite-clubs)
 
 <!-- /MarkdownTOC -->
 
@@ -143,4 +146,60 @@ a partial account is made, in which the registeration is expected to finish when
 {
     "status": "success"
 }
+```
+
+### Get favorite clubs
+* Description: Gets favorite clubs for user, in order of *when* they favorited
+* Path: `GET /api/student/favorite-clubs`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body output:
+```json
+[
+    "example-club-3",
+    "example-club-1",
+    "example-club-4",
+]
+```
+
+### Add favorite clubs
+* Description: Add favorite clubs for user. Ordering is preserved based on *when* they favorited.
+* Path: `POST /api/student/favorite-clubs`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "clubs": ["example-club-7", "example-club-8"]
+}
+```
+* Sample body output:
+```json
+[
+    "example-club-3",
+    "example-club-1",
+    "example-club-4",
+    "example-club-7",
+    "example-club-8"
+]
+```
+
+### Remove favorite clubs
+* Description: Remove favorite clubs for user. Ordering is preserved based on *when* they favorited.
+* Path: `DELETE /api/student/favorite-clubs`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "clubs": ["example-club-3", "example-club-7"]
+}
+```
+* Sample body output:
+```json
+[
+    "example-club-1",
+    "example-club-4",
+    "example-club-8"
+]
 ```
