@@ -6,7 +6,7 @@ from slugify import slugify
 from init_app import flask_exts
 from flask import Blueprint, request, g, make_response
 from flask_json import as_json, JsonError
-from flask_utils import validate_json, query_to_objects, role_required
+from flask_utils import validate_json, query_to_objects, query_to_objects_full, role_required
 from flask_jwt_extended import jwt_required, get_current_user
 
 from models import *
@@ -225,16 +225,6 @@ def edit_profile():
     return {'status': 'success'}
 
 
-@student_blueprint.route('/favorite-clubs', methods=['GET'])
-@jwt_required
-@role_required(roles=['student'])
-def get_favorite_clubs():
-    user = get_current_user()
-    json = g.clean_json
-
-    return _fetch_fav_clubs_list(user)
-
-
 @student_blueprint.route('/favorite-clubs', methods=['POST'])
 @jwt_required
 @role_required(roles=['student'])
@@ -245,7 +235,6 @@ def add_favorite_clubs():
     user = get_current_user()
     json = g.clean_json
 
-    # Ordering is important so not list(set(arr)) here
     for club in json['clubs']:
         if club not in user.favorited_clubs:
             user.favorited_clubs += [club]
@@ -265,7 +254,6 @@ def remove_favorite_clubs():
     user = get_current_user()
     json = g.clean_json
 
-    # Ordering is important so not list(set(arr)) here
     for club in user.favorited_clubs:
         if club in json['clubs']:
             user.favorited_clubs.remove(club)
@@ -273,6 +261,7 @@ def remove_favorite_clubs():
     user.save()
 
     return _fetch_fav_clubs_list(user)
+
 
 
 @student_blueprint.route('/club-board', methods=['PUT'])
@@ -293,4 +282,4 @@ def update_club_board():
 
     user.save()
 
-    return {'status': 'success'}
+    return query_to_objects(user.club_board)

@@ -12,7 +12,6 @@
 - [Managing Data](#managing-data)
     - [Fetch profile info](#fetch-profile-info)
     - [Edit profile info](#edit-profile-info)
-    - [Get favorite clubs](#get-favorite-clubs)
     - [Add favorite clubs](#add-favorite-clubs)
     - [Remove favorite clubs](#remove-favorite-clubs)
 
@@ -148,20 +147,6 @@ a partial account is made, in which the registeration is expected to finish when
 {
     "status": "success"
 }
-```
-
-### Get favorite clubs
-* Description: Gets favorite clubs for user, in order of *when* they favorited
-* Path: `GET /api/student/favorite-clubs`
-* Headers:
-    - `Authorization: Bearer <access_token>`
-* Sample body output:
-```json
-[
-    "example-club-3",
-    "example-club-1",
-    "example-club-4",
-]
 ```
 
 ### Add favorite clubs
