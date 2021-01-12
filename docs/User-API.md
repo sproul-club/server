@@ -28,7 +28,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Sample body input:
 ```json
 {
-    "email": "example@gmail.com",
+    "email": "exampleuser@berkeley.edu",
 }
 ```
 * Sample body output:
@@ -61,7 +61,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 ```json
 {
     "name": "Example Club",
-    "email": "example@gmail.com",
+    "email": "exampleuser@berkeley.edu",
     "password": "examplepassword",
     "tags": [3, 1, 4],
     "app_required": true,
@@ -82,7 +82,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Sample body input:
 ```json
 {
-    "email": "example@gmail.com",
+    "email": "exampleuser@berkeley.edu",
 }
 ```
 * Sample body output:
@@ -98,12 +98,12 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Result: Redirects you to the club edit profile page (ideally)
 
 ## Login user
-* Description: Logs in a user
+* Description: Logs in a club admin user
 * Path: `POST /api/user/login`
 * Sample body input:
 ```json
 {
-    "email": "example@gmail.com",
+    "email": "exampleuser@berkeley.edu",
     "password": "examplepassword"
 }
 ```
@@ -124,7 +124,7 @@ We use JWTs to manage authentication, mainly for allowing the user to edit their
 * Sample body input:
 ```json
 {
-    "email": "example@gmail.com"
+    "email": "exampleuser@berkeley.edu"
 }
 ```
 * Sample body output:

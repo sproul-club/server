@@ -51,7 +51,7 @@ fa = FlaskAuthomatic(
 
 @student_blueprint.route('/login', methods=['GET'])
 @fa.login('google')
-def glogin():
+def login():
     if fa.result is not None:
         google_user = fa.result.user
         login_error = fa.result.error
@@ -91,10 +91,16 @@ def glogin():
             RefreshJTI(owner=potential_user, token_id=refresh_jti).save()
 
             return {
-                'access': access_token,
-                'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
-                'refresh': refresh_token,
-                'refresh_expires_in': int(CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
+                'profile': {
+                    'name': student_name,
+                    'email': student_email,
+                },
+                'token': {
+                    'access': access_token,
+                    'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
+                    'refresh': refresh_token,
+                    'refresh_expires_in': int(CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
+                }
             }
     else:
         return fa.response

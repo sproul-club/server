@@ -39,7 +39,7 @@
 {
     "name": "Example Club",
     "link_name": "example-club",
-    "owner": "example@gmail.com",
+    "owner": "exampleuser@berkeley.edu",
     "about_us": "This is something about the club.",
     "get_involved": "This is something about getting involved.",
     "banner_url": "<banner-pic-url>",
@@ -104,7 +104,7 @@
 {
     "name": "Example Club",
     "link_name": "example-club",
-    "owner": "example@gmail.com",
+    "owner": "exampleuser@berkeley.edu",
     "about_us": "This is something about the club.",
     "get_involved": "This is something about getting involved.",
     "app_required": true,
