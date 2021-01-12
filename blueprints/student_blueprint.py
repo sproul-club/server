@@ -126,11 +126,9 @@ def finish_register():
     if potential_user is not None:
         raise JsonError(status='error', reason='The student account for this email already exists!', status_=404)
 
-    potential_user.update(
-        majors=Major.objects.filter(id__in=student_majors),
-        minors=Minor.objects.filter(id__in=student_minors),
-        interests=Tag.objects.filter(id__in=student_interests),
-    )
+    potential_user.majors = Major.objects.filter(id__in=student_majors)
+    potential_user.minors = Minor.objects.filter(id__in=student_minors)
+    potential_user.interests = Tag.objects.filter(id__in=student_interests)
 
     potential_user.save()
 

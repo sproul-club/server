@@ -95,7 +95,9 @@ def upload_logo():
         logo_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, logo_file, 'logo', 1.0)
 
         user.club.last_updated = datetime.datetime.now()
-        user.update(club__logo_url=logo_url)
+        user.club.logo_url = logo_url
+
+        user.save()
         return {'status': 'success', 'logo-url': club.logo_url}
     else:
         raise JsonError(status='error', reason='A logo was not provided for uploading.')
@@ -114,7 +116,9 @@ def upload_banner():
         banner_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, banner_file, 'banner', 10 / 3)
 
         user.club.last_updated = datetime.datetime.now()
-        user.update(club__banner_url=banner_url)
+        user.club.banner_url = banner_url
+
+        user.save()
         return {'status': 'success', 'banner-url': club.banner_url}
     else:
         raise JsonError(status='error', reason='A banner was not provided for uploading.')
