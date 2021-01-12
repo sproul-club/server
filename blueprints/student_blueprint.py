@@ -123,8 +123,8 @@ def finish_register():
 
     # Check if email is already registered
     potential_user = NewStudentUser.objects(email=student_email).first()
-    if potential_user is None:
-        raise JsonError(status='error', reason='The student account for this email does not exist', status_=404)
+    if potential_user is not None:
+        raise JsonError(status='error', reason='The student account for this email already exists!', status_=404)
 
     potential_user.update(
         majors=Major.objects.filter(id__in=student_majors),
@@ -196,8 +196,15 @@ def revoke_refresh():
 @role_required(roles=['student'])
 def fetch_profile():
     user = get_current_user()
-    user_obj = query_to_objects(user)
 
+    user_obj = query_to_objects(user)
+    accepted_keys = [
+        'full_name', 'email',
+        'majors', 'minors', 'interests',
+        'club_board', 'favorited_clubs',
+    ]
+
+    user_obj = {k: v for (k, v) in user_obj.items() if k in accepted_keys}
     return user_obj
 
 
@@ -209,7 +216,6 @@ def fetch_profile():
     'minors': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'interests': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'favorited_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
-    'visited_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
     'club_board': {
         'type': 'dict',
         'schema': {

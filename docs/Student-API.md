@@ -2,6 +2,7 @@
 
 <!-- MarkdownTOC autolink="true" -->
 
+- [Postman Collection](#postman-collection)
 - [Managing Account](#managing-account)
     - [Login user](#login-user)
     - [Finish registeration](#finish-registeration)
@@ -9,8 +10,12 @@
     - [Revoke access token](#revoke-access-token)
     - [Revoke refresh token](#revoke-refresh-token)
 - [Managing Data](#managing-data)
+    - [Fetch profile info](#fetch-profile-info)
 
 <!-- /MarkdownTOC -->
+
+## Postman Collection
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/e9d0784bab2cc5792865)
 
 ## Managing Account
 
@@ -95,3 +100,25 @@ a partial account is made, in which the registeration is expected to finish when
 ```
 
 ## Managing Data
+
+### Fetch profile info
+* Description: Fetches the complete student profile
+* Path: `GET /api/student/profile`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body output:
+```json
+{
+    "full_name": "Tejas Shah",
+    "email": "tejashah88@gmail.com",
+    "majors": [2, 3, 7],
+    "minors": [1, 3, 4],
+    "interests": [2, 6, 8],
+    "favorited_clubs": [],
+    "club_board": {
+        "applied_clubs": [],
+        "interested_clubs": [],
+        "interviewed_clubs": []
+    }
+}
+```
