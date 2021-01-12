@@ -20,5 +20,5 @@ All endpoints except for the email confirmation and confirming a password reset 
 * [Admin API](docs/Admin-API.md)
 * [Catalog API](docs/Catalog-API.md)
 * [Monitor API](docs/Monitor-API.md)
-* [Student API](docs/User-API.md)
+* [Student API](docs/Student-API.md)
 * [User API](docs/User-API.md)
