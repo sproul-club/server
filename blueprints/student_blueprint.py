@@ -28,6 +28,37 @@ _fetch_fav_clubs_list = lambda user: [query_to_objects(club) for club in user.fa
 student_blueprint = Blueprint('student', __name__, url_prefix='/api/student')
 
 
+def _fetch_user_profile(user):
+    user_obj = query_to_objects_full(user)
+
+    full_fav_clubs_query = NewOfficerUser.objects \
+        .filter(club__link_name__in=user.favorited_clubs) \
+        .only('club.name', 'club.link_name', 'club.events', 'club.recruiting_events')
+
+    full_fav_clubs = [obj['club'] for obj in query_to_objects(full_fav_clubs_query)]
+
+
+    full_club_board = {}
+
+    for key in user.club_board:
+        club_query = NewOfficerUser.objects \
+            .filter(club__link_name__in=user.club_board[key]) \
+            .only('club.name', 'club.link_name', 'club.logo_url', 'club.events', 'club.recruiting_events')
+
+        column_clubs = [obj['club'] for obj in query_to_objects(club_query)]
+        full_club_board[key] = column_clubs
+
+    return {
+        'full_name': user.full_name,
+        'email': user.email,
+        'majors': user_obj['majors'],
+        'minors': user_obj['minors'],
+        'interests': user_obj['interests'],
+        'favorited_clubs': full_fav_clubs,
+        'club_board': full_club_board,
+    }
+
+
 fa = FlaskAuthomatic(
     config={
         'google': {
@@ -192,16 +223,7 @@ def revoke_refresh():
 @role_required(roles=['student'])
 def fetch_profile():
     user = get_current_user()
-
-    user_obj = query_to_objects(user)
-    accepted_keys = [
-        'full_name', 'email',
-        'majors', 'minors', 'interests',
-        'club_board', 'favorited_clubs',
-    ]
-
-    user_obj = {k: v for (k, v) in user_obj.items() if k in accepted_keys}
-    return user_obj
+    return _fetch_user_profile(user)
 
 
 @student_blueprint.route('/profile', methods=['POST'])
@@ -222,7 +244,7 @@ def edit_profile():
 
     user.save()
 
-    return {'status': 'success'}
+    return _fetch_user_profile(user)
 
 
 @student_blueprint.route('/favorite-clubs', methods=['POST'])
@@ -241,7 +263,7 @@ def add_favorite_clubs():
 
     user.save()
 
-    return _fetch_fav_clubs_list(user)
+    return _fetch_user_profile(user)['favorited_clubs']
 
 
 @student_blueprint.route('/favorite-clubs', methods=['DELETE'])
@@ -260,8 +282,7 @@ def remove_favorite_clubs():
 
     user.save()
 
-    return _fetch_fav_clubs_list(user)
-
+    return _fetch_user_profile(user)['favorited_clubs']
 
 
 @student_blueprint.route('/club-board', methods=['PUT'])
@@ -282,4 +303,4 @@ def update_club_board():
 
     user.save()
 
-    return query_to_objects(user.club_board)
+    return _fetch_user_profile(user)['club_board']
