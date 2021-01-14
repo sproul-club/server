@@ -193,9 +193,6 @@ def login():
     if potential_user is None:
         raise JsonError(status='error', reason='The user does not exist.')
 
-    if not potential_user.confirmed:
-        raise JsonError(status='error', reason='The user has not confirmed their email.')
-
     if not hash_manager.verify(password, potential_user.password):
         raise JsonError(status='error', reason='The password is incorrect.')
 
