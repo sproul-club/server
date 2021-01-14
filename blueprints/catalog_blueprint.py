@@ -9,7 +9,7 @@ catalog_blueprint = Blueprint('catalog', __name__, url_prefix='/api/catalog')
 CATALOG_VIEW_FIELDS = [
     'club.name', 'club.link_name', 'club.about_us',
     'club.tags', 'club.app_required', 'club.new_members', 'club.num_users',
-    'club.logo_url', 'club.banner_url'
+    'club.logo_url', 'club.banner_url', 'club.last_updated', 'club.apply_deadline_end'
 ]
 
 def to_int_safe(s, default):
