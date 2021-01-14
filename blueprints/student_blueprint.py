@@ -107,6 +107,10 @@ def login():
                 )
 
                 new_user.save()
+
+                first_time_login = True
+            else:
+                first_time_login = False
             
             access_token = create_access_token(identity=potential_user)
             refresh_token = create_refresh_token(identity=potential_user)
@@ -118,6 +122,7 @@ def login():
             RefreshJTI(owner=potential_user, token_id=refresh_jti).save()
 
             return {
+                'is_new_user': first_time_login,
                 'profile': {
                     'name': student_name,
                     'email': student_email,
@@ -167,6 +172,7 @@ def finish_register():
 @student_blueprint.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 @role_required(roles=['student'])
+@confirmed_account_required
 def refresh():
     user = get_current_user()
     access_token = create_access_token(identity=user)
@@ -183,6 +189,7 @@ def refresh():
 @student_blueprint.route('/revoke-access', methods=['DELETE'])
 @jwt_required
 @role_required(roles=['student'])
+@confirmed_account_required
 def revoke_access():
     jti = get_raw_jwt()['jti']
 
@@ -202,6 +209,7 @@ def revoke_access():
 @student_blueprint.route('/revoke-refresh', methods=['DELETE'])
 @jwt_refresh_token_required
 @role_required(roles=['student'])
+@confirmed_account_required
 def revoke_refresh():
     jti = get_raw_jwt()['jti']
 
@@ -221,13 +229,13 @@ def revoke_refresh():
 @student_blueprint.route('/majors', methods=['GET'])
 @as_json
 def get_majors():
-    return query_to_objects(Majors.objects.all())
+    return query_to_objects(Major.objects.all())
 
 
 @student_blueprint.route('/minors', methods=['GET'])
 @as_json
 def get_minors():
-    return query_to_objects(Minors.objects.all())
+    return query_to_objects(Minor.objects.all())
 
 
 @student_blueprint.route('/years', methods=['GET'])
@@ -239,6 +247,7 @@ def get_student_years():
 @student_blueprint.route('/profile', methods=['GET'])
 @jwt_required
 @role_required(roles=['student'])
+@confirmed_account_required
 def fetch_profile():
     user = get_current_user()
     return _fetch_user_profile(user)
@@ -247,6 +256,7 @@ def fetch_profile():
 @student_blueprint.route('/profile', methods=['POST'])
 @jwt_required
 @role_required(roles=['student'])
+@confirmed_account_required
 @validate_json(schema={
     'majors': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'minors': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
@@ -268,6 +278,7 @@ def edit_profile():
 @student_blueprint.route('/favorite-clubs', methods=['POST'])
 @jwt_required
 @role_required(roles=['student'])
+@confirmed_account_required
 @validate_json(schema={
     'clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
 })
@@ -287,6 +298,7 @@ def add_favorite_clubs():
 @student_blueprint.route('/favorite-clubs', methods=['DELETE'])
 @jwt_required
 @role_required(roles=['student'])
+@confirmed_account_required
 @validate_json(schema={
     'clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
 })
@@ -306,6 +318,7 @@ def remove_favorite_clubs():
 @student_blueprint.route('/club-board', methods=['PUT'])
 @jwt_required
 @role_required(roles=['student'])
+@confirmed_account_required
 @validate_json(schema={
     'interested_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
     'applied_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},

@@ -36,6 +36,7 @@ def user_identity_lookup(user):
     return {
         'email': user.email,
         'role': user.role,
+        'confirmed': user.confirmed,
     }
 
 
@@ -43,7 +44,8 @@ def user_identity_lookup(user):
 def user_loader_callback(identity):
     return NewBaseUser.objects(
         email=identity['email'],
-        role=identity['role']
+        role=identity['role'],
+        confirmed=identity['confirmed'],
     ).first()
 
 
