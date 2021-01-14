@@ -1,8 +1,11 @@
 from flask import Blueprint, g, request
 from flask_json import as_json, JsonError
 from flask_utils import validate_json, query_to_objects, role_required
+from flask_jwt_extended import jwt_optional, get_current_user
 
 from models import *
+
+from app_config import CurrentConfig
 
 catalog_blueprint = Blueprint('catalog', __name__, url_prefix='/api/catalog')
 
@@ -17,6 +20,21 @@ def to_int_safe(s, default):
         return int(s)
     except ValueError:
         return default
+
+def _random_generic_club_recommendations(size):
+    random_recommended_users = NewOfficerUser.objects.aggregate(
+       [{ '$sample': {'size': size} }]
+    )
+
+    random_recommended_clubs = []
+    for user in random_recommended_users:
+        random_recommended_clubs += [{
+            'link_name': user['club']['link_name'],
+            'name': user['club']['name'],
+            'logo_url': user['club']['logo_url']
+        }]
+
+    return random_recommended_clubs
 
 
 @catalog_blueprint.route('/tags', methods=['GET'])
@@ -47,11 +65,12 @@ def get_organizations():
 
     return {
         'results': results,
-        'num_results': query.count()
+        'num_results': query.count_documents()
     }
 
 
 @catalog_blueprint.route('/organizations/<org_link_name>', methods=['GET'])
+@jwt_optional
 def get_org_by_id(org_link_name):
     user = NewOfficerUser.objects(club__link_name=org_link_name).first()
     if user is None:
@@ -64,5 +83,19 @@ def get_org_by_id(org_link_name):
 
     for r_event in club_obj['recruiting_events']:
         del r_event['_cls']
+
+
+    current_user = get_current_user()
+
+    if current_user and current_user.role == 'student':
+        current_user.visited_clubs += [org_link_name]
+        current_user.save()
+
+    # FIXME!!!!
+    if CurrentConfig.DEBUG or True:
+        club_obj['recommended_clubs'] = _random_club_recommendations(3)
+    else:
+        # TODO: replace random clubs with recommended clubs for prod
+        pass
 
     return club_obj

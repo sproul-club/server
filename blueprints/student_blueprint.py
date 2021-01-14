@@ -28,6 +28,22 @@ _fetch_fav_clubs_list = lambda user: [query_to_objects(club) for club in user.fa
 student_blueprint = Blueprint('student', __name__, url_prefix='/api/student')
 
 
+def _random_smart_club_recommendations(size):
+    random_recommended_users = NewOfficerUser.objects.aggregate(
+       [{ '$sample': {'size': size} }]
+    )
+
+    random_recommended_clubs = []
+    for user in random_recommended_users:
+        random_recommended_clubs += [{
+            'link_name': user['club']['link_name'],
+            'name': user['club']['name'],
+            'logo_url': user['club']['logo_url']
+        }]
+
+    return random_recommended_clubs
+
+
 def _fetch_user_profile(user):
     user_obj = query_to_objects_full(user)
 
@@ -48,6 +64,12 @@ def _fetch_user_profile(user):
         column_clubs = [obj['club'] for obj in query_to_objects(club_query)]
         full_club_board[key] = column_clubs
 
+    # FIXME!!!
+    if CurrentConfig.DEBUG or True:
+        recommended_clubs = _random_smart_club_recommendations(3)
+    else:
+        pass
+
     return {
         'full_name': user.full_name,
         'email': user.email,
@@ -56,6 +78,7 @@ def _fetch_user_profile(user):
         'interests': user_obj['interests'],
         'favorited_clubs': full_fav_clubs,
         'club_board': full_club_board,
+        'recommended_clubs': recommended_clubs,
     }
 
 
