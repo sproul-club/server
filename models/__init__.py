@@ -1,6 +1,6 @@
 __all__ = [
     'RelaxedURLField',
-    'Tag', 'NumUsersTag', 'Major', 'Minor',
+    'Tag', 'NumUsersTag', 'Major', 'Minor', 'StudentYear',
     'NewBaseUser', 'PreVerifiedEmail', 'AccessJTI', 'RefreshJTI', 'ConfirmEmailToken', 'ResetPasswordToken',
     'StudentKanbanBoard', 'NewStudentUser',
     'Event', 'RecruitingEvent', 'Resource', 'SocialMediaLinks', 'CaptionedPic', 'NewClub', 'NewOfficerUser',
@@ -9,7 +9,7 @@ __all__ = [
 
 from models.relaxed_url_field import RelaxedURLField
 
-from models.metadata import Tag, NumUsersTag, Major, Minor
+from models.metadata import Tag, NumUsersTag, Major, Minor, StudentYear
 
 from models.user import NewBaseUser, PreVerifiedEmail, AccessJTI, RefreshJTI, ConfirmEmailToken, ResetPasswordToken
 

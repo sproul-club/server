@@ -218,6 +218,24 @@ def revoke_refresh():
     }
 
 
+@student_blueprint.route('/majors', methods=['GET'])
+@as_json
+def get_majors():
+    return query_to_objects(Majors.objects.all())
+
+
+@student_blueprint.route('/minors', methods=['GET'])
+@as_json
+def get_minors():
+    return query_to_objects(Minors.objects.all())
+
+
+@student_blueprint.route('/years', methods=['GET'])
+@as_json
+def get_student_years():
+    return query_to_objects(StudentYear.objects.all())
+
+
 @student_blueprint.route('/profile', methods=['GET'])
 @jwt_required
 @role_required(roles=['student'])

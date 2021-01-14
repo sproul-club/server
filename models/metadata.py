@@ -24,3 +24,9 @@ class Minor(gj.Document):
     minor = mongo.StringField(required=True)
 
     meta = {'auto_create_index': False}
+
+class StudentYear(gj.Document):
+    id    = mongo.IntField(required=True, primary_key=True)
+    year  = mongo.StringField(required=True)
+
+    meta = {'auto_create_index': False}

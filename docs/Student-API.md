@@ -9,6 +9,10 @@
     - [Refresh access token](#refresh-access-token)
     - [Revoke access token](#revoke-access-token)
     - [Revoke refresh token](#revoke-refresh-token)
+- [Metadata fetching](#metadata-fetching)
+    - [Fetch set of majors](#fetch-set-of-majors)
+    - [Fetch set of minors](#fetch-set-of-minors)
+    - [Fetch set of student years](#fetch-set-of-student-years)
 - [Managing Data](#managing-data)
     - [Fetch profile info](#fetch-profile-info)
     - [Edit profile info](#edit-profile-info)
@@ -103,6 +107,59 @@ a partial account is made, in which the registeration is expected to finish when
     "status": "success",
     "message": "Refresh token revoked!"
 }
+```
+
+## Metadata fetching
+
+### Fetch set of majors
+* Description: Fetches the set of majors
+* Path: `GET /api/student/majors`
+* Sample body output:
+```json
+[
+    {
+        "id": 42,
+        "major": "Computer Science"
+    },
+    {
+        "id": 84,
+        "major": "Anthropology"
+    }
+]
+```
+
+### Fetch set of minors
+* Description: Fetches the set of minors
+* Path: `GET /api/student/minors`
+* Sample body output:
+```json
+[
+    {
+        "id": 42,
+        "minor": "Astrophysics"
+    },
+    {
+        "id": 84,
+        "minor": "Chemistry"
+    }
+]
+```
+
+### Fetch set of student years
+* Description: Fetches the set of student years
+* Path: `GET /api/student/years`
+* Sample body output:
+```json
+[
+    {
+        "id": 42,
+        "year": "Freshman"
+    },
+    {
+        "id": 84,
+        "year": "Not Freshman"
+    }
+]
 ```
 
 ## Managing Data
