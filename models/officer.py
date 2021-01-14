@@ -14,7 +14,7 @@ from models.metadata import Tag, NumUsersTag
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
     name = mongo.StringField(required=True, max_length=100)
-    link = RelaxedURLField(null=True)
+    link = RelaxedURLField(null=True, default='')
     event_start = mongo.DateTimeField(required=True)
     event_end   = mongo.DateTimeField(required=True)
     description = mongo.StringField(required=True, max_length=1000)
@@ -24,7 +24,8 @@ class Event(gj.EmbeddedDocument):
 
 class RecruitingEvent(Event):
     description = mongo.StringField(required=True, max_length=200)
-    virtual_link = RelaxedURLField(null=True)
+    virtual_link = RelaxedURLField(null=True, default='')
+    invite_only = mongo.BooleanField(required=True)
 
     meta = {'auto_create_index': False}
 
@@ -55,6 +56,7 @@ class SocialMediaLinks(gj.EmbeddedDocument):
 
 
 class CaptionedPic(gj.EmbeddedDocument):
+    id      = mongo.StringField(required=True, max_length=100)
     pic_url = RelaxedURLField(null=True, default='')
     caption = mongo.StringField(required=True, max_length=50)
 

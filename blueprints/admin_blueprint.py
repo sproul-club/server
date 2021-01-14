@@ -345,6 +345,7 @@ def get_recruiting_events():
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
     'link': {'type': 'string'},
     'virtual_link': {'type': 'string'},
+    'invite_only': {'type': 'boolean', 'required': True},
     'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'description': {'type': 'string', 'maxlength': 200}
@@ -370,6 +371,7 @@ def add_recruiting_event():
         event_start     = json['event_start'],
         event_end       = json['event_end'],
         description     = json['description'],
+        invite_only     = json['invite_only'].
     )
 
     club.recruiting_events += [new_r_event]
@@ -387,6 +389,7 @@ def add_recruiting_event():
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
     'link': {'type': 'string'},
     'virtual_link': {'type': 'string'},
+    'invite_only': {'type': 'boolean', 'required': True},
     'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'description': {'type': 'string', 'maxlength': 200}
