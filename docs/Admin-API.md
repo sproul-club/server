@@ -47,8 +47,11 @@
     "app_required": true,
     "new_members": false,
     "num_users": 0,
-    "apply_deadline": "2020-05-20T12:00:00",
     "apply_link": "https://www.apply-here-now.com",
+    "apply_deadline_start": "2020-04-20T12:00:00",
+    "apply_deadline_end": "2020-05-20T12:00:00",
+    "recruiting_start": "2020-03-20T12:00:00",
+    "recruiting_end": "2020-06-20T12:00:00",
     "tags": [1, 3, 4],
     "resources": [
         {
@@ -110,8 +113,11 @@
     "app_required": true,
     "new_members": false,
     "num_users": 0,
-    "apply_deadline": "2020-05-20T12:00:00",
     "apply_link": "https://www.apply-here-now.com",
+    "apply_deadline_start": "2020-04-20T12:00:00",
+    "apply_deadline_end": "2020-05-20T12:00:00",
+    "recruiting_start": "2020-03-20T12:00:00",
+    "recruiting_end": "2020-06-20T12:00:00",
     "tags": [1, 3, 4],
     "social_media_links": {
         "contact_email": "example-email@gmail.com",

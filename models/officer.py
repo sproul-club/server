@@ -79,7 +79,11 @@ class NewClub(gj.EmbeddedDocument):
     get_involved = mongo.StringField(default='', max_length=1000)
 
     apply_link = RelaxedURLField(null=True, default='')
-    apply_deadline = mongo.DateTimeField(null=True)
+    apply_deadline_start = mongo.DateTimeField(null=True)
+    apply_deadline_end = mongo.DateTimeField(null=True)
+
+    recruiting_start = mongo.DateTimeField(null=True)
+    recruiting_end = mongo.DateTimeField(null=True)
 
     resources = mongo.EmbeddedDocumentListField(Resource, default=[])
     events    = mongo.EmbeddedDocumentListField(Event, default=[])

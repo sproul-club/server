@@ -43,7 +43,10 @@ def fetch_profile():
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
     'apply_link': {'type': 'string', 'empty': False},
-    'apply_deadline': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'apply_deadline_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'apply_deadline_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'recruiting_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'recruiting_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'social_media_links': {
         'type': 'dict',
         'schema': {
