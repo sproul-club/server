@@ -371,7 +371,7 @@ def add_recruiting_event():
         event_start     = json['event_start'],
         event_end       = json['event_end'],
         description     = json['description'],
-        invite_only     = json['invite_only'].
+        invite_only     = json['invite_only'],
     )
 
     club.recruiting_events += [new_r_event]

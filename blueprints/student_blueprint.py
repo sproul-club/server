@@ -309,13 +309,20 @@ def add_favorite_clubs():
     user = get_current_user()
     json = g.clean_json
 
-    for club in json['clubs']:
+    new_fav_clubs_query = NewOfficerUser.objects \
+        .filter(confirmed=True) \
+        .filter(club__link_name__in=json['clubs']) \
+        .only('club.link_name')
+
+    potential_clubs = [club['club']['link_name'] for club in query_to_objects(new_fav_clubs_query)]
+
+    for club in potential_clubs:
         if club not in user.favorited_clubs:
             user.favorited_clubs += [club]
 
     user.save()
 
-    return _fetch_user_profile(user)['favorited_clubs']
+    return jsonify(_fetch_user_profile(user)['favorited_clubs'])
 
 
 @student_blueprint.route('/favorite-clubs', methods=['DELETE'])
@@ -335,7 +342,7 @@ def remove_favorite_clubs():
 
     user.save()
 
-    return _fetch_user_profile(user)['favorited_clubs']
+    return jsonify(_fetch_user_profile(user)['favorited_clubs'])
 
 
 @student_blueprint.route('/club-board', methods=['PUT'])
