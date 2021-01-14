@@ -35,6 +35,7 @@ a partial account is made, in which the registeration is expected to finish when
 * Sample body output:
 ```json
 {
+    "is_new_user": true,
     "profile": {
         "name": "Example User",
         "email": "exampleuser@berkeley.edu"

@@ -4,9 +4,9 @@ from passlib.hash import pbkdf2_sha512 as hash_manager
 from slugify import slugify
 
 from init_app import flask_exts
-from flask import Blueprint, request, g, make_response
+from flask import Blueprint, request, g, make_response, jsonify
 from flask_json import as_json, JsonError
-from flask_utils import validate_json, query_to_objects, query_to_objects_full, role_required
+from flask_utils import validate_json, query_to_objects, query_to_objects_full, role_required, confirmed_account_required
 from flask_jwt_extended import jwt_required, get_current_user
 
 from models import *
