@@ -95,6 +95,9 @@ class NewClub(gj.EmbeddedDocument):
 
     last_updated = mongo.DateTimeField(null=True)
 
+    reactivated = mongo.BooleanField(default=False)
+    reactivated_last = mongo.DateTimeField(null=True)
+
     meta = {'auto_create_index': False}
 
 
