@@ -393,6 +393,7 @@
         "name": "Example recruiting event 1",
         "link": "http://example.com/",
         "virtual_link": "https://zoom.com/example-link",
+        "invite_only": false,
         "event_start": "2020-04-01T07:00:00.000Z",
         "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the event."
@@ -411,6 +412,7 @@
     "name": "Example recruiting event 2",
     "link": "http://example.com/",
     "virtual_link": "https://zoom.com/example-link",
+    "invite_only": true,
     "event_start": "2020-04-01T07:00:00.000Z",
     "event_end": "2020-08-01T07:00:00.000Z",
     "description": "This is something about the event."
@@ -424,6 +426,7 @@
         "name": "Example recruiting event 1",
         "link": "http://example.com/",
         "virtual_link": "https://zoom.com/example-link",
+        "invite_only": false,
         "event_start": "2020-04-01T07:00:00.000Z",
         "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the event."
@@ -433,6 +436,7 @@
         "name": "Example recruiting event 2",
         "link": "http://example.com/",
         "virtual_link": "https://zoom.com/example-link",
+        "invite_only": true,
         "event_start": "2020-04-01T07:00:00.000Z",
         "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the event."
@@ -451,6 +455,7 @@
     "name": "Example recruiting event 10",
     "link": "http://example.com/",
     "virtual_link": "https://zoom.com/example-link",
+    "invite_only": false,
     "event_start": "2020-04-01T07:00:00.000Z",
     "event_end": "2020-08-01T07:00:00.000Z",
     "description": "This is something about the new event."
@@ -464,6 +469,7 @@
         "name": "Example recruiting event 10",
         "link": "http://example.com/",
         "virtual_link": "https://zoom.com/example-link",
+        "invite_only": false,
         "event_start": "2020-04-01T07:00:00.000Z",
         "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the new event."
@@ -473,6 +479,7 @@
         "name": "Example recruiting event 2",
         "link": "http://example.com/",
         "virtual_link": "https://zoom.com/example-link",
+        "invite_only": false,
         "event_start": "2020-04-01T07:00:00.000Z",
         "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the event."
@@ -493,6 +500,7 @@
         "name": "Example recruiting event 10",
         "link": "http://example.com/",
         "virtual_link": "https://zoom.com/example-link",
+        "invite_only": false,
         "event_start": "2020-04-01T07:00:00.000Z",
         "event_end": "2020-08-01T07:00:00.000Z",
         "description": "This is something about the new event."
