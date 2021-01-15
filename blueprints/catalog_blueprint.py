@@ -65,7 +65,7 @@ def get_organizations():
 
     return {
         'results': results,
-        'num_results': query.count_documents()
+        'num_results': query.count()
     }
 
 
