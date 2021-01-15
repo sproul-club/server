@@ -93,7 +93,7 @@ def get_org_by_id(org_link_name):
 
     # FIXME!!!!
     if CurrentConfig.DEBUG or True:
-        club_obj['recommended_clubs'] = _random_club_recommendations(3)
+        club_obj['recommended_clubs'] = _random_generic_club_recommendations(3)
     else:
         # TODO: replace random clubs with recommended clubs for prod
         pass

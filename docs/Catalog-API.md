@@ -95,6 +95,8 @@
     "recruiting_start": "2020-03-20T12:00:00",
     "recruiting_end": "2020-06-20T12:00:00",
     "tags": [1, 3, 4],
+    "reactivated": false,
+    "reactivated_last": null,
     "resources": [
         {
             "id": "example-resource",
@@ -135,6 +137,23 @@
         "gcalendar": "<google-calendar-link>",
         "discord": "<discord-invite-link>"
     },
+    "recommended_clubs": [
+        {
+            "name": "Example Club 1",
+            "link_name": "example-club-1",
+            "logo_url": "<logo-pic-url>"
+        },
+        {
+            "name": "Example Club 2",
+            "link_name": "example-club-2",
+            "logo_url": "<logo-pic-url>"
+        },
+        {
+            "name": "Example Club 3",
+            "link_name": "example-club-3",
+            "logo_url": "<logo-pic-url>"
+        },
+    ],
     "last_updated": "2020-10-20T12:00:00"
 }
 ```
