@@ -81,9 +81,6 @@ def get_org_by_id(org_link_name):
     for event in club_obj['events']:
         del event['_cls']
 
-    for r_event in club_obj['recruiting_events']:
-        del r_event['_cls']
-
 
     current_user = get_current_user()
 
