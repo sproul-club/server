@@ -110,6 +110,7 @@
 * Sample body input:
 ```json
 {
+    "is_reactivating": false,
     "name": "Example Club",
     "link_name": "example-club",
     "owner": "exampleuser@berkeley.edu",

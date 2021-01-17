@@ -36,6 +36,7 @@ def fetch_profile():
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
+    'is_reactivating': {'type': 'boolean', 'required': True},
     'name': {'type': 'string', 'empty': False, 'maxlength': 100},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
@@ -81,6 +82,11 @@ def edit_profile():
             user.club[key] = json[key]
 
     user.club.last_updated = datetime.datetime.now()
+
+    if json['is_reactivating'] and not user.club.reactivated:
+        user.club.reactivated = True
+        user.club.reactivated_last = user.club.last_updated
+        
     user.save()
 
     return {'status': 'success'}
