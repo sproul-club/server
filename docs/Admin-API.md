@@ -7,6 +7,11 @@
 - [Edit profile info](#edit-profile-info)
 - [Upload logo](#upload-logo)
 - [Upload banner](#upload-banner)
+- [Gallery Pictures](#gallery-pictures)
+    - [Get gallery pictures](#get-gallery-pictures)
+    - [Add gallery picture](#add-gallery-picture)
+    - [Update gallery picture](#update-gallery-picture)
+    - [Delete gallery picture](#delete-gallery-picture)
 - [Resources](#resources)
     - [Get resources](#get-resources)
     - [Add resource](#add-resource)
@@ -171,6 +176,80 @@
 {
     "status": "success",
     "banner_url": "https://sproul-club-images-prod.s3-us-west-1.amazonaws.com/banner/example-club-banner.png"
+}
+```
+
+## Gallery Pictures
+
+### Get gallery pictures
+* Description: Gets all gallery pictures (text only) from a club
+* Path: `GET /api/admin/gallery-pics`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body output:
+```json
+[
+    {
+        "id": "example-gallery-pic-1",
+        "url": "<gallery-pic-url>",
+        "caption": "Example caption 1"
+    }
+]
+```
+
+### Add gallery picture
+* Description: Adds a gallery picture to the club
+* Path: `POST /api/admin/gallery-pics`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "caption": "Example caption 2"
+}
+```
+* multipart/form-data
+    * `gallery` - banner image
+* Sample body output:
+```json
+{
+    "id": "example-gallery-pic-2",
+    "url": "<gallery-pic-url>",
+    "caption": "Example caption 2"
+}
+```
+
+### Update gallery picture
+* Description: Updates a gallery picture from the club
+* Path: `PUT /api/admin/gallery-pics/<pic-id>`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body input:
+```json
+{
+    "caption": "Example caption 3"
+}
+```
+* multipart/form-data
+    * `gallery` - banner image
+* Sample body output:
+```json
+{
+    "id": "example-gallery-pic-3",
+    "url": "<gallery-pic-url>",
+    "caption": "Example caption 3"
+}
+```
+
+### Delete gallery picture
+* Description: Deletes a gallery picture from the club
+* Path: `DELETE /api/admin/gallery-pics/<pic-id>`
+* Headers:
+    - `Authorization: Bearer <access_token>`
+* Sample body output:
+```json
+{
+    "status": "success"
 }
 ```
 

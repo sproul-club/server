@@ -57,7 +57,7 @@ class SocialMediaLinks(gj.EmbeddedDocument):
 
 class CaptionedPic(gj.EmbeddedDocument):
     id      = mongo.StringField(required=True, max_length=100)
-    pic_url = RelaxedURLField(null=True, default='')
+    url = RelaxedURLField(null=True, default='')
     caption = mongo.StringField(required=True, max_length=50)
 
     meta = {'auto_create_index': False}

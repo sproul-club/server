@@ -17,6 +17,7 @@ admin_blueprint = Blueprint('admin', __name__, url_prefix='/api/admin')
 _fetch_resources_list = lambda user: [query_to_objects(res) for res in user.club.resources]
 _fetch_event_list = lambda user: [query_to_objects(event) for event in user.club.events]
 _fetch_recruiting_events_list = lambda user: [query_to_objects(r_event) for r_event in user.club.recruiting_events]
+_fetch_gallery_pics_list = lambda user: [query_to_objects(gallery_pic) for gallery_pic in user.club.gallery_pics]
 
 
 @admin_blueprint.route('/profile', methods=['GET'])
@@ -90,18 +91,17 @@ def edit_profile():
 @role_required(roles=['officer'])
 def upload_logo():
     user = get_current_user()
-    club = user.club
 
     logo_file = request.files.get('logo', None)
 
     if logo_file is not None:
-        logo_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, logo_file, 'logo', 1.0)
+        logo_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, logo_file, 'logo', 1.0)
 
         user.club.last_updated = datetime.datetime.now()
         user.club.logo_url = logo_url
 
         user.save()
-        return {'status': 'success', 'logo-url': club.logo_url}
+        return {'status': 'success', 'logo-url': user.club.logo_url}
     else:
         raise JsonError(status='error', reason='A logo was not provided for uploading.')
 
@@ -111,20 +111,101 @@ def upload_logo():
 @role_required(roles=['officer'])
 def upload_banner():
     user = get_current_user()
-    club = user.club
 
     banner_file = request.files.get('banner', None)
 
     if banner_file is not None:
-        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, banner_file, 'banner', 10 / 3)
+        banner_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, banner_file, 'banner', 10 / 3)
 
         user.club.last_updated = datetime.datetime.now()
         user.club.banner_url = banner_url
 
         user.save()
-        return {'status': 'success', 'banner-url': club.banner_url}
+        return {'status': 'success', 'banner-url': user.club.banner_url}
     else:
         raise JsonError(status='error', reason='A banner was not provided for uploading.')
+
+
+@admin_blueprint.route('/gallery-pics', methods=['GET'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def get_gallery_pics():
+    user = get_current_user()
+    return _fetch_gallery_pics_list(user)
+
+
+@admin_blueprint.route('/gallery-pics', methods=['POST'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
+})
+def add_gallery_pic():
+    user = get_current_user()
+    json = g.clean_json
+
+    gallery_pic_file = request.files.get('gallery', None)
+
+    if gallery_pic_file is not None:
+        gallery_pic_url, pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
+
+        captioned_pic = CaptionedPic(
+            id      = pic_id,
+            url = gallery_pic_url,
+            caption = json['caption']
+        )
+
+        user.club.gallery_pics += [captioned_pic]
+        user.club.last_updated = datetime.datetime.now()
+
+        user.save()
+        return json.loads(captioned_pic.to_json())
+    else:
+        raise JsonError(status='error', reason='A gallery picture was not provided for uploading.')
+
+
+@admin_blueprint.route('/gallery-pics/<pic_id>', methods=['PUT'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
+})
+def modify_gallery_pic(pic_id):
+    user = get_current_user()
+    json = g.clean_json
+
+    captioned_pic = user.club.gallery_pics.filter(id=pic_id).first()
+    if captioned_pic is None:
+        raise JsonError(status='error', reason='Specified gallery picture does not exist.')
+
+    if json.get('caption') is not None:
+        captioned_pic.caption = json['caption']
+
+    gallery_pic_file = request.files.get('gallery', None)
+
+    if gallery_pic_file is not None:
+        gallery_pic_url, new_pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
+        
+        captioned_pic.id = new_pic_id
+        captioned_pic.url = gallery_pic_url
+    
+    user.club.last_updated = datetime.datetime.now()
+    user.save()
+    return json.loads(captioned_pic.to_json())
+
+
+@admin_blueprint.route('/gallery-pics/<pic_id>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['officer'])
+def remove_gallery_pic(pic_id):
+    user = get_current_user()
+
+    user.club.gallery_pics = [gallery_pic for gallery_pic in user.club.gallery_pics if gallery_pic.id != pic_id]
+    user.club.last_updated = datetime.datetime.now()
+    user.save()
+
+    return {'status': 'success'}
 
 
 @admin_blueprint.route('/resources', methods=['GET'])
