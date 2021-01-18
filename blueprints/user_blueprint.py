@@ -11,7 +11,7 @@ from flask_jwt_extended import (
     get_raw_jwt, get_jti, get_current_user
 )
 
-from flask_utils import validate_json, role_required
+from flask_utils import validate_json, role_required, datetime_or_null
 
 from slugify import slugify
 
@@ -57,6 +57,10 @@ def is_password_strong_enough():
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
     'num_users': {'type': 'integer'},
+    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
 }, require_all=True)
 def register():
     json = g.clean_json

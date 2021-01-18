@@ -2,7 +2,8 @@ __all__ = [
     'EmailVerifier', 'EmailSender', 'ImageManager', 'PasswordEnforcer',
     'validate_json', 'mongo_aggregations',
     'role_required', 'confirmed_account_required',
-    'query_to_objects', 'query_to_objects_full', 'get_random_bits'
+    'query_to_objects', 'query_to_objects_full', 'get_random_bits',
+    'datetime_or_null'
 ]
 
 import json
@@ -19,3 +20,9 @@ query_to_objects = lambda query: json.loads(query.to_json())
 query_to_objects_full = lambda query: json.loads(query.to_json(follow_reference=True))
 
 get_random_bits = lambda num_bits: os.urandom(num_bits).hex()
+
+def datetime_or_null(dt_obj):
+    try:
+        return dateutil.parser.parse(dt_obj)
+    except:
+        return None

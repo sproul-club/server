@@ -7,7 +7,7 @@ from slugify import slugify
 from init_app import flask_exts
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
-from flask_utils import validate_json, query_to_objects, role_required
+from flask_utils import validate_json, query_to_objects, role_required, datetime_or_null
 from flask_jwt_extended import jwt_required, get_current_user
 
 from models import *
@@ -46,10 +46,10 @@ def fetch_profile():
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
     'apply_link': {'type': 'string', 'nullable': True, 'empty': False},
-    'apply_deadline_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'apply_deadline_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'recruiting_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
-    'recruiting_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
     'social_media_links': {
         'type': 'dict',
         'schema': {
