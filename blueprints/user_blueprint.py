@@ -20,8 +20,11 @@ from app_config import CurrentConfig
 from models import *
 
 LOGIN_CONFIRMED_EXT = '?confirmed=true'
-LOGIN_URL = 'https://www.sproul.club/signin'
-RECOVER_URL = 'https://www.sproul.club/resetpassword'
+BASE_SITE_URL_PROD = 'https://www.sproul.club'
+BASE_SITE_URL_LOCAL = 'http://localhost:3000'
+BASE_SITE_URL = BASE_SITE_URL_LOCAL
+LOGIN_URL = BASE_SITE_URL + '/signin'
+RECOVER_URL = BASE_SITE_URL + '/resetpassword'
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
 
@@ -73,6 +76,11 @@ def register():
     new_members = json['new_members']
     num_users_id = json['num_users']
 
+    apply_deadline_start = json['apply_deadline_start']
+    apply_deadline_end = json['apply_deadline_end']
+    recruiting_start = json['recruiting_start']
+    recruiting_end = json['recruiting_end']
+
     # Check if email is part of pre-verified list of emails
     email_exists = PreVerifiedEmail.objects(email=club_email).first() is not None
     if not email_exists:
@@ -97,7 +105,12 @@ def register():
         new_members=new_members,
         num_users=NumUsersTag.objects.filter(id=num_users_id).first(),
 
-        social_media_links=SocialMediaLinks(contact_email=club_email)
+        social_media_links=SocialMediaLinks(contact_email=club_email),
+
+        apply_deadline_start=apply_deadline_start,
+        apply_deadline_end=apply_deadline_end,
+        recruiting_start=recruiting_start,
+        recruiting_end=recruiting_end,
     )
 
     new_user = NewOfficerUser(
