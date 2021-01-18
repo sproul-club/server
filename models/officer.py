@@ -1,3 +1,5 @@
+import datetime
+
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
@@ -95,8 +97,8 @@ class NewClub(gj.EmbeddedDocument):
 
     last_updated = mongo.DateTimeField(null=True)
 
-    reactivated = mongo.BooleanField(default=False)
-    reactivated_last = mongo.DateTimeField(null=True)
+    reactivated = mongo.BooleanField(default=True)
+    reactivated_last = mongo.DateTimeField(null=True, default=datetime.datetime.now)
 
     meta = {'auto_create_index': False}
 

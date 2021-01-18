@@ -56,6 +56,7 @@ def get_organizations():
 
     query = NewOfficerUser.objects \
         .filter(confirmed=True) \
+        .filter(club__reactivated=True) \
         .only(*CATALOG_VIEW_FIELDS) \
         .order_by('club.name') \
         .limit(limit) \

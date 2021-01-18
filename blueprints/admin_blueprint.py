@@ -28,6 +28,7 @@ def fetch_profile():
 
     club_obj = query_to_objects(user.club)
     club_obj['owner'] = user.email
+    club_obj['confirmed'] = user.confirmed
 
     return club_obj
 
@@ -36,7 +37,7 @@ def fetch_profile():
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
-    'is_reactivating': {'type': 'boolean', 'required': True},
+    'is_reactivating': {'type': 'boolean', 'default': False},
     'name': {'type': 'string', 'empty': False, 'maxlength': 100},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
@@ -72,6 +73,8 @@ def edit_profile():
     json = g.clean_json
 
     for key in json.keys():
+        if key == 'is_reactivating':
+            continue
         if key == 'tags':
             user.club['tags'] = Tag.objects.filter(id__in=json['tags'])
         elif key == 'num_users':
