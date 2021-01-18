@@ -164,12 +164,7 @@ def confirm_email(token):
 
     confirmed_on = datetime.datetime.now()
     if confirmed_on - potential_user.registered_on > CurrentConfig.CONFIRM_EMAIL_EXPIRY:
-        # Delete the user with the associated club here
-        # HACK: This was supposed to simulate the auto-deletion of the user and club after the first confirmation email expires,
-        # but MongoDB TTL doesn't support deleting referenced or back-referenced documents (user -> club).
-        potential_user.delete()
-
-        raise JsonError(status='error', reason='The account associated with the email has expired. Please re-register the club again.')
+        raise JsonError(status='error', reason='The account associated with the email has expired. Please request for a new confirmation email by logging in.')
 
     # Then, set the user and club to 'confirmed' if it's not done already
     potential_user.confirmed = True
