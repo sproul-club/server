@@ -234,8 +234,8 @@ def request_reset_password():
 
 @user_blueprint.route('/confirm-reset', methods=['POST'])
 @validate_json(schema={
-    'token': {'type': 'string'},
-    'password': {'type': 'string'}
+    'token': {'type': 'string', 'empty': False},
+    'password': {'type': 'string', 'empty': False}
 }, require_all=True)
 def confirm_reset_password():
     json = g.clean_json

@@ -45,7 +45,7 @@ def fetch_profile():
     'num_users': {'type': 'integer'},
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
-    'apply_link': {'type': 'string', 'empty': False},
+    'apply_link': {'type': 'string', 'nullable': True, 'empty': False},
     'apply_deadline_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'apply_deadline_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'recruiting_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
@@ -54,17 +54,17 @@ def fetch_profile():
         'type': 'dict',
         'schema': {
             'contact_email': {'type': 'string', 'empty': False},
-            'website': {'type': 'string', 'nullable': True, 'empty': True},
-            'facebook': {'type': 'string', 'nullable': True, 'empty': True},
-            'instagram': {'type': 'string', 'nullable': True, 'empty': True},
-            'linkedin': {'type': 'string', 'nullable': True, 'empty': True},
-            'twitter': {'type': 'string', 'nullable': True, 'empty': True},
-            'youtube': {'type': 'string', 'nullable': True, 'empty': True},
-            'github': {'type': 'string', 'nullable': True, 'empty': True},
-            'behance': {'type': 'string', 'nullable': True, 'empty': True},
-            'medium': {'type': 'string', 'nullable': True, 'empty': True},
-            'gcalendar': {'type': 'string', 'nullable': True, 'empty': True},
-            'discord': {'type': 'string', 'nullable': True, 'empty': True}
+            'website': {'type': 'string', 'nullable': True, 'empty': False},
+            'facebook': {'type': 'string', 'nullable': True, 'empty': False},
+            'instagram': {'type': 'string', 'nullable': True, 'empty': False},
+            'linkedin': {'type': 'string', 'nullable': True, 'empty': False},
+            'twitter': {'type': 'string', 'nullable': True, 'empty': False},
+            'youtube': {'type': 'string', 'nullable': True, 'empty': False},
+            'github': {'type': 'string', 'nullable': True, 'empty': False},
+            'behance': {'type': 'string', 'nullable': True, 'empty': False},
+            'medium': {'type': 'string', 'nullable': True, 'empty': False},
+            'gcalendar': {'type': 'string', 'nullable': True, 'empty': False},
+            'discord': {'type': 'string', 'nullable': True, 'empty': False}
         }
     }
 })
@@ -149,7 +149,7 @@ def get_gallery_pics():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
-})
+}, require_all=True)
 def add_gallery_pic():
     user = get_current_user()
     json = g.clean_json
@@ -326,10 +326,10 @@ def get_events():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
-    'link': {'type': 'string'},
+    'link': {'type': 'string', 'default': None},
     'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 500}
+    'description': {'type': 'string', 'maxlength': 500, 'default': ''}
 })
 @as_json
 def add_event():
@@ -370,10 +370,10 @@ def add_event():
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
-    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'name': {'type': 'string', 'maxlength': 100},
     'link': {'type': 'string'},
-    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
-    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'description': {'type': 'string', 'maxlength': 500}
 })
 @as_json
@@ -433,12 +433,12 @@ def get_recruiting_events():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
-    'link': {'type': 'string'},
-    'virtual_link': {'type': 'string'},
+    'link': {'type': 'string', 'default': None},
+    'virtual_link': {'type': 'string', 'default': None},
     'invite_only': {'type': 'boolean', 'required': True},
     'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 200}
+    'description': {'type': 'string', 'maxlength': 200, 'default': ''}
 })
 @as_json
 def add_recruiting_event():
@@ -476,12 +476,12 @@ def add_recruiting_event():
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
-    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'name': {'type': 'string', 'maxlength': 100},
     'link': {'type': 'string'},
     'virtual_link': {'type': 'string'},
-    'invite_only': {'type': 'boolean', 'required': True},
-    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
-    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'invite_only': {'type': 'boolean'},
+    'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'description': {'type': 'string', 'maxlength': 200}
 })
 @as_json

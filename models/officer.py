@@ -16,7 +16,7 @@ from models.metadata import Tag, NumUsersTag
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
     name = mongo.StringField(required=True, max_length=100)
-    link = RelaxedURLField(null=True, default='')
+    link = RelaxedURLField(null=True, default=None)
     event_start = mongo.DateTimeField(required=True)
     event_end   = mongo.DateTimeField(required=True)
     description = mongo.StringField(required=True, max_length=1000)
@@ -26,7 +26,7 @@ class Event(gj.EmbeddedDocument):
 
 class RecruitingEvent(Event):
     description = mongo.StringField(required=True, max_length=200)
-    virtual_link = RelaxedURLField(null=True, default='')
+    virtual_link = RelaxedURLField(null=True, default=None)
     invite_only = mongo.BooleanField(required=True)
 
     meta = {'auto_create_index': False}
@@ -42,17 +42,17 @@ class Resource(gj.EmbeddedDocument):
 
 class SocialMediaLinks(gj.EmbeddedDocument):
     contact_email = mongo.EmailField(required=True)
-    website     = RelaxedURLField(null=True, default='')
-    facebook    = RelaxedURLField(null=True, default='')
-    instagram   = RelaxedURLField(null=True, default='')
-    linkedin    = RelaxedURLField(null=True, default='')
-    twitter     = RelaxedURLField(null=True, default='')
-    youtube     = RelaxedURLField(null=True, default='')
-    github      = RelaxedURLField(null=True, default='')
-    behance     = RelaxedURLField(null=True, default='')
-    medium      = RelaxedURLField(null=True, default='')
-    gcalendar   = RelaxedURLField(null=True, default='')
-    discord     = RelaxedURLField(null=True, default='')
+    website     = RelaxedURLField(null=True, default=None)
+    facebook    = RelaxedURLField(null=True, default=None)
+    instagram   = RelaxedURLField(null=True, default=None)
+    linkedin    = RelaxedURLField(null=True, default=None)
+    twitter     = RelaxedURLField(null=True, default=None)
+    youtube     = RelaxedURLField(null=True, default=None)
+    github      = RelaxedURLField(null=True, default=None)
+    behance     = RelaxedURLField(null=True, default=None)
+    medium      = RelaxedURLField(null=True, default=None)
+    gcalendar   = RelaxedURLField(null=True, default=None)
+    discord     = RelaxedURLField(null=True, default=None)
 
     meta = {'auto_create_index': False}
 
@@ -74,15 +74,15 @@ class NewClub(gj.EmbeddedDocument):
     new_members  = mongo.BooleanField(required=True)
     num_users    = mongo.ReferenceField(NumUsersTag, required=True)
 
-    logo_url   = RelaxedURLField(null=True, default='')
-    banner_url = RelaxedURLField(null=True, default='')
+    logo_url   = RelaxedURLField(null=True, default=None)
+    banner_url = RelaxedURLField(null=True, default=None)
 
     gallery_pics = mongo.EmbeddedDocumentListField(CaptionedPic, default=[], max_length=5)
 
     about_us     = mongo.StringField(default='', max_length=1500)
     get_involved = mongo.StringField(default='', max_length=1000)
 
-    apply_link = RelaxedURLField(null=True, default='')
+    apply_link = RelaxedURLField(null=True, default=None)
     apply_deadline_start = mongo.DateTimeField(null=True)
     apply_deadline_end = mongo.DateTimeField(null=True)
 
