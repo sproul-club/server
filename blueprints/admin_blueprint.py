@@ -433,8 +433,8 @@ def get_recruiting_events():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
-    'link': {'type': 'string', 'default': None},
-    'virtual_link': {'type': 'string', 'default': None},
+    'link': {'type': 'string', 'nullable': True, 'default': None},
+    'virtual_link': {'type': 'string', 'nullable': True, 'default': None},
     'invite_only': {'type': 'boolean', 'required': True},
     'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
@@ -477,8 +477,8 @@ def add_recruiting_event():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'name': {'type': 'string', 'maxlength': 100},
-    'link': {'type': 'string'},
-    'virtual_link': {'type': 'string'},
+    'link': {'type': 'string', 'nullable': True},
+    'virtual_link': {'type': 'string', 'nullable': True},
     'invite_only': {'type': 'boolean'},
     'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
@@ -494,8 +494,7 @@ def update_recruiting_event(r_event_id):
     for (i, r_event) in enumerate(club.recruiting_events):
         if r_event.id == r_event_id:
             for key in json.keys():
-                if json.get(key) is not None:
-                    club.recruiting_events[i][key] = json[key]
+                club.recruiting_events[i][key] = json[key]
 
             user.club.last_updated = datetime.datetime.now()
             user.save()
