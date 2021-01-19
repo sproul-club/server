@@ -20,11 +20,8 @@ from app_config import CurrentConfig
 from models import *
 
 LOGIN_CONFIRMED_EXT = '?confirmed=true'
-BASE_SITE_URL_PROD = 'https://www.sproul.club'
-BASE_SITE_URL_LOCAL = 'http://localhost:3000'
-BASE_SITE_URL = BASE_SITE_URL_LOCAL
-LOGIN_URL = BASE_SITE_URL + '/signin'
-RECOVER_URL = BASE_SITE_URL + '/resetpassword'
+LOGIN_URL = CurrentConfig.FRONTEND_BASE_URL + '/signin'
+RECOVER_URL = CurrentConfig.FRONTEND_BASE_URL + '/resetpassword'
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
 
@@ -122,7 +119,7 @@ def register():
     new_user.save()
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
+    confirm_url = CurrentConfig.BACKEND_BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(
@@ -151,7 +148,7 @@ def resend_confirm_email():
         raise JsonError(status='error', reason='The user is already confirmed.')
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
+    confirm_url = CurrentConfig.BACKEND_BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(

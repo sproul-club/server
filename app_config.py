@@ -1,10 +1,12 @@
 import datetime
 import os
 
-DEV_MODE = os.getenv('DEV_MODE') == 'true'
-if DEV_MODE is None:
-    DEV_MODE = True
-ENV_FILE = '.env.dev' if DEV_MODE else '.env.prod'
+ALLOWED_MODES = ['local', 'dev', 'staging', 'prod']
+MODE = os.getenv('MODE')
+if MODE not in ALLOWED_MODES:
+    raise Exception(f'Invalid operating mode: "{MODE}"')
+
+ENV_FILE = f'.env.{MODE}'
 
 from dotenv import load_dotenv
 load_dotenv(dotenv_path=ENV_FILE)
@@ -51,19 +53,33 @@ class BaseConfig(object):
     GOOGLE_OAUTH_CLIENT_ID     = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
     GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
 
-# Development config object for Flask app
+class LocalConfig(BaseConfig):
+    DEBUG = True
+    FRONTEND_BASE_URL = 'http://localhost:3000'
+    BACKEND_BASE_URL = 'https://sc-backend.ngrok.io'
+
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
-    ENV = 'development'
-    BASE_URL = 'https://sc-backend-dev.herokuapp.com'
+    FRONTEND_BASE_URL = 'http://localhost:3000'
+    BACKEND_BASE_URL = 'https://sc-backend-dev.herokuapp.com'
 
-# Production config object for Flask app
+class StagingConfig(BaseConfig):
+    DEBUG = False
+    FRONTEND_BASE_URL = 'http://localhost:3000'
+    BACKEND_BASE_URL = 'https://sc-backend-staging.herokuapp.com'
+
 class ProductionConfig(BaseConfig):
     DEBUG = False
-    ENV = 'production'
-    BASE_URL = 'https://sc-backend-prod.herokuapp.com'
+    FRONTEND_BASE_URL = 'https://www.sproul.club'
+    BACKEND_BASE_URL = 'https://sc-backend-prod.herokuapp.com'
 
-if DEV_MODE:
+if MODE == 'local':
+    CurrentConfig = LocalConfig
+elif MODE == 'dev':
     CurrentConfig = DevelopmentConfig
-else:
+elif MODE == 'staging':
+    CurrentConfig = StagingConfig
+elif MODE == 'prod':
     CurrentConfig = ProductionConfig
+else:
+    raise Exception(f'Invalid operating mode: "{MODE}"')
