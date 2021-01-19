@@ -30,8 +30,9 @@ def _random_generic_club_recommendations(size):
     for user in random_recommended_users:
         random_recommended_clubs += [{
             'link_name': user['club']['link_name'],
-            'name': user['club']['name'],
-            'logo_url': user['club']['logo_url']
+            'name':      user['club']['name'],
+            'logo_url':  user['club']['logo_url'],
+            'about_us':  user['club']['about_us'],
         }]
 
     return random_recommended_clubs
