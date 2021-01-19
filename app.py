@@ -4,6 +4,9 @@ load_dotenv()
 from flask import request
 from flask_json import JsonError
 
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from init_app import app, flask_exts
 from blueprints import *
 
@@ -91,6 +94,18 @@ app.register_blueprint(catalog_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(monitor_blueprint)
 app.register_blueprint(student_blueprint)
+
+
+scheduler = BackgroundScheduler()
+
+def update_apply_required_or_recruiting_statuses():
+    print('hi')
+    pass
+
+# job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'interval', seconds=1)
+scheduler.start()
+
+atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
     app.run(load_dotenv=False, use_reloader=False)
