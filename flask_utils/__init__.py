@@ -3,7 +3,7 @@ __all__ = [
     'validate_json', 'mongo_aggregations',
     'role_required', 'confirmed_account_required',
     'query_to_objects', 'query_to_objects_full', 'get_random_bits',
-    'datetime_or_null'
+    'datetime_or_null', 'slugify', 'random_slugify'
 ]
 
 import json
@@ -29,3 +29,5 @@ def datetime_or_null(dt_obj):
         return dateutil.parser.parse(dt_obj)
     except:
         return None
+
+random_slugify = lambda string, bits=16: f'{slugify(string)}-{os.urandom(bits).hex()}'

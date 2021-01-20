@@ -243,7 +243,7 @@ def add_resource():
     res_name = json['name']
     res_link = json['link']
 
-    new_resource_id = slugify(res_name, max_length=100)
+    new_resource_id = random_slugify(res_name, max_length=100)
     for resource in club.resources:
         if resource.id == new_resource_id:
             raise JsonError(status='error', reason='Resource already exists under that name')
@@ -344,7 +344,7 @@ def add_event():
     event_end         = json['event_end']
     event_description = json['description']
 
-    new_event_id = slugify(event_name, max_length=100)
+    new_event_id = random_slugify(event_name, max_length=100)
     for event in club.events:
         if event.id == new_event_id:
             raise JsonError(status='error', reason='Event already exists under that name')
@@ -448,7 +448,7 @@ def add_recruiting_event():
     json = g.clean_json
     r_event_name = json['name']
 
-    new_event_id = slugify(r_event_name, max_length=100)
+    new_event_id = random_slugify(r_event_name, max_length=100)
     for r_event in club.recruiting_events:
         if r_event.id == new_event_id:
             raise JsonError(status='error', reason='Recruiting event already exists under that name')

@@ -95,7 +95,7 @@ def register():
 
     new_club = NewClub(
         name=club_name,
-        link_name=slugify(club_name, max_length=100),
+        link_name=slugify(club_name, max_length=70),
 
         tags=Tag.objects.filter(id__in=club_tag_ids),
         app_required=app_required,
