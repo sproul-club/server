@@ -1,5 +1,5 @@
 import datetime
-import dateutil
+import dateutil.parser
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 from slugify import slugify

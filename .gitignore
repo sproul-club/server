@@ -134,3 +134,6 @@ dmypy.json
 
 # Database management folder
 db_admin/
+
+# Data from 'exported' folder from sc-notebook
+exported/

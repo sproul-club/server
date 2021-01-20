@@ -1,7 +1,6 @@
 import dateutil
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
-from slugify import slugify
 
 from init_app import flask_exts
 from flask import Blueprint, request, g, make_response, jsonify
