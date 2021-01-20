@@ -11,7 +11,7 @@ from flask_jwt_extended import (
     get_raw_jwt, get_jti, get_current_user
 )
 
-from flask_utils import validate_json, role_required
+from flask_utils import validate_json, role_required, datetime_or_null
 
 from slugify import slugify
 
@@ -20,8 +20,8 @@ from app_config import CurrentConfig
 from models import *
 
 LOGIN_CONFIRMED_EXT = '?confirmed=true'
-LOGIN_URL = 'https://www.sproul.club/signin'
-RECOVER_URL = 'https://www.sproul.club/resetpassword'
+LOGIN_URL = CurrentConfig.FRONTEND_BASE_URL + '/signin'
+RECOVER_URL = CurrentConfig.FRONTEND_BASE_URL + '/resetpassword'
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
 
@@ -50,12 +50,17 @@ def is_password_strong_enough():
 
 @user_blueprint.route('/register', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 70},
     'email': {'type': 'string', 'empty': False},
     'password': {'type': 'string', 'empty': False},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
-    'new_members': {'type': 'boolean'}
+    'new_members': {'type': 'boolean'},
+    'num_users': {'type': 'integer'},
+    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
 }, require_all=True)
 def register():
     json = g.clean_json
@@ -66,6 +71,12 @@ def register():
     club_tag_ids = json['tags']
     app_required = json['app_required']
     new_members = json['new_members']
+    num_users_id = json['num_users']
+
+    apply_deadline_start = json['apply_deadline_start']
+    apply_deadline_end = json['apply_deadline_end']
+    recruiting_start = json['recruiting_start']
+    recruiting_end = json['recruiting_end']
 
     # Check if email is part of pre-verified list of emails
     email_exists = PreVerifiedEmail.objects(email=club_email).first() is not None
@@ -84,12 +95,19 @@ def register():
 
     new_club = NewClub(
         name=club_name,
-        link_name=slugify(club_name, max_length=100),
+        link_name=slugify(club_name, max_length=70),
 
         tags=Tag.objects.filter(id__in=club_tag_ids),
         app_required=app_required,
         new_members=new_members,
-        social_media_links=SocialMediaLinks(contact_email=club_email)
+        num_users=NumUsersTag.objects.filter(id=num_users_id).first(),
+
+        social_media_links=SocialMediaLinks(contact_email=club_email),
+
+        apply_deadline_start=apply_deadline_start,
+        apply_deadline_end=apply_deadline_end,
+        recruiting_start=recruiting_start,
+        recruiting_end=recruiting_end,
     )
 
     new_user = NewOfficerUser(
@@ -101,7 +119,7 @@ def register():
     new_user.save()
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
+    confirm_url = CurrentConfig.BACKEND_BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(
@@ -130,7 +148,7 @@ def resend_confirm_email():
         raise JsonError(status='error', reason='The user is already confirmed.')
 
     verification_token = flask_exts.email_verifier.generate_token(club_email, 'confirm-email')
-    confirm_url = CurrentConfig.BASE_URL + url_for('user.confirm_email', token=verification_token)
+    confirm_url = CurrentConfig.BACKEND_BASE_URL + url_for('user.confirm_email', token=verification_token)
     html = render_template('confirm-email.html', confirm_url=confirm_url)
 
     flask_exts.email_sender.send(
@@ -160,12 +178,7 @@ def confirm_email(token):
 
     confirmed_on = datetime.datetime.now()
     if confirmed_on - potential_user.registered_on > CurrentConfig.CONFIRM_EMAIL_EXPIRY:
-        # Delete the user with the associated club here
-        # HACK: This was supposed to simulate the auto-deletion of the user and club after the first confirmation email expires,
-        # but MongoDB TTL doesn't support deleting referenced or back-referenced documents (user -> club).
-        potential_user.delete()
-
-        raise JsonError(status='error', reason='The account associated with the email has expired. Please re-register the club again.')
+        raise JsonError(status='error', reason='The account associated with the email has expired. Please request for a new confirmation email by logging in.')
 
     # Then, set the user and club to 'confirmed' if it's not done already
     potential_user.confirmed = True
@@ -189,14 +202,8 @@ def login():
     if potential_user is None:
         raise JsonError(status='error', reason='The user does not exist.')
 
-    if not potential_user.confirmed:
-        raise JsonError(status='error', reason='The user has not confirmed their email.')
-
     if not hash_manager.verify(password, potential_user.password):
         raise JsonError(status='error', reason='The password is incorrect.')
-
-    if potential_user.role == 'student':
-        raise JsonError(status='error', reason='Student sign-in is not supported!')
 
     access_token = create_access_token(identity=potential_user)
     refresh_token = create_refresh_token(identity=potential_user)
@@ -241,8 +248,8 @@ def request_reset_password():
 
 @user_blueprint.route('/confirm-reset', methods=['POST'])
 @validate_json(schema={
-    'token': {'type': 'string'},
-    'password': {'type': 'string'}
+    'token': {'type': 'string', 'empty': False},
+    'password': {'type': 'string', 'empty': False}
 }, require_all=True)
 def confirm_reset_password():
     json = g.clean_json
@@ -279,6 +286,7 @@ def confirm_reset_password():
 
 @user_blueprint.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
+@role_required(roles=['officer'])
 def refresh():
     user = get_current_user()
     access_token = create_access_token(identity=user)
@@ -294,6 +302,7 @@ def refresh():
 
 @user_blueprint.route('/revoke-access', methods=['DELETE'])
 @jwt_required
+@role_required(roles=['officer'])
 def revoke_access():
     jti = get_raw_jwt()['jti']
 
@@ -312,6 +321,7 @@ def revoke_access():
 
 @user_blueprint.route('/revoke-refresh', methods=['DELETE'])
 @jwt_refresh_token_required
+@role_required(roles=['officer'])
 def revoke_refresh():
     jti = get_raw_jwt()['jti']
 

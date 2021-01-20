@@ -33,7 +33,7 @@ class ImageManager:
         return f'{self.public_url}/{img_type}/{club_id}-{img_type}.png'
         
     def upload_img_asset_s3(self, club_id, flask_file, img_type, req_aspect_ratio, error_rate=0.05):
-        if img_type not in ['logo', 'banner']:
+        if img_type not in ['logo', 'banner', 'gallery']:
             raise JsonError(status='error', reason='Invalid image type provided when trying to upload club image asset.', status_=500)
 
         if flask_file is not None and allowed_file(secure_filename(flask_file.filename), self.allowed_img_exts):
@@ -57,4 +57,5 @@ class ImageManager:
             if os.path.exists(img_file_location):
                 os.remove(img_file_location)
 
-            return f'{self.public_url}/{img_type}/{club_id}-{img_type}-{random_bits}.png'
+            final_pic_url = f'{self.public_url}/{img_type}/{club_id}-{img_type}-{random_bits}.png'
+            return final_pic_url, random_bits

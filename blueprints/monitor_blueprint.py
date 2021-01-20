@@ -279,7 +279,8 @@ def edit_tag(tag_id):
     if new_tag is not None:
         raise JsonError(status='error', reason='New tag already exists!')
 
-    old_tag.update(name=new_tag_name)
+    old_tag.name = new_tag_name
+    old_tag.save()
     return {'status': 'success'}
 
 

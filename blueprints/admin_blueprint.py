@@ -1,4 +1,5 @@
-import dateutil
+import datetime
+import dateutil.parser
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 from slugify import slugify
@@ -6,7 +7,7 @@ from slugify import slugify
 from init_app import flask_exts
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
-from flask_utils import validate_json, query_to_objects, role_required
+from flask_utils import validate_json, query_to_objects, role_required, datetime_or_null
 from flask_jwt_extended import jwt_required, get_current_user
 
 from models import *
@@ -15,6 +16,8 @@ admin_blueprint = Blueprint('admin', __name__, url_prefix='/api/admin')
 
 _fetch_resources_list = lambda user: [query_to_objects(res) for res in user.club.resources]
 _fetch_event_list = lambda user: [query_to_objects(event) for event in user.club.events]
+_fetch_recruiting_events_list = lambda user: [query_to_objects(r_event) for r_event in user.club.recruiting_events]
+_fetch_gallery_pics_list = lambda user: [query_to_objects(gallery_pic) for gallery_pic in user.club.gallery_pics]
 
 
 @admin_blueprint.route('/profile', methods=['GET'])
@@ -25,6 +28,7 @@ def fetch_profile():
 
     club_obj = query_to_objects(user.club)
     club_obj['owner'] = user.email
+    club_obj['confirmed'] = user.confirmed
 
     return club_obj
 
@@ -33,27 +37,34 @@ def fetch_profile():
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
-    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'is_reactivating': {'type': 'boolean', 'default': False},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 70},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
+    'num_users': {'type': 'integer'},
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
+    'apply_link': {'type': 'string', 'nullable': True, 'empty': False},
+    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
     'social_media_links': {
         'type': 'dict',
         'schema': {
             'contact_email': {'type': 'string', 'empty': False},
-            'website': {'type': 'string', 'nullable': True, 'empty': True},
-            'facebook': {'type': 'string', 'nullable': True, 'empty': True},
-            'instagram': {'type': 'string', 'nullable': True, 'empty': True},
-            'linkedin': {'type': 'string', 'nullable': True, 'empty': True},
-            'twitter': {'type': 'string', 'nullable': True, 'empty': True},
-            'youtube': {'type': 'string', 'nullable': True, 'empty': True},
-            'github': {'type': 'string', 'nullable': True, 'empty': True},
-            'behance': {'type': 'string', 'nullable': True, 'empty': True},
-            'medium': {'type': 'string', 'nullable': True, 'empty': True},
-            'gcalendar': {'type': 'string', 'nullable': True, 'empty': True},
-            'discord': {'type': 'string', 'nullable': True, 'empty': True}
+            'website': {'type': 'string', 'nullable': True, 'empty': False},
+            'facebook': {'type': 'string', 'nullable': True, 'empty': False},
+            'instagram': {'type': 'string', 'nullable': True, 'empty': False},
+            'linkedin': {'type': 'string', 'nullable': True, 'empty': False},
+            'twitter': {'type': 'string', 'nullable': True, 'empty': False},
+            'youtube': {'type': 'string', 'nullable': True, 'empty': False},
+            'github': {'type': 'string', 'nullable': True, 'empty': False},
+            'behance': {'type': 'string', 'nullable': True, 'empty': False},
+            'medium': {'type': 'string', 'nullable': True, 'empty': False},
+            'gcalendar': {'type': 'string', 'nullable': True, 'empty': False},
+            'discord': {'type': 'string', 'nullable': True, 'empty': False}
         }
     }
 })
@@ -62,14 +73,25 @@ def edit_profile():
     json = g.clean_json
 
     for key in json.keys():
+        if key == 'is_reactivating':
+            continue
         if key == 'tags':
             user.club['tags'] = Tag.objects.filter(id__in=json['tags'])
+        elif key == 'num_users':
+            user.club['num_users'] = NumUsersTag.objects.filter(id=json['num_users']).first()
         elif key == 'social_media_links':
             user.update(club__social_media_links=json['social_media_links'])
         else:
             user.club[key] = json[key]
 
+    user.club.last_updated = datetime.datetime.now()
+
+    if json['is_reactivating'] and not user.club.reactivated:
+        user.club.reactivated = True
+        user.club.reactivated_last = user.club.last_updated
+        
     user.save()
+
     return {'status': 'success'}
 
 
@@ -78,14 +100,17 @@ def edit_profile():
 @role_required(roles=['officer'])
 def upload_logo():
     user = get_current_user()
-    club = user.club
 
     logo_file = request.files.get('logo', None)
 
     if logo_file is not None:
-        logo_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, logo_file, 'logo', 1.0)
-        user.update(club__logo_url=logo_url)
-        return {'status': 'success', 'logo-url': club.logo_url}
+        logo_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, logo_file, 'logo', 1.0)
+
+        user.club.last_updated = datetime.datetime.now()
+        user.club.logo_url = logo_url
+
+        user.save()
+        return {'status': 'success', 'logo-url': user.club.logo_url}
     else:
         raise JsonError(status='error', reason='A logo was not provided for uploading.')
 
@@ -95,16 +120,101 @@ def upload_logo():
 @role_required(roles=['officer'])
 def upload_banner():
     user = get_current_user()
-    club = user.club
 
     banner_file = request.files.get('banner', None)
 
     if banner_file is not None:
-        banner_url = flask_exts.img_manager.upload_img_asset_s3(club.link_name, banner_file, 'banner', 8 / 3)
-        user.update(club__banner_url=banner_url)
-        return {'status': 'success', 'banner-url': club.banner_url}
+        banner_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, banner_file, 'banner', 10 / 3)
+
+        user.club.last_updated = datetime.datetime.now()
+        user.club.banner_url = banner_url
+
+        user.save()
+        return {'status': 'success', 'banner-url': user.club.banner_url}
     else:
         raise JsonError(status='error', reason='A banner was not provided for uploading.')
+
+
+@admin_blueprint.route('/gallery-pics', methods=['GET'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def get_gallery_pics():
+    user = get_current_user()
+    return _fetch_gallery_pics_list(user)
+
+
+@admin_blueprint.route('/gallery-pics', methods=['POST'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
+}, require_all=True)
+def add_gallery_pic():
+    user = get_current_user()
+    json = g.clean_json
+
+    gallery_pic_file = request.files.get('gallery', None)
+
+    if gallery_pic_file is not None:
+        gallery_pic_url, pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
+
+        captioned_pic = CaptionedPic(
+            id      = pic_id,
+            url = gallery_pic_url,
+            caption = json['caption']
+        )
+
+        user.club.gallery_pics += [captioned_pic]
+        user.club.last_updated = datetime.datetime.now()
+
+        user.save()
+        return json.loads(captioned_pic.to_json())
+    else:
+        raise JsonError(status='error', reason='A gallery picture was not provided for uploading.')
+
+
+@admin_blueprint.route('/gallery-pics/<pic_id>', methods=['PUT'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
+})
+def modify_gallery_pic(pic_id):
+    user = get_current_user()
+    json = g.clean_json
+
+    captioned_pic = user.club.gallery_pics.filter(id=pic_id).first()
+    if captioned_pic is None:
+        raise JsonError(status='error', reason='Specified gallery picture does not exist.')
+
+    if json.get('caption') is not None:
+        captioned_pic.caption = json['caption']
+
+    gallery_pic_file = request.files.get('gallery', None)
+
+    if gallery_pic_file is not None:
+        gallery_pic_url, new_pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
+        
+        captioned_pic.id = new_pic_id
+        captioned_pic.url = gallery_pic_url
+    
+    user.club.last_updated = datetime.datetime.now()
+    user.save()
+    return json.loads(captioned_pic.to_json())
+
+
+@admin_blueprint.route('/gallery-pics/<pic_id>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['officer'])
+def remove_gallery_pic(pic_id):
+    user = get_current_user()
+
+    user.club.gallery_pics = [gallery_pic for gallery_pic in user.club.gallery_pics if gallery_pic.id != pic_id]
+    user.club.last_updated = datetime.datetime.now()
+    user.save()
+
+    return {'status': 'success'}
 
 
 @admin_blueprint.route('/resources', methods=['GET'])
@@ -133,7 +243,7 @@ def add_resource():
     res_name = json['name']
     res_link = json['link']
 
-    new_resource_id = slugify(res_name, max_length=100)
+    new_resource_id = random_slugify(res_name, max_length=100)
     for resource in club.resources:
         if resource.id == new_resource_id:
             raise JsonError(status='error', reason='Resource already exists under that name')
@@ -145,6 +255,8 @@ def add_resource():
     )
 
     club.resources += [resource]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     return _fetch_resources_list(user)
@@ -169,6 +281,8 @@ def update_resource(resource_id):
             for key in json.keys():
                 if json.get(key) is not None:
                     club.resources[i][key] = json[key]
+
+            user.club.last_updated = datetime.datetime.now()
             user.save()
 
             return _fetch_resources_list(user)
@@ -187,6 +301,8 @@ def delete_resource(resource_id):
     prev_len = len(club.resources)
 
     club.resources = [resource for resource in club.resources if resource.id != resource_id]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     new_len = len(club.resources)
@@ -210,10 +326,10 @@ def get_events():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
-    'link': {'type': 'string'},
+    'link': {'type': 'string', 'default': None},
     'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 500}
+    'description': {'type': 'string', 'maxlength': 500, 'default': ''}
 })
 @as_json
 def add_event():
@@ -228,7 +344,7 @@ def add_event():
     event_end         = json['event_end']
     event_description = json['description']
 
-    new_event_id = slugify(event_name, max_length=100)
+    new_event_id = random_slugify(event_name, max_length=100)
     for event in club.events:
         if event.id == new_event_id:
             raise JsonError(status='error', reason='Event already exists under that name')
@@ -243,6 +359,8 @@ def add_event():
     )
 
     club.events += [event]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     return _fetch_event_list(user)
@@ -252,10 +370,10 @@ def add_event():
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
-    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'name': {'type': 'string', 'maxlength': 100},
     'link': {'type': 'string'},
-    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
-    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
     'description': {'type': 'string', 'maxlength': 500}
 })
 @as_json
@@ -270,6 +388,8 @@ def update_event(event_id):
             for key in json.keys():
                 if json.get(key) is not None:
                     club.events[i][key] = json[key]
+
+            user.club.last_updated = datetime.datetime.now()
             user.save()
 
             return _fetch_event_list(user)
@@ -288,6 +408,8 @@ def delete_event(event_id):
     prev_len = len(club.events)
 
     club.events = [event for event in club.events if event.id != event_id]
+
+    user.club.last_updated = datetime.datetime.now()
     user.save()
 
     new_len = len(club.events)
@@ -295,6 +417,114 @@ def delete_event(event_id):
         return _fetch_event_list(user)
     else:
         raise JsonError(status='error', reason='Requested event does not exist', status_=404)
+
+
+@admin_blueprint.route('/recruiting-events', methods=['GET'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def get_recruiting_events():
+    user = get_current_user()
+    return _fetch_recruiting_events_list(user)
+
+
+@admin_blueprint.route('/recruiting-events', methods=['POST'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'name': {'type': 'string', 'required': True, 'maxlength': 100},
+    'link': {'type': 'string', 'nullable': True, 'default': None},
+    'virtual_link': {'type': 'string', 'nullable': True, 'default': None},
+    'invite_only': {'type': 'boolean', 'required': True},
+    'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
+    'description': {'type': 'string', 'maxlength': 200, 'default': ''}
+})
+@as_json
+def add_recruiting_event():
+    user = get_current_user()
+    club = user.club
+
+    json = g.clean_json
+    r_event_name = json['name']
+
+    new_event_id = random_slugify(r_event_name, max_length=100)
+    for r_event in club.recruiting_events:
+        if r_event.id == new_event_id:
+            raise JsonError(status='error', reason='Recruiting event already exists under that name')
+
+    new_r_event = RecruitingEvent(
+        id              = new_event_id,
+        name            = r_event_name,
+        link            = json['link'],
+        virtual_link    = json['virtual_link'],
+        event_start     = json['event_start'],
+        event_end       = json['event_end'],
+        description     = json['description'],
+        invite_only     = json['invite_only'],
+    )
+
+    club.recruiting_events += [new_r_event]
+
+    user.club.last_updated = datetime.datetime.now()
+    user.save()
+
+    return _fetch_recruiting_events_list(user)
+
+
+@admin_blueprint.route('/recruiting-events/<r_event_id>', methods=['PUT'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'name': {'type': 'string', 'maxlength': 100},
+    'link': {'type': 'string', 'nullable': True},
+    'virtual_link': {'type': 'string', 'nullable': True},
+    'invite_only': {'type': 'boolean'},
+    'event_start': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'event_end': {'type': 'datetime', 'coerce': dateutil.parser.parse},
+    'description': {'type': 'string', 'maxlength': 200}
+})
+@as_json
+def update_recruiting_event(r_event_id):
+    user = get_current_user()
+    club = user.club
+
+    json = g.clean_json
+
+    for (i, r_event) in enumerate(club.recruiting_events):
+        if r_event.id == r_event_id:
+            for key in json.keys():
+                club.recruiting_events[i][key] = json[key]
+
+            user.club.last_updated = datetime.datetime.now()
+            user.save()
+
+            return _fetch_recruiting_events_list(user)
+
+    raise JsonError(status='error', reason='Requested recruiting event does not exist', status_=404)
+
+
+@admin_blueprint.route('/recruiting-events/<r_event_id>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def delete_recruiting_event(r_event_id):
+    user = get_current_user()
+    club = user.club
+
+    prev_len = len(club.recruiting_events)
+
+    club.recruiting_events = [r_event for r_event in club.recruiting_events if r_event.id != r_event_id]
+
+    user.club.last_updated = datetime.datetime.now()
+    user.save()
+
+    new_len = len(club.recruiting_events)
+    if new_len != prev_len:
+        return _fetch_recruiting_events_list(user)
+    else:
+        raise JsonError(status='error', reason='Requested recruiting event does not exist', status_=404)
+
 
 
 @admin_blueprint.route('/change-password', methods=['POST'])

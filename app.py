@@ -4,8 +4,13 @@ load_dotenv()
 from flask import request
 from flask_json import JsonError
 
+import datetime
+
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from init_app import app, flask_exts
-from blueprints import user_blueprint, catalog_blueprint, admin_blueprint, monitor_blueprint
+from blueprints import *
 
 from models import *
 
@@ -36,6 +41,7 @@ def user_identity_lookup(user):
     return {
         'email': user.email,
         'role': user.role,
+        'confirmed': user.confirmed,
     }
 
 
@@ -43,7 +49,8 @@ def user_identity_lookup(user):
 def user_loader_callback(identity):
     return NewBaseUser.objects(
         email=identity['email'],
-        role=identity['role']
+        role=identity['role'],
+        confirmed=identity['confirmed'],
     ).first()
 
 
@@ -88,6 +95,29 @@ app.register_blueprint(user_blueprint)
 app.register_blueprint(catalog_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(monitor_blueprint)
+app.register_blueprint(student_blueprint)
+
+
+scheduler = BackgroundScheduler()
+
+def update_apply_required_or_recruiting_statuses():
+    right_now_dt = datetime.datetime.now()
+
+    for officer_user in NewOfficerUser.objects:
+        if officer_user.club.app_required and officer_user.club.apply_deadline_start and officer_user.club.apply_deadline_end:
+            apply_deadline_in_range = officer_user.club.apply_deadline_start < right_now_dt and officer_user.club.apply_deadline_end > right_now_dt
+            officer_user.club.new_members = apply_deadline_in_range
+            officer_user.save()
+        elif not officer_user.club.app_required and officer_user.club.recruiting_start and officer_user.club.recruiting_end:
+            recruiting_period_in_range = officer_user.club.recruiting_start < right_now_dt and officer_user.club.recruiting_end > right_now_dt
+            officer_user.club.new_members = recruiting_period_in_range
+            officer_user.save()
+
+
+job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'interval', minutes=1)
+scheduler.start()
+
+atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
     app.run(load_dotenv=False, use_reloader=False)

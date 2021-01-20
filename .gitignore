@@ -109,8 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.env.dev
-.env.prod
+.env.*
 
 # Spyder project settings
 .spyderproject
@@ -132,3 +131,9 @@ dmypy.json
 
 # JSON data files
 *.json
+
+# Database management folder
+db_admin/
+
+# Data from 'exported' folder from sc-notebook
+exported/

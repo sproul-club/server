@@ -1,0 +1,112 @@
+import datetime
+
+import mongoengine as mongo
+import mongoengine_goodjson as gj
+
+from models.relaxed_url_field import RelaxedURLField
+
+from models.user import NewBaseUser, USER_ROLES
+from models.metadata import Tag, NumUsersTag
+
+# TODO: Decouple embedded 'NewClub' from 'NewOfficerUser'
+# TODO: Decouple embedded 'Event' from 'NewOfficerUser'
+# TODO: Decouple embedded 'RecruitingEvent' from 'NewOfficerUser'
+
+
+class Event(gj.EmbeddedDocument):
+    id   = mongo.StringField(required=True, max_length=100)
+    name = mongo.StringField(required=True, max_length=100)
+    link = RelaxedURLField(null=True, default=None)
+    event_start = mongo.DateTimeField(required=True)
+    event_end   = mongo.DateTimeField(required=True)
+    description = mongo.StringField(required=True, max_length=1000)
+
+    meta = {'auto_create_index': False, 'allow_inheritance': True}
+
+
+class RecruitingEvent(Event):
+    description = mongo.StringField(required=True, max_length=200)
+    virtual_link = RelaxedURLField(null=True, default=None)
+    invite_only = mongo.BooleanField(required=True)
+
+    meta = {'auto_create_index': False}
+
+
+class Resource(gj.EmbeddedDocument):
+    id   = mongo.StringField(required=True, max_length=100)
+    name = mongo.StringField(required=True, max_length=100)
+    link = RelaxedURLField(required=True)
+
+    meta = {'auto_create_index': False}
+
+
+class SocialMediaLinks(gj.EmbeddedDocument):
+    contact_email = mongo.EmailField(required=True)
+    website     = RelaxedURLField(null=True, default=None)
+    facebook    = RelaxedURLField(null=True, default=None)
+    instagram   = RelaxedURLField(null=True, default=None)
+    linkedin    = RelaxedURLField(null=True, default=None)
+    twitter     = RelaxedURLField(null=True, default=None)
+    youtube     = RelaxedURLField(null=True, default=None)
+    github      = RelaxedURLField(null=True, default=None)
+    behance     = RelaxedURLField(null=True, default=None)
+    medium      = RelaxedURLField(null=True, default=None)
+    gcalendar   = RelaxedURLField(null=True, default=None)
+    discord     = RelaxedURLField(null=True, default=None)
+
+    meta = {'auto_create_index': False}
+
+
+class CaptionedPic(gj.EmbeddedDocument):
+    id      = mongo.StringField(required=True, max_length=100)
+    url     = RelaxedURLField(required=True, default=None)
+    caption = mongo.StringField(required=True, max_length=50)
+
+    meta = {'auto_create_index': False}
+
+
+class NewClub(gj.EmbeddedDocument):
+    name  = mongo.StringField(required=True, max_length=100)
+    link_name = mongo.StringField(required=True)
+
+    tags         = mongo.ListField(mongo.ReferenceField(Tag), required=True, max_length=3)
+    app_required = mongo.BooleanField(required=True)
+    new_members  = mongo.BooleanField(required=True)
+    num_users    = mongo.ReferenceField(NumUsersTag, required=True)
+
+    logo_url   = RelaxedURLField(null=True, default=None)
+    banner_url = RelaxedURLField(null=True, default=None)
+
+    gallery_pics = mongo.EmbeddedDocumentListField(CaptionedPic, default=[], max_length=5)
+
+    about_us     = mongo.StringField(default='', max_length=1500)
+    get_involved = mongo.StringField(default='', max_length=1000)
+
+    apply_link = RelaxedURLField(null=True, default=None)
+    apply_deadline_start = mongo.DateTimeField(null=True)
+    apply_deadline_end = mongo.DateTimeField(null=True)
+
+    recruiting_start = mongo.DateTimeField(null=True)
+    recruiting_end = mongo.DateTimeField(null=True)
+
+    resources = mongo.EmbeddedDocumentListField(Resource, default=[])
+    events    = mongo.EmbeddedDocumentListField(Event, default=[])
+    recruiting_events = mongo.EmbeddedDocumentListField(RecruitingEvent, default=[])
+
+    social_media_links = mongo.EmbeddedDocumentField(SocialMediaLinks)
+
+    last_updated = mongo.DateTimeField(null=True)
+
+    reactivated = mongo.BooleanField(default=True)
+    reactivated_last = mongo.DateTimeField(null=True, default=datetime.datetime.now)
+
+    meta = {'auto_create_index': False}
+
+
+class NewOfficerUser(NewBaseUser):
+    role = mongo.StringField(default='officer', choices=USER_ROLES)
+    has_usable_password = mongo.BooleanField(default=True)
+
+    club = mongo.EmbeddedDocumentField(NewClub, required=True)
+
+    meta = {'auto_create_index': False}
