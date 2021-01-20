@@ -4,6 +4,8 @@ load_dotenv()
 from flask import request
 from flask_json import JsonError
 
+import datetime
+
 import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -99,10 +101,20 @@ app.register_blueprint(student_blueprint)
 scheduler = BackgroundScheduler()
 
 def update_apply_required_or_recruiting_statuses():
-    print('hi')
-    pass
+    right_now_dt = datetime.datetime.now()
 
-# job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'interval', seconds=1)
+    for officer_user in NewOfficerUser.objects:
+        if officer_user.club.app_required and officer_user.club.apply_deadline_start and officer_user.club.apply_deadline_end:
+            apply_deadline_in_range = officer_user.club.apply_deadline_start < right_now_dt and officer_user.club.apply_deadline_end > right_now_dt
+            officer_user.club.new_members = apply_deadline_in_range
+            officer_user.save()
+        elif not officer_user.club.app_required and officer_user.club.recruiting_start and officer_user.club.recruiting_end:
+            recruiting_period_in_range = officer_user.club.recruiting_start < right_now_dt and officer_user.club.recruiting_end > right_now_dt
+            officer_user.club.new_members = recruiting_period_in_range
+            officer_user.save()
+
+
+job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'interval', minutes=1)
 scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())
