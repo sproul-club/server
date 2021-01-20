@@ -50,7 +50,7 @@ def is_password_strong_enough():
 
 @user_blueprint.route('/register', methods=['POST'])
 @validate_json(schema={
-    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 70},
     'email': {'type': 'string', 'empty': False},
     'password': {'type': 'string', 'empty': False},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},

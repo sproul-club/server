@@ -38,7 +38,7 @@ def fetch_profile():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'is_reactivating': {'type': 'boolean', 'default': False},
-    'name': {'type': 'string', 'empty': False, 'maxlength': 100},
+    'name': {'type': 'string', 'empty': False, 'maxlength': 70},
     'tags': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
