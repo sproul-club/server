@@ -134,8 +134,8 @@ def list_rso_users():
 
 
 @monitor_blueprint.route('/rso/download', methods=['GET'])
-@role_required(roles=['admin'])
 @jwt_required
+@role_required(roles=['admin'])
 def download_rso_users():
     rso_list = mongo_aggregations.fetch_aggregated_rso_list()
     for rso_email in rso_list:
