@@ -30,4 +30,4 @@ def datetime_or_null(dt_obj):
     except:
         return None
 
-random_slugify = lambda string, bits=16: f'{slugify(string)}-{os.urandom(bits).hex()}'
+random_slugify = lambda string, bits=16, max_length=0: f'{slugify(string, max_length=max_length)}-{os.urandom(bits).hex()}'
