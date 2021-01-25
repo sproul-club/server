@@ -213,11 +213,18 @@
     * `gallery` - banner image
 * Sample body output:
 ```json
-{
-    "id": "example-gallery-pic-2",
-    "url": "<gallery-pic-url>",
-    "caption": "Example caption 2"
-}
+[
+    {
+        "id": "example-gallery-pic-1",
+        "url": "<gallery-pic-url>",
+        "caption": "Example caption 1"
+    },
+    {
+        "id": "example-gallery-pic-2",
+        "url": "<gallery-pic-url>",
+        "caption": "Example caption 2"
+    }
+]
 ```
 
 ### Update gallery picture
@@ -235,11 +242,18 @@
     * `gallery` - banner image
 * Sample body output:
 ```json
-{
-    "id": "example-gallery-pic-3",
-    "url": "<gallery-pic-url>",
-    "caption": "Example caption 3"
-}
+[
+    {
+        "id": "example-gallery-pic-1",
+        "url": "<gallery-pic-url>",
+        "caption": "Example caption 1"
+    },
+    {
+        "id": "example-gallery-pic-2",
+        "url": "<gallery-pic-url>",
+        "caption": "Example caption 3"
+    }
+]
 ```
 
 ### Delete gallery picture
@@ -249,9 +263,13 @@
     - `Authorization: Bearer <access_token>`
 * Sample body output:
 ```json
-{
-    "status": "success"
-}
+[
+    {
+        "id": "example-gallery-pic-2",
+        "url": "<gallery-pic-url>",
+        "caption": "Example caption 3"
+    }
+]
 ```
 
 ## Resources

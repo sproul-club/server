@@ -171,7 +171,7 @@ def add_gallery_pic():
         user.club.last_updated = pst_right_now()
 
         user.save()
-        return json.loads(captioned_pic.to_json())
+        return _fetch_gallery_pics_list(user)
     else:
         raise JsonError(status='error', reason='A gallery picture was not provided for uploading.')
 
@@ -203,7 +203,7 @@ def modify_gallery_pic(pic_id):
     
     user.club.last_updated = pst_right_now()
     user.save()
-    return json.loads(captioned_pic.to_json())
+    return _fetch_gallery_pics_list(user)
 
 
 @admin_blueprint.route('/gallery-pics/<pic_id>', methods=['DELETE'])
@@ -216,7 +216,7 @@ def remove_gallery_pic(pic_id):
     user.club.last_updated = pst_right_now()
     user.save()
 
-    return {'status': 'success'}
+    return _fetch_gallery_pics_list(user)
 
 
 @admin_blueprint.route('/resources', methods=['GET'])
