@@ -22,9 +22,10 @@ def to_int_safe(s, default):
         return default
 
 def _random_generic_club_recommendations(size):
-    random_recommended_users = NewOfficerUser.objects.aggregate(
-       [{ '$sample': {'size': size} }]
-    )
+    random_recommended_users = NewOfficerUser.objects \
+        .filter(confirmed=True) \
+        .filter(club__reactivated=True) \
+        .aggregate([{ '$sample': {'size': size} }])
 
     random_recommended_clubs = []
     for user in random_recommended_users:

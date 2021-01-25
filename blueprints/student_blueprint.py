@@ -28,9 +28,10 @@ student_blueprint = Blueprint('student', __name__, url_prefix='/api/student')
 
 
 def _random_smart_club_recommendations(size):
-    random_recommended_users = NewOfficerUser.objects.aggregate(
-       [{ '$sample': {'size': size} }]
-    )
+    random_recommended_users = NewOfficerUser.objects \
+        .filter(confirmed=True) \
+        .filter(club__reactivated=True) \
+        .aggregate([{ '$sample': {'size': size} }])
 
     random_recommended_clubs = []
     for user in random_recommended_users:
