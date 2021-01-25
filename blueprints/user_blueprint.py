@@ -11,7 +11,8 @@ from flask_jwt_extended import (
     get_raw_jwt, get_jti, get_current_user
 )
 
-from flask_utils import validate_json, role_required, datetime_or_null
+from utils import datetime_or_null, pst_right_now
+from flask_utils import validate_json, role_required
 
 from slugify import slugify
 
@@ -176,13 +177,13 @@ def confirm_email(token):
     if potential_user.confirmed:
         return redirect(LOGIN_URL + LOGIN_CONFIRMED_EXT)
 
-    confirmed_on = datetime.datetime.now()
+    confirmed_on = pst_right_now()
     if confirmed_on - potential_user.registered_on > CurrentConfig.CONFIRM_EMAIL_EXPIRY:
         raise JsonError(status='error', reason='The account associated with the email has expired. Please request for a new confirmation email by logging in.')
 
     # Then, set the user and club to 'confirmed' if it's not done already
     potential_user.confirmed = True
-    potential_user.confirmed_on = datetime.datetime.now()
+    potential_user.confirmed_on = confirmed_on
     potential_user.save()
 
     return redirect(LOGIN_URL + LOGIN_CONFIRMED_EXT)

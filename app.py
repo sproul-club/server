@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from utils import pst_right_now
 from flask import request
 from flask_json import JsonError
 
@@ -101,7 +102,7 @@ app.register_blueprint(student_blueprint)
 scheduler = BackgroundScheduler()
 
 def update_apply_required_or_recruiting_statuses():
-    right_now_dt = datetime.datetime.now()
+    right_now_dt = pst_right_now()
 
     for officer_user in NewOfficerUser.objects:
         if officer_user.club.app_required and officer_user.club.apply_deadline_start and officer_user.club.apply_deadline_end:

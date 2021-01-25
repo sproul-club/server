@@ -2,6 +2,8 @@ import datetime
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 
+from utils import pst_right_now
+
 from flask import Blueprint, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
@@ -74,25 +76,25 @@ def login():
 @jwt_required
 @role_required(roles=['admin'])
 def fetch_sign_up_stats():
-    one_day_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
+    time_delta = pst_right_now() - datetime.timedelta(weeks=1)
     officer_users = NewOfficerUser.objects
     student_users = NewStudentUser.objects
 
     # Officer stats
     num_registered_clubs = officer_users.count()
-    recent_num_registered_clubs = officer_users.filter(registered_on__gte=one_day_ago).count()
+    recent_num_registered_clubs = officer_users.filter(registered_on__gte=time_delta).count()
 
     num_confirmed_clubs = officer_users.filter(confirmed=True).count()
-    recent_num_confirmed_clubs = officer_users.filter(confirmed=True, registered_on__gte=one_day_ago).count()
+    recent_num_confirmed_clubs = officer_users.filter(confirmed=True, registered_on__gte=time_delta).count()
 
     num_clubs_rso_list = PreVerifiedEmail.objects.count()
 
     # Student stats
     num_students_signed_up = student_users.count()
-    recent_num_students_signed_up = student_users.filter(registered_on__gte=one_day_ago).count()
+    recent_num_students_signed_up = student_users.filter(registered_on__gte=time_delta).count()
 
     num_confirmed_students = student_users.filter(confirmed=True).count()
-    recent_num_confirmed_students = student_users.filter(confirmed=True, registered_on__gte=one_day_ago).count()
+    recent_num_confirmed_students = student_users.filter(confirmed=True, registered_on__gte=time_delta).count()
 
     return {
         'main': {

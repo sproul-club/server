@@ -2,6 +2,8 @@ import datetime
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
+from utils import pst_right_now
+
 from models.metadata import Major, Minor, Tag
 USER_ROLES = ['student', 'officer', 'admin']
 
@@ -10,7 +12,7 @@ class NewBaseUser(gj.Document):
     email    = mongo.EmailField(required=True)
     password = mongo.StringField(required=True)
 
-    registered_on = mongo.DateTimeField(default=datetime.datetime.utcnow)
+    registered_on = mongo.DateTimeField(default=pst_right_now)
     confirmed     = mongo.BooleanField(default=False)
     confirmed_on  = mongo.DateTimeField(default=None)
 
@@ -31,7 +33,7 @@ class AccessJTI(gj.Document):
     owner = mongo.ReferenceField(NewBaseUser, required=True)
     token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
+    expiry_time = mongo.DateTimeField(default=pst_right_now)
 
     meta = {'collection': 'access_jti', 'auto_create_index': False}
 
@@ -40,7 +42,7 @@ class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(NewBaseUser, required=True)
     token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=datetime.datetime.now)
+    expiry_time = mongo.DateTimeField(default=pst_right_now)
 
     meta = {'collection': 'refresh_jti', 'auto_create_index': False}
 
@@ -48,7 +50,7 @@ class RefreshJTI(gj.Document):
 class ConfirmEmailToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
+    expiry_time = mongo.DateTimeField(default=pst_right_now)
 
     meta = {'auto_create_index': False}
 
@@ -56,6 +58,6 @@ class ConfirmEmailToken(gj.Document):
 class ResetPasswordToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=datetime.datetime.utcnow)
+    expiry_time = mongo.DateTimeField(default=pst_right_now)
 
     meta = {'auto_create_index': False}

@@ -8,6 +8,8 @@ from models.relaxed_url_field import RelaxedURLField
 from models.user import NewBaseUser, USER_ROLES
 from models.metadata import Tag, NumUsersTag
 
+from utils import pst_right_now
+
 # TODO: Decouple embedded 'NewClub' from 'NewOfficerUser'
 # TODO: Decouple embedded 'Event' from 'NewOfficerUser'
 # TODO: Decouple embedded 'RecruitingEvent' from 'NewOfficerUser'
@@ -98,7 +100,7 @@ class NewClub(gj.EmbeddedDocument):
     last_updated = mongo.DateTimeField(null=True)
 
     reactivated = mongo.BooleanField(default=True)
-    reactivated_last = mongo.DateTimeField(null=True, default=datetime.datetime.now)
+    reactivated_last = mongo.DateTimeField(null=True, default=pst_right_now)
 
     meta = {'auto_create_index': False}
 

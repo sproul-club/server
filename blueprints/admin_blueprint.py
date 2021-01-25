@@ -4,10 +4,12 @@ import dateutil.parser
 from passlib.hash import pbkdf2_sha512 as hash_manager
 from slugify import slugify
 
+from utils import datetime_or_null, random_slugify, pst_right_now
+
 from init_app import flask_exts
 from flask import Blueprint, request, g
 from flask_json import as_json, JsonError
-from flask_utils import validate_json, query_to_objects, role_required, datetime_or_null, random_slugify
+from flask_utils import validate_json, query_to_objects, role_required
 from flask_jwt_extended import jwt_required, get_current_user
 
 from models import *
@@ -84,7 +86,7 @@ def edit_profile():
         else:
             user.club[key] = json[key]
 
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
 
     if json['is_reactivating'] and not user.club.reactivated:
         user.club.reactivated = True
@@ -106,7 +108,7 @@ def upload_logo():
     if logo_file is not None:
         logo_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, logo_file, 'logo', 1.0)
 
-        user.club.last_updated = datetime.datetime.now()
+        user.club.last_updated = pst_right_now()
         user.club.logo_url = logo_url
 
         user.save()
@@ -126,7 +128,7 @@ def upload_banner():
     if banner_file is not None:
         banner_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, banner_file, 'banner', 10 / 3)
 
-        user.club.last_updated = datetime.datetime.now()
+        user.club.last_updated = pst_right_now()
         user.club.banner_url = banner_url
 
         user.save()
@@ -166,7 +168,7 @@ def add_gallery_pic():
         )
 
         user.club.gallery_pics += [captioned_pic]
-        user.club.last_updated = datetime.datetime.now()
+        user.club.last_updated = pst_right_now()
 
         user.save()
         return json.loads(captioned_pic.to_json())
@@ -199,7 +201,7 @@ def modify_gallery_pic(pic_id):
         captioned_pic.id = new_pic_id
         captioned_pic.url = gallery_pic_url
     
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
     return json.loads(captioned_pic.to_json())
 
@@ -211,7 +213,7 @@ def remove_gallery_pic(pic_id):
     user = get_current_user()
 
     user.club.gallery_pics = [gallery_pic for gallery_pic in user.club.gallery_pics if gallery_pic.id != pic_id]
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
 
     return {'status': 'success'}
@@ -256,7 +258,7 @@ def add_resource():
 
     club.resources += [resource]
 
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
 
     return _fetch_resources_list(user)
@@ -282,7 +284,7 @@ def update_resource(resource_id):
                 if json.get(key) is not None:
                     club.resources[i][key] = json[key]
 
-            user.club.last_updated = datetime.datetime.now()
+            user.club.last_updated = pst_right_now()
             user.save()
 
             return _fetch_resources_list(user)
@@ -302,7 +304,7 @@ def delete_resource(resource_id):
 
     club.resources = [resource for resource in club.resources if resource.id != resource_id]
 
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
 
     new_len = len(club.resources)
@@ -360,7 +362,7 @@ def add_event():
 
     club.events += [event]
 
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
 
     return _fetch_event_list(user)
@@ -389,7 +391,7 @@ def update_event(event_id):
                 if json.get(key) is not None:
                     club.events[i][key] = json[key]
 
-            user.club.last_updated = datetime.datetime.now()
+            user.club.last_updated = pst_right_now()
             user.save()
 
             return _fetch_event_list(user)
@@ -409,7 +411,7 @@ def delete_event(event_id):
 
     club.events = [event for event in club.events if event.id != event_id]
 
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
 
     new_len = len(club.events)
@@ -466,7 +468,7 @@ def add_recruiting_event():
 
     club.recruiting_events += [new_r_event]
 
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
 
     return _fetch_recruiting_events_list(user)
@@ -496,7 +498,7 @@ def update_recruiting_event(r_event_id):
             for key in json.keys():
                 club.recruiting_events[i][key] = json[key]
 
-            user.club.last_updated = datetime.datetime.now()
+            user.club.last_updated = pst_right_now()
             user.save()
 
             return _fetch_recruiting_events_list(user)
@@ -516,7 +518,7 @@ def delete_recruiting_event(r_event_id):
 
     club.recruiting_events = [r_event for r_event in club.recruiting_events if r_event.id != r_event_id]
 
-    user.club.last_updated = datetime.datetime.now()
+    user.club.last_updated = pst_right_now()
     user.save()
 
     new_len = len(club.recruiting_events)
