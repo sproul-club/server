@@ -87,6 +87,12 @@ def fetch_sign_up_stats():
     num_confirmed_clubs = officer_users.filter(confirmed=True).count()
     recent_num_confirmed_clubs = officer_users.filter(confirmed=True, registered_on__gte=time_delta).count()
 
+    num_reactivated_clubs = officer_users.filter(confirmed=True, club__reactivated=True).count()
+    recent_num_reactivated_clubs = officer_users.filter(
+        confirmed=True, club__reactivated=True,
+        club__reactivated_last__gte=time_delta
+    ).count()
+
     num_clubs_rso_list = PreVerifiedEmail.objects.count()
 
     # Student stats
@@ -97,18 +103,28 @@ def fetch_sign_up_stats():
     recent_num_confirmed_students = student_users.filter(confirmed=True, registered_on__gte=time_delta).count()
 
     return {
-        'main': {
-            'clubs_registered': num_registered_clubs,
-            'clubs_confirmed': num_confirmed_clubs,
-            'clubs_rso_list': num_clubs_rso_list,
-            'students_signed_up': num_students_signed_up,
-            'students_confirmed': num_confirmed_students,
+        'club_admin': {
+            'main': {
+                'clubs_registered': num_registered_clubs,
+                'clubs_confirmed': num_confirmed_clubs,
+                'clubs_reactivated': num_reactivated_clubs,
+                'clubs_rso_list': num_clubs_rso_list,
+            },
+            'changed': {
+                'clubs_registered': recent_num_registered_clubs,
+                'clubs_confirmed': recent_num_confirmed_clubs,
+                'clubs_reactivated': recent_num_reactivated_clubs,
+            }
         },
-        'changed': {
-            'clubs_registered': recent_num_registered_clubs,
-            'clubs_confirmed': recent_num_confirmed_clubs,
-            'students_signed_up': recent_num_students_signed_up,
-            'students_confirmed': recent_num_confirmed_students
+        'student': {
+            'main': {
+                'students_signed_up': num_students_signed_up,
+                'students_confirmed': num_confirmed_students,
+            },
+            'changed': {
+                'students_signed_up': recent_num_students_signed_up,
+                'students_confirmed': recent_num_confirmed_students
+            }
         }
     }
 
@@ -120,8 +136,8 @@ def fetch_activity_stats():
     active_user_stats = mongo_aggregations.fetch_active_users_stats()
 
     return {
-        'active_admins': active_user_stats['officer'],
-        'active_users': active_user_stats['student'],
+        'active_club_admins': active_user_stats['officer'],
+        'active_students': active_user_stats['student'],
         'catalog_searches': 'N/A'
     }
 
