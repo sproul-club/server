@@ -226,8 +226,6 @@ class ClubRecommender:
             os.makedirs(os.path.dirname(self.model_file_loc), exist_ok=True)
             self.distance_table.to_pickle(self.model_file_loc)
 
-        print(self.distance_table)
-
     def _count_tags(self, a, b, num_tags):
         """
         Description:
@@ -260,7 +258,6 @@ class ClubRecommender:
         num_of_tags = len(club_tags)
         while (np.count_nonzero(filtered_clubs) - 1 < k):
             if num_of_tags == 0:
-                print("Matched {} tags".format(num_of_tags))
                 return [True] * len(self.club_tags_list)
 
             filtered_clubs = []
