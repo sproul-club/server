@@ -7,11 +7,11 @@
 - [Edit profile info](#edit-profile-info)
 - [Upload logo](#upload-logo)
 - [Upload banner](#upload-banner)
-- [Gallery Pictures](#gallery-pictures)
-    - [Get gallery pictures](#get-gallery-pictures)
+- [Gallery Media](#gallery-media)
+    - [Get gallery media](#get-gallery-media)
     - [Add gallery picture](#add-gallery-picture)
     - [Update gallery picture](#update-gallery-picture)
-    - [Delete gallery picture](#delete-gallery-picture)
+    - [Delete gallery media](#delete-gallery-media)
 - [Resources](#resources)
     - [Get resources](#get-resources)
     - [Add resource](#add-resource)
@@ -180,11 +180,11 @@
 }
 ```
 
-## Gallery Pictures
+## Gallery Media
 
-### Get gallery pictures
-* Description: Gets all gallery pictures (text only) from a club
-* Path: `GET /api/admin/gallery-pics`
+### Get gallery media
+* Description: Gets all gallery media (text only) from a club
+* Path: `GET /api/admin/gallery-media`
 * Headers:
     - `Authorization: Bearer <access_token>`
 * Sample body output:
@@ -200,7 +200,7 @@
 
 ### Add gallery picture
 * Description: Adds a gallery picture to the club
-* Path: `POST /api/admin/gallery-pics`
+* Path: `POST /api/admin/gallery-media/photo`
 * Headers:
     - `Authorization: Bearer <access_token>`
 * Sample body input:
@@ -210,7 +210,7 @@
 }
 ```
 * multipart/form-data
-    * `gallery` - banner image
+    * `photo` - gallery image
 * Sample body output:
 ```json
 [
@@ -229,7 +229,7 @@
 
 ### Update gallery picture
 * Description: Updates a gallery picture from the club
-* Path: `PUT /api/admin/gallery-pics/<pic-id>`
+* Path: `PUT /api/admin/gallery-media/photo/<pic-id>`
 * Headers:
     - `Authorization: Bearer <access_token>`
 * Sample body input:
@@ -239,7 +239,7 @@
 }
 ```
 * multipart/form-data
-    * `gallery` - banner image
+    * `photo` - gallery image
 * Sample body output:
 ```json
 [
@@ -256,9 +256,9 @@
 ]
 ```
 
-### Delete gallery picture
-* Description: Deletes a gallery picture from the club
-* Path: `DELETE /api/admin/gallery-pics/<pic-id>`
+### Delete gallery media
+* Description: Deletes a gallery media from the club
+* Path: `DELETE /api/admin/gallery-media/<media-id>`
 * Headers:
     - `Authorization: Bearer <access_token>`
 * Sample body output:
