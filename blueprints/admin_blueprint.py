@@ -151,7 +151,8 @@ def get_gallery_pics():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
-}, require_all=True)
+}, require_all=True, form_keys=['caption'])
+@as_json
 def add_gallery_pic():
     user = get_current_user()
     json = g.clean_json
@@ -171,6 +172,7 @@ def add_gallery_pic():
         user.club.last_updated = pst_right_now()
 
         user.save()
+        print(_fetch_gallery_pics_list(user))
         return _fetch_gallery_pics_list(user)
     else:
         raise JsonError(status='error', reason='A gallery picture was not provided for uploading.')
@@ -181,7 +183,8 @@ def add_gallery_pic():
 @role_required(roles=['officer'])
 @validate_json(schema={
     'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
-})
+}, form_keys=['caption'])
+@as_json
 def modify_gallery_pic(pic_id):
     user = get_current_user()
     json = g.clean_json
@@ -209,6 +212,7 @@ def modify_gallery_pic(pic_id):
 @admin_blueprint.route('/gallery-pics/<pic_id>', methods=['DELETE'])
 @jwt_required
 @role_required(roles=['officer'])
+@as_json
 def remove_gallery_pic(pic_id):
     user = get_current_user()
 
