@@ -2,13 +2,12 @@ import datetime
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 
-from utils import pst_right_now
+from utils import pst_right_now, array_diff
 
 from flask import Blueprint, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
-from flask_utils import validate_json, query_to_objects, role_required
-from flask_utils import mongo_aggregations
+from flask_utils import validate_json, query_to_objects, role_required, mongo_aggregations
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jti
 
 from app_config import CurrentConfig
@@ -78,30 +77,35 @@ def login():
 @role_required(roles=['admin'])
 def fetch_sign_up_stats():
     time_delta = pst_right_now() - datetime.timedelta(weeks=1)
-    officer_users = NewOfficerUser.objects
-    student_users = NewStudentUser.objects
+    history_deltas = [pst_right_now() - datetime.timedelta(weeks=delay) for delay in range(11)]
 
     # Officer stats
-    num_registered_clubs = officer_users.count()
-    recent_num_registered_clubs = officer_users.filter(registered_on__gte=time_delta).count()
+    num_registered_clubs = NewOfficerUser.objects.count()
+    recent_num_registered_clubs = NewOfficerUser.objects.filter(registered_on__gte=time_delta).count()
+    num_registered_clubs_history = reversed(array_diff([NewOfficerUser.objects.filter(registered_on__gte=hist_delta).count() for hist_delta in history_deltas]))
 
-    num_confirmed_clubs = officer_users.filter(confirmed=True).count()
-    recent_num_confirmed_clubs = officer_users.filter(confirmed=True, registered_on__gte=time_delta).count()
+    num_confirmed_clubs = NewOfficerUser.objects.filter(confirmed=True).count()
+    recent_num_confirmed_clubs = NewOfficerUser.objects.filter(confirmed=True, registered_on__gte=time_delta).count()
+    num_confirmed_clubs_history = reversed(array_diff([NewOfficerUser.objects.filter(confirmed=True, registered_on__gte=hist_delta).count() for hist_delta in history_deltas]))
 
-    num_reactivated_clubs = officer_users.filter(confirmed=True, club__reactivated=True).count()
-    recent_num_reactivated_clubs = officer_users.filter(
+    num_reactivated_clubs = NewOfficerUser.objects.filter(confirmed=True, club__reactivated=True).count()
+    recent_num_reactivated_clubs = NewOfficerUser.objects.filter(
         confirmed=True, club__reactivated=True,
         club__reactivated_last__gte=time_delta
     ).count()
+    num_reactivated_clubs_history = reversed(array_diff([NewOfficerUser.objects.filter(
+        confirmed=True, club__reactivated=True,
+        club__reactivated_last__gte=hist_delta
+    ).count() for hist_delta in history_deltas]))
 
     num_clubs_rso_list = PreVerifiedEmail.objects.count()
 
     # Student stats
-    num_students_signed_up = student_users.count()
-    recent_num_students_signed_up = student_users.filter(registered_on__gte=time_delta).count()
+    num_students_signed_up = NewStudentUser.objects.count()
+    recent_num_students_signed_up = NewStudentUser.objects.filter(registered_on__gte=time_delta).count()
 
-    num_confirmed_students = student_users.filter(confirmed=True).count()
-    recent_num_confirmed_students = student_users.filter(confirmed=True, registered_on__gte=time_delta).count()
+    num_confirmed_students = NewStudentUser.objects.filter(confirmed=True).count()
+    recent_num_confirmed_students = NewStudentUser.objects.filter(confirmed=True, registered_on__gte=time_delta).count()
 
     return {
         'club_admin': {
@@ -115,6 +119,11 @@ def fetch_sign_up_stats():
                 'clubs_registered': recent_num_registered_clubs,
                 'clubs_confirmed': recent_num_confirmed_clubs,
                 'clubs_reactivated': recent_num_reactivated_clubs,
+            },
+            'history': {
+                'clubs_registered': num_registered_clubs_history,
+                'clubs_confirmed': num_confirmed_clubs_history,
+                'clubs_reactivated': num_reactivated_clubs_history,
             }
         },
         'student': {

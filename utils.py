@@ -1,5 +1,6 @@
 __all__ = [
-    'get_random_bits', 'datetime_or_null', 'random_slugify', 'utc_right_now', 'pst_right_now', 'make_expiry_time_generator'
+    'get_random_bits', 'datetime_or_null', 'random_slugify',
+    'utc_right_now', 'pst_right_now', 'array_diff'
 ]
 
 import os
@@ -29,10 +30,5 @@ def pst_right_now():
     dt_obj = dt_obj.replace(tzinfo=None)
     return dt_obj
 
-def make_expiry_time_generator(expiry_timedelta):
-    def expiry_time_gen():
-        now = pst_right_now()
-        offset_now = now + expiry_timedelta
-        corrected_time = offset_now.astimezone(PST)
-        return corrected_time
-    return expiry_time_gen
+# Source: https://stackoverflow.com/a/2400875
+array_diff = lambda arr: [j - i for i, j in zip(arr[:-1], arr[1:])]
