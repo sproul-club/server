@@ -8,6 +8,7 @@ import pandas as pd
 import scipy
 
 import nltk
+nltk.download('stopwords')
 from nltk.corpus import stopwords
 
 import gensim
