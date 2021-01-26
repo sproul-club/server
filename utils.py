@@ -1,5 +1,5 @@
 __all__ = [
-    'get_random_bits', 'datetime_or_null', 'random_slugify', 'pst_right_now', 'make_expiry_time_generator'
+    'get_random_bits', 'datetime_or_null', 'random_slugify', 'utc_right_now', 'pst_right_now', 'make_expiry_time_generator'
 ]
 
 import os
@@ -20,6 +20,8 @@ def datetime_or_null(dt_obj):
         return None
 
 random_slugify = lambda string, bits=16, max_length=0: f'{slugify(string, max_length=max_length)}-{os.urandom(bits).hex()}'
+
+utc_right_now = lambda: datetime.datetime.now(tz=pytz.utc).replace(tzinfo=None)
 
 # HACK: Right now, it formats as UTC but dates in PST
 def pst_right_now():

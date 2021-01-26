@@ -4,7 +4,7 @@ import mongoengine_goodjson as gj
 
 from app_config import CurrentConfig
 
-from utils import pst_right_now, make_expiry_time_generator
+from utils import pst_right_now, utc_right_now
 
 from models.metadata import Major, Minor, Tag
 USER_ROLES = ['student', 'officer', 'admin']
@@ -35,7 +35,7 @@ class AccessJTI(gj.Document):
     owner = mongo.ReferenceField(NewBaseUser, required=True)
     token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES))
+    expiry_time = mongo.DateTimeField(default=utc_right_now)
 
     meta = {'collection': 'access_jti', 'auto_create_index': False}
 
@@ -44,7 +44,7 @@ class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(NewBaseUser, required=True)
     token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES))
+    expiry_time = mongo.DateTimeField(default=utc_right_now)
 
     meta = {'collection': 'refresh_jti', 'auto_create_index': False}
 
@@ -52,7 +52,7 @@ class RefreshJTI(gj.Document):
 class ConfirmEmailToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.CONFIRM_EMAIL_EXPIRY))
+    expiry_time = mongo.DateTimeField(default=utc_right_now)
 
     meta = {'auto_create_index': False}
 
@@ -60,6 +60,6 @@ class ConfirmEmailToken(gj.Document):
 class ResetPasswordToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.RESET_PASSWORD_EXPIRY))
+    expiry_time = mongo.DateTimeField(default=utc_right_now)
 
     meta = {'auto_create_index': False}
