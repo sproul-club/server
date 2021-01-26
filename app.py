@@ -114,8 +114,12 @@ def update_apply_required_or_recruiting_statuses():
             officer_user.club.new_members = recruiting_period_in_range
             officer_user.save()
 
+def retrain_club_recommender_model():
+    flask_exts.club_recommender.train_or_load_model(force_train=True)
 
-job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'interval', minutes=1)
+
+job = scheduler.add_job(update_apply_required_or_recruiting_statuses, 'cron', minute='*/1')
+job = scheduler.add_job(retrain_club_recommender_model, 'cron', hour='*/4')
 scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())

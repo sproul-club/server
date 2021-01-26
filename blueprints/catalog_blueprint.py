@@ -2,6 +2,7 @@ from flask import Blueprint, g, request
 from flask_json import as_json, JsonError
 from flask_utils import validate_json, query_to_objects, role_required
 from flask_jwt_extended import jwt_optional, get_current_user
+from init_app import flask_exts
 
 from models import *
 
@@ -26,6 +27,22 @@ def _random_generic_club_recommendations(size):
         .filter(confirmed=True) \
         .filter(club__reactivated=True) \
         .aggregate([{ '$sample': {'size': size} }])
+
+    random_recommended_clubs = []
+    for user in random_recommended_users:
+        random_recommended_clubs += [{
+            'link_name': user['club']['link_name'],
+            'name':      user['club']['name'],
+            'logo_url':  user['club']['logo_url'],
+            'about_us':  user['club']['about_us'],
+        }]
+
+    return random_recommended_clubs
+
+
+def _fetch_recommended_club_info(link_names):
+    random_recommended_users = NewOfficerUser.objects \
+        .filter(club__link_name__in=link_names)
 
     random_recommended_clubs = []
     for user in random_recommended_users:
@@ -96,11 +113,11 @@ def get_org_by_id(org_link_name):
         current_user.visited_clubs += [org_link_name]
         current_user.save()
 
-    # FIXME!!!!
-    if CurrentConfig.DEBUG or True:
+    if CurrentConfig.DEBUG:
         club_obj['recommended_clubs'] = _random_generic_club_recommendations(3)
     else:
-        # TODO: replace random clubs with recommended clubs for prod
-        pass
+        recommended_club_link_names = flask_exts.club_recommender.recommend(org_link_name)
+        club_obj['recommended_clubs'] = _fetch_recommended_club_info(recommended_club_link_names)
+
 
     return club_obj

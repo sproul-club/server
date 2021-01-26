@@ -55,21 +55,29 @@ class BaseConfig(object):
 
 class LocalConfig(BaseConfig):
     DEBUG = True
+    MODE = 'local'
+    DATABASE_NAME = 'develop-db'
     FRONTEND_BASE_URL = 'http://localhost:3000'
     BACKEND_BASE_URL = 'https://sc-backend.ngrok.io'
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
+    MODE = 'dev'
+    DATABASE_NAME = 'develop-db'
     FRONTEND_BASE_URL = 'http://localhost:3000'
     BACKEND_BASE_URL = 'https://sc-backend-dev.herokuapp.com'
 
 class StagingConfig(BaseConfig):
     DEBUG = False
+    MODE = 'staging'
+    DATABASE_NAME = 'staging-db'
     FRONTEND_BASE_URL = 'http://localhost:3000'
     BACKEND_BASE_URL = 'https://sc-backend-staging.herokuapp.com'
 
 class ProductionConfig(BaseConfig):
     DEBUG = False
+    MODE = 'prod'
+    DATABASE_NAME = 'production-db'
     FRONTEND_BASE_URL = 'https://www.sproul.club'
     BACKEND_BASE_URL = 'https://sc-backend-prod.herokuapp.com'
 

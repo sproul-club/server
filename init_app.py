@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+import pymongo
 import mongoengine as mongo
 # import walrus
 
@@ -16,6 +17,8 @@ from flask_compress import Compress
 
 from app_config import CurrentConfig
 from flask_utils import EmailVerifier, EmailSender, ImageManager, PasswordEnforcer
+
+from recommenders import ClubRecommender
 
 # Setup Sentry SDK
 import sentry_sdk
@@ -45,8 +48,13 @@ class FlaskExtensions(object):
         self.scout_apm = ScoutApm(app)
         self.compressor = Compress(app)
 
+        self.pymongo_db = pymongo.MongoClient(os.getenv('MONGO_URI'))[app.config['DATABASE_NAME']]
+
         self.mongo = mongo
         self.mongo.connect(host=os.getenv('MONGO_URI'))
+
+        self.club_recommender = ClubRecommender(self.pymongo_db, f'ml-models/club-model-{CurrentConfig.MODE}.pkl')
+        self.club_recommender.train_or_load_model(force_train=True)
 
         # redis_url = urlparse.urlparse(os.environ.get('REDIS_URI'))
         # self.redis = walrus.Database(host=redis_url.hostname, port=redis_url.port, password=redis_url.password, db=0, decode_responses=True)

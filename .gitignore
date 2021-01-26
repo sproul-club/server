@@ -137,3 +137,6 @@ db_admin/
 
 # Data from 'exported' folder from sc-notebook
 exported/
+
+# ML models trained on the server
+ml-models/
