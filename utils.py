@@ -30,7 +30,7 @@ def pst_right_now():
 def make_expiry_time_generator(expiry_timedelta):
     def expiry_time_gen():
         now = pst_right_now()
-        offset_now = pst_right_now() + expiry_timedelta
+        offset_now = now + expiry_timedelta
         corrected_time = offset_now.astimezone(PST)
         return corrected_time
     return expiry_time_gen

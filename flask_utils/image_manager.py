@@ -34,7 +34,7 @@ class ImageManager:
     def get_s3_url(self, img_type, club_id):
         return f'{self.public_url}/{img_type}/{club_id}-{img_type}.png'
         
-    def upload_img_asset_s3(self, club_id, flask_file, img_type, req_aspect_ratio, error_rate=0.05):
+    def upload_img_asset_s3(self, club_id, flask_file, img_type, req_aspect_ratio=None, error_rate=0.05, file_size_limit=None):
         if img_type not in ['logo', 'banner', 'gallery']:
             raise JsonError(status='error', reason='Invalid image type provided when trying to upload club image asset.', status_=500)
 
@@ -44,9 +44,16 @@ class ImageManager:
             except UnidentifiedImageError as ex:
                 raise JsonError(status='error', reason=f'The provided {img_type} is not an image.', data={'image_type': img_type})
 
-            img_aspect_ratio = pil_image.width / pil_image.height
-            if abs(img_aspect_ratio - req_aspect_ratio) > error_rate:
-                raise JsonError(status='error', reason=f'The provided {img_type}\'s aspect ratio deviates too far from the required ratio.', data={'image_type': img_type})
+            if file_size_limit is not None:
+                flask_blob = flask_file.read()
+                file_size = len(flask_blob)
+                if file_size > file_size_limit:
+                    raise JsonError(status='error', reason=f'The provided {img_type} is too large.', data={'image_type': img_type})
+
+            if req_aspect_ratio is not None:
+                img_aspect_ratio = pil_image.width / pil_image.height
+                if abs(img_aspect_ratio - req_aspect_ratio) > error_rate:
+                    raise JsonError(status='error', reason=f'The provided {img_type}\'s aspect ratio deviates too far from the required ratio.', data={'image_type': img_type})
             
             random_bits = get_random_bits(16)
             img_filename = f'{club_id}-{img_type}-{random_bits}.png'

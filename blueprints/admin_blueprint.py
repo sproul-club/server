@@ -106,7 +106,11 @@ def upload_logo():
     logo_file = request.files.get('logo', None)
 
     if logo_file is not None:
-        logo_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, logo_file, 'logo', 1.0)
+        logo_url, _ = flask_exts.img_manager.upload_img_asset_s3(
+            user.club.link_name, logo_file, 'logo',
+            req_aspect_ratio = 1.0,
+            file_size_limit = 2 * 1024 * 1024
+        )
 
         user.club.last_updated = pst_right_now()
         user.club.logo_url = logo_url
@@ -126,7 +130,11 @@ def upload_banner():
     banner_file = request.files.get('banner', None)
 
     if banner_file is not None:
-        banner_url, _ = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, banner_file, 'banner', 10 / 3)
+        banner_url, _ = flask_exts.img_manager.upload_img_asset_s3(
+            user.club.link_name, banner_file, 'banner',
+            req_aspect_ratio = 10 / 3,
+            file_size_limit = 10 * 1024 * 1024
+        )
 
         user.club.last_updated = pst_right_now()
         user.club.banner_url = banner_url
@@ -160,7 +168,10 @@ def add_gallery_media_pic():
     gallery_pic_file = request.files.get('photo', None)
 
     if gallery_pic_file is not None:
-        gallery_pic_url, pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
+        gallery_pic_url, pic_id = flask_exts.img_manager.upload_img_asset_s3(
+            user.club.link_name, gallery_pic_file, 'gallery',
+            file_size_limit = 2 * 1024 * 1024
+        )
 
         gallery_pic = GalleryPic(
             id      = pic_id,
@@ -199,7 +210,10 @@ def modify_gallery_pic(pic_id):
     gallery_pic_file = request.files.get('photo', None)
 
     if gallery_pic_file is not None:
-        gallery_pic_url, new_pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
+        gallery_pic_url, new_pic_id = flask_exts.img_manager.upload_img_asset_s3(
+            user.club.link_name, gallery_pic_file, 'gallery',
+            file_size_limit = 2 * 1024 * 1024
+        )
         
         gallery_pic.id = new_pic_id
         gallery_pic.url = gallery_pic_url
