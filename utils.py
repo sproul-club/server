@@ -1,5 +1,5 @@
 __all__ = [
-    'get_random_bits', 'datetime_or_null', 'random_slugify', 'pst_right_now'
+    'get_random_bits', 'datetime_or_null', 'random_slugify', 'pst_right_now', 'make_expiry_time_generator'
 ]
 
 import os
@@ -26,3 +26,11 @@ def pst_right_now():
     dt_obj = datetime.datetime.now(tz=pytz.utc) + datetime.datetime.now(tz=PST).utcoffset()
     dt_obj = dt_obj.replace(tzinfo=None)
     return dt_obj
+
+def make_expiry_time_generator(expiry_timedelta):
+    def expiry_time_gen():
+        now = pst_right_now()
+        offset_now = pst_right_now() + expiry_timedelta
+        corrected_time = offset_now.astimezone(PST)
+        return corrected_time
+    return expiry_time_gen

@@ -2,7 +2,9 @@ import datetime
 import mongoengine as mongo
 import mongoengine_goodjson as gj
 
-from utils import pst_right_now
+from app_config import CurrentConfig
+
+from utils import pst_right_now, make_expiry_time_generator
 
 from models.metadata import Major, Minor, Tag
 USER_ROLES = ['student', 'officer', 'admin']
@@ -33,7 +35,7 @@ class AccessJTI(gj.Document):
     owner = mongo.ReferenceField(NewBaseUser, required=True)
     token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=pst_right_now)
+    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES))
 
     meta = {'collection': 'access_jti', 'auto_create_index': False}
 
@@ -42,7 +44,7 @@ class RefreshJTI(gj.Document):
     owner = mongo.ReferenceField(NewBaseUser, required=True)
     token_id = mongo.StringField(required=True)
     expired = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=pst_right_now)
+    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.JWT_REFRESH_TOKEN_EXPIRES))
 
     meta = {'collection': 'refresh_jti', 'auto_create_index': False}
 
@@ -50,7 +52,7 @@ class RefreshJTI(gj.Document):
 class ConfirmEmailToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=pst_right_now)
+    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.CONFIRM_EMAIL_EXPIRY))
 
     meta = {'auto_create_index': False}
 
@@ -58,6 +60,6 @@ class ConfirmEmailToken(gj.Document):
 class ResetPasswordToken(gj.Document):
     token = mongo.StringField(required=True)
     used = mongo.BooleanField(default=False)
-    expiry_time = mongo.DateTimeField(default=pst_right_now)
+    expiry_time = mongo.DateTimeField(default=make_expiry_time_generator(CurrentConfig.RESET_PASSWORD_EXPIRY))
 
     meta = {'auto_create_index': False}
