@@ -14,6 +14,11 @@ from utils import pst_right_now
 # TODO: Decouple embedded 'Event' from 'NewOfficerUser'
 # TODO: Decouple embedded 'RecruitingEvent' from 'NewOfficerUser'
 
+GALLERY_MEDIA_TYPES = [
+    'picture',
+    #'video',
+]
+
 
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
@@ -59,11 +64,23 @@ class SocialMediaLinks(gj.EmbeddedDocument):
     meta = {'auto_create_index': False}
 
 
-class CaptionedPic(gj.EmbeddedDocument):
+class GalleryMedia(gj.EmbeddedDocument):
     id      = mongo.StringField(required=True, max_length=100)
-    url     = RelaxedURLField(required=True, default=None)
+    type    = mongo.StringField(required=True, choices=GALLERY_MEDIA_TYPES)
+    url     = RelaxedURLField(null=True, default=None)
     caption = mongo.StringField(required=True, max_length=50)
+    
+    meta = {'auto_create_index': False, 'allow_inheritance': True}
 
+class GalleryPic(GalleryMedia):
+    type    = mongo.StringField(default='picture', choices=GALLERY_MEDIA_TYPES)
+    
+    meta = {'auto_create_index': False}
+
+
+class GalleryVideo(GalleryMedia):
+    type    = mongo.StringField(default='video', choices=GALLERY_MEDIA_TYPES)
+    
     meta = {'auto_create_index': False}
 
 
@@ -79,7 +96,7 @@ class NewClub(gj.EmbeddedDocument):
     logo_url   = RelaxedURLField(null=True, default=None)
     banner_url = RelaxedURLField(null=True, default=None)
 
-    gallery_pics = mongo.EmbeddedDocumentListField(CaptionedPic, default=[], max_length=5)
+    gallery_media = mongo.EmbeddedDocumentListField(GalleryMedia, default=[], max_length=5)
 
     about_us     = mongo.StringField(default='', max_length=1500)
     get_involved = mongo.StringField(default='', max_length=1000)

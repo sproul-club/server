@@ -19,7 +19,7 @@ admin_blueprint = Blueprint('admin', __name__, url_prefix='/api/admin')
 _fetch_resources_list = lambda user: [query_to_objects(res) for res in user.club.resources]
 _fetch_event_list = lambda user: [query_to_objects(event) for event in user.club.events]
 _fetch_recruiting_events_list = lambda user: [query_to_objects(r_event) for r_event in user.club.recruiting_events]
-_fetch_gallery_pics_list = lambda user: [query_to_objects(gallery_pic) for gallery_pic in user.club.gallery_pics]
+_fetch_gallery_media_list = lambda user: [query_to_objects(gallery_media) for gallery_media in user.club.gallery_media]
 
 
 @admin_blueprint.route('/profile', methods=['GET'])
@@ -137,48 +137,47 @@ def upload_banner():
         raise JsonError(status='error', reason='A banner was not provided for uploading.')
 
 
-@admin_blueprint.route('/gallery-pics', methods=['GET'])
+@admin_blueprint.route('/gallery-media', methods=['GET'])
 @jwt_required
 @role_required(roles=['officer'])
 @as_json
-def get_gallery_pics():
+def get_gallery_media():
     user = get_current_user()
-    return _fetch_gallery_pics_list(user)
+    return _fetch_gallery_media_list(user)
 
 
-@admin_blueprint.route('/gallery-pics', methods=['POST'])
+@admin_blueprint.route('/gallery-media/photo', methods=['POST'])
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
     'caption': {'type': 'string', 'empty': True, 'maxlength': 50}
 }, require_all=True, form_keys=['caption'])
 @as_json
-def add_gallery_pic():
+def add_gallery_media_pic():
     user = get_current_user()
     json = g.clean_json
 
-    gallery_pic_file = request.files.get('gallery', None)
+    gallery_pic_file = request.files.get('photo', None)
 
     if gallery_pic_file is not None:
         gallery_pic_url, pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
 
-        captioned_pic = CaptionedPic(
+        gallery_pic = GalleryPic(
             id      = pic_id,
             url     = gallery_pic_url,
             caption = json['caption']
         )
 
-        user.club.gallery_pics += [captioned_pic]
+        user.club.gallery_media += [gallery_pic]
         user.club.last_updated = pst_right_now()
 
         user.save()
-        print(_fetch_gallery_pics_list(user))
-        return _fetch_gallery_pics_list(user)
+        return _fetch_gallery_media_list(user)
     else:
         raise JsonError(status='error', reason='A gallery picture was not provided for uploading.')
 
 
-@admin_blueprint.route('/gallery-pics/<pic_id>', methods=['PUT'])
+@admin_blueprint.route('/gallery-media/photo/<pic_id>', methods=['PUT'])
 @jwt_required
 @role_required(roles=['officer'])
 @validate_json(schema={
@@ -189,38 +188,40 @@ def modify_gallery_pic(pic_id):
     user = get_current_user()
     json = g.clean_json
 
-    captioned_pic = user.club.gallery_pics.filter(id=pic_id).first()
-    if captioned_pic is None:
+    gallery_pic = user.club.gallery_media.filter(id=pic_id).first()
+    if gallery_pic is None:
         raise JsonError(status='error', reason='Specified gallery picture does not exist.')
 
-    if json.get('caption') is not None:
-        captioned_pic.caption = json['caption']
+    new_caption = json.get('caption', None)
+    if new_caption is not None:
+        gallery_pic.caption = new_caption
 
-    gallery_pic_file = request.files.get('gallery', None)
+    gallery_pic_file = request.files.get('photo', None)
 
     if gallery_pic_file is not None:
         gallery_pic_url, new_pic_id = flask_exts.img_manager.upload_img_asset_s3(user.club.link_name, gallery_pic_file, 'gallery', 16 / 9)
         
-        captioned_pic.id = new_pic_id
-        captioned_pic.url = gallery_pic_url
+        gallery_pic.id = new_pic_id
+        gallery_pic.url = gallery_pic_url
     
     user.club.last_updated = pst_right_now()
+
     user.save()
-    return _fetch_gallery_pics_list(user)
+    return _fetch_gallery_media_list(user)
 
 
-@admin_blueprint.route('/gallery-pics/<pic_id>', methods=['DELETE'])
+@admin_blueprint.route('/gallery-media/<media_id>', methods=['DELETE'])
 @jwt_required
 @role_required(roles=['officer'])
 @as_json
-def remove_gallery_pic(pic_id):
+def remove_gallery_media(media_id):
     user = get_current_user()
 
-    user.club.gallery_pics = [gallery_pic for gallery_pic in user.club.gallery_pics if gallery_pic.id != pic_id]
+    user.club.gallery_media = [gallery_media for gallery_media in user.club.gallery_media if gallery_media.id != media_id]
     user.club.last_updated = pst_right_now()
     user.save()
 
-    return _fetch_gallery_pics_list(user)
+    return _fetch_gallery_media_list(user)
 
 
 @admin_blueprint.route('/resources', methods=['GET'])

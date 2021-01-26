@@ -3,7 +3,7 @@ __all__ = [
     'Tag', 'NumUsersTag', 'Major', 'Minor', 'StudentYear',
     'NewBaseUser', 'PreVerifiedEmail', 'AccessJTI', 'RefreshJTI', 'ConfirmEmailToken', 'ResetPasswordToken',
     'StudentKanbanBoard', 'NewStudentUser',
-    'Event', 'RecruitingEvent', 'Resource', 'SocialMediaLinks', 'CaptionedPic', 'NewClub', 'NewOfficerUser',
+    'Event', 'RecruitingEvent', 'Resource', 'SocialMediaLinks', 'GalleryMedia', 'GalleryPic', 'GalleryVideo', 'NewClub', 'NewOfficerUser',
     'NewAdminUser',
 ]
 
@@ -13,6 +13,6 @@ from models.metadata import Tag, NumUsersTag, Major, Minor, StudentYear
 
 from models.user import NewBaseUser, PreVerifiedEmail, AccessJTI, RefreshJTI, ConfirmEmailToken, ResetPasswordToken
 
-from models.officer import Event, RecruitingEvent, Resource, SocialMediaLinks, CaptionedPic, NewClub, NewOfficerUser
+from models.officer import Event, RecruitingEvent, Resource, SocialMediaLinks, GalleryMedia, GalleryPic, GalleryVideo, NewClub, NewOfficerUser
 from models.student import StudentKanbanBoard, NewStudentUser
 from models.admin import NewAdminUser

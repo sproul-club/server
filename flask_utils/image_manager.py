@@ -7,6 +7,8 @@ from flask_json import JsonError
 from PIL import Image, UnidentifiedImageError
 import boto3
 
+from utils import get_random_bits
+
 def allowed_file(filename, allowed_exts):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_exts
 
@@ -46,7 +48,7 @@ class ImageManager:
             if abs(img_aspect_ratio - req_aspect_ratio) > error_rate:
                 raise JsonError(status='error', reason=f'The provided {img_type}\'s aspect ratio deviates too far from the required ratio.', data={'image_type': img_type})
             
-            random_bits = os.urandom(16).hex()
+            random_bits = get_random_bits(16)
             img_filename = f'{club_id}-{img_type}-{random_bits}.png'
             img_file_location = os.path.join(self.upload_folder, img_filename)
             pil_image.save(img_file_location, 'PNG')
