@@ -18,6 +18,12 @@ def validate_json(func, schema={}, allow_unknown=False, require_all=False, form_
             obj = {}
             for key in form_keys:
                 obj[key] = request.form.get(key, None)
+
+                if obj[key] is None and require_all:
+                    raise JsonError(
+                        status='error',
+                        reason=f'A form field was missing during validation: "{key}"',
+                    )
         else:
             obj = request.get_json()
 
