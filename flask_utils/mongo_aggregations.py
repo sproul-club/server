@@ -124,6 +124,16 @@ def fetch_aggregated_social_media_usage():
                     '$sum': {
                         '$cond': [{ '$ne': ['$medium', '']}, 1, 0]
                     }
+                },
+                'gcalendar': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$gcalendar', '']}, 1, 0]
+                    }
+                },
+                'discord': {
+                    '$sum': {
+                        '$cond': [{ '$ne': ['$discord', '']}, 1, 0]
+                    }
                 }
             }
         }, {

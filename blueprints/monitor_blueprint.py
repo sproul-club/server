@@ -19,7 +19,7 @@ monitor_blueprint = Blueprint('monitor', __name__, url_prefix='/api/monitor')
 
 
 def fetch_clubs():
-    club_list_query = NewOfficerUser.objects.scalar('club.name', 'confirmed', 'email')
+    club_list_query = NewOfficerUser.objects.scalar('club.name', 'email', 'confirmed', 'club.reactivated')
     raw_club_list = query_to_objects(club_list_query)
     club_list = []
 
@@ -30,6 +30,7 @@ def fetch_clubs():
             'name': club['club']['name'],
             'email': club['email'],
             'confirmed': club['confirmed'],
+            'reactivated': club['club']['reactivated'],
         })
 
     return club_list
