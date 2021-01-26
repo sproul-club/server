@@ -75,7 +75,12 @@ def get_organizations():
 @catalog_blueprint.route('/organizations/<org_link_name>', methods=['GET'])
 @jwt_optional
 def get_org_by_id(org_link_name):
-    user = NewOfficerUser.objects(club__link_name=org_link_name).first()
+    user = NewOfficerUser.objects(
+        club__link_name=org_link_name,
+        confirmed=True,
+        club__reactivated=True,
+    ).first()
+
     if user is None:
         raise JsonError(status='error', reason='The requested club does not exist!', status_=404)
 
