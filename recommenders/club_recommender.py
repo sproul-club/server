@@ -302,7 +302,7 @@ class ClubRecommender:
         
         filtered_distances = self.distance_table[filtered_clubs]
         club_distances = filtered_distances[target_club_name] 
-        sorted_club_distances = club_distances.sort_values(ascending = True, na_position = 'last')
+        sorted_club_distances = club_distances.sort_values(ascending = False, na_position = 'last')
         recommendations = sorted_club_distances.keys()[1: k + 1]
         
         return list(recommendations)
