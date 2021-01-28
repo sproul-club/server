@@ -221,9 +221,10 @@ def list_clubs():
 def download_clubs():
     club_list = fetch_clubs()
     for club in club_list:
-        club['confirmed'] = 'Yes' if club['confirmed'] else 'No'
+        club['confirmed']   = 'Yes' if club['confirmed'] else 'No'
+        club['reactivated'] = 'Yes' if club['reactivated'] else 'No'
 
-    return send_csv(club_list, 'clubs.csv', ['name', 'email', 'confirmed'], cache_timeout=0)
+    return send_csv(club_list, 'clubs.csv', ['name', 'email', 'confirmed', 'reactivated'], cache_timeout=0)
 
 
 @monitor_blueprint.route('/club/<email>', methods=['DELETE'])
