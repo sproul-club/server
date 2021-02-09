@@ -17,7 +17,13 @@ def fetch_aggregated_rso_list():
             }
         }, {
             '$match': {
-                'user.role': 'officer'
+                '$or': [
+                    {
+                        'user.role': 'officer'
+                    }, {
+                        'user': None
+                    }
+                ]
             }
         }, {
             '$project': {
