@@ -348,9 +348,12 @@ def get_events():
 @validate_json(schema={
     'name': {'type': 'string', 'required': True, 'maxlength': 100},
     'link': {'type': 'string', 'default': None},
+    'links': {'type': 'list', 'schema': {'type': 'string'}, 'default': []},
+    'location': {'type': 'string', 'default': ''},
     'event_start': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
     'event_end': {'type': 'datetime', 'required': True, 'coerce': dateutil.parser.parse},
-    'description': {'type': 'string', 'maxlength': 500, 'default': ''}
+    'description': {'type': 'string', 'maxlength': 500, 'default': ''},
+    'tags': {'type': 'list', 'schema': {'type': 'string'}}
 })
 @as_json
 def add_event():
@@ -361,9 +364,12 @@ def add_event():
 
     event_name        = json['name']
     event_link        = json['link']
+    event_links       = json['links']
+    event_location    = json['location']
     event_start       = json['event_start']
     event_end         = json['event_end']
     event_description = json['description']
+    event_tags        = json['tags']
 
     new_event_id = random_slugify(event_name, max_length=100)
     for event in club.events:
@@ -374,9 +380,12 @@ def add_event():
         id=new_event_id,
         name=event_name,
         link=event_link,
+        links=event_links,
+        location=event_location,
         event_start=event_start,
         event_end=event_end,
         description=event_description,
+        tags=event_tags
     )
 
     club.events += [event]
