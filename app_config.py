@@ -58,7 +58,7 @@ class LocalConfig(BaseConfig):
     MODE = 'local'
     DATABASE_NAME = 'develop-db'
     FRONTEND_BASE_URL = 'http://localhost:3000'
-    BACKEND_BASE_URL = 'https://sc-backend.ngrok.io'
+    BACKEND_BASE_URL = 'http://localhost:5000'
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
