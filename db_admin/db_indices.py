@@ -2,6 +2,10 @@ import pymongo
 from app_config import CurrentConfig
 to_seconds = lambda dt_obj: round(dt_obj.total_seconds())
 
+"""
+This file contains all of the DB index configurations and is used by 'manage_indices.py'
+"""
+
 ALL_INDICES = [
     {
         'collection': 'access_jti',

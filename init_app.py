@@ -20,10 +20,14 @@ from flask_utils import EmailVerifier, EmailSender, ImageManager, PasswordEnforc
 
 from recommenders import ClubRecommender
 
-# Setup Sentry SDK
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
+"""
+This file contains the setup process for the Flask app, by initializing and attaching the necessary middleware.
+"""
+
+# Setup the sentry SDK
 sentry_sdk.init(
     dsn=os.getenv('SENTRY_URL'),
     integrations=[FlaskIntegration()]
@@ -32,9 +36,30 @@ sentry_sdk.init(
 app = Flask('app', template_folder='templates')
 app.config.from_object(CurrentConfig)
 
+# Create the uploads folder if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok = True)
 
-# Flask extension libraries
+"""
+FlaskExtensions is a convenience class that allows you to easily access useful libraries that were initialized
+with the Flask application object.
+
+Example:
+
+from init_app import flask_exts
+
+...
+
+@user_blueprint.route('/password-strength', methods=['POST'])
+@validate_json(schema={
+    'password': {'type': 'string', 'empty': False}
+}, require_all=True)
+def is_password_strong_enough():
+    json = g.clean_json
+    password = json['password']
+
+    is_strong = flask_exts.password_checker.check(password)
+    return {'strong': is_strong}
+"""
 class FlaskExtensions(object):
     def __init__(self, app):
         self.cors = CORS(app)
