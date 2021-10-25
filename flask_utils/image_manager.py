@@ -9,9 +9,15 @@ import boto3
 
 from utils import get_random_bits
 
+ALLOWED_IMG_TYPES = ['logo', 'banner', 'gallery']
+
 def allowed_file(filename, allowed_exts):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_exts
 
+"""
+This class manages photo uploading for club logos and banners, although it can be expanded to support
+any category of photo uploads
+"""
 class ImageManager:
     def __init__(self, app=None):
         if isinstance(app, Flask):
@@ -35,7 +41,7 @@ class ImageManager:
         return f'{self.public_url}/{img_type}/{club_id}-{img_type}.png'
         
     def upload_img_asset_s3(self, club_id, flask_file, img_type, req_aspect_ratio=None, error_rate=0.05, file_size_limit=None):
-        if img_type not in ['logo', 'banner', 'gallery']:
+        if img_type not in ALLOWED_IMG_TYPES:
             raise JsonError(status='error', reason='Invalid image type provided when trying to upload club image asset.', status_=500)
 
         if flask_file is not None and allowed_file(secure_filename(flask_file.filename), self.allowed_img_exts):
