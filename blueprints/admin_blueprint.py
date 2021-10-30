@@ -4,7 +4,7 @@ import dateutil.parser
 from passlib.hash import pbkdf2_sha512 as hash_manager
 from slugify import slugify
 
-from utils import datetime_or_null, random_slugify, pst_right_now
+from utils import try_parsing_datetime, random_slugify, pst_right_now
 
 from init_app import flask_exts
 from flask import Blueprint, request, g
@@ -48,10 +48,10 @@ def fetch_profile():
     'about_us': {'type': 'string', 'maxlength': 750},
     'get_involved': {'type': 'string', 'maxlength': 500},
     'apply_link': {'type': 'string', 'nullable': True, 'empty': False},
-    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
-    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
-    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
-    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
+    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
+    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
+    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
     'social_media_links': {
         'type': 'dict',
         'schema': {

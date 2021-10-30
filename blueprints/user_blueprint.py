@@ -11,7 +11,7 @@ from flask_jwt_extended import (
     get_raw_jwt, get_jti, get_current_user
 )
 
-from utils import datetime_or_null, pst_right_now
+from utils import try_parsing_datetime, pst_right_now
 from flask_utils import validate_json, role_required
 
 from slugify import slugify
@@ -58,10 +58,10 @@ def is_password_strong_enough():
     'app_required': {'type': 'boolean'},
     'new_members': {'type': 'boolean'},
     'num_users': {'type': 'integer'},
-    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
-    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
-    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
-    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': datetime_or_null},
+    'apply_deadline_start': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
+    'apply_deadline_end': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
+    'recruiting_start': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
+    'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
 }, require_all=True)
 def register():
     json = g.clean_json

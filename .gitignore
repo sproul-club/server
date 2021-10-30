@@ -134,6 +134,8 @@ dmypy.json
 
 # Database management folder
 db_admin/
+!db_admin/db_indices.py
+!db_admin/reset_indices.py
 
 # Data from 'exported' folder from sc-notebook
 exported/

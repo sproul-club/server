@@ -72,6 +72,7 @@ class GalleryMedia(gj.EmbeddedDocument):
     
     meta = {'auto_create_index': False, 'allow_inheritance': True}
 
+
 class GalleryPic(GalleryMedia):
     type    = mongo.StringField(default='picture', choices=GALLERY_MEDIA_TYPES)
     
