@@ -89,6 +89,7 @@ fa = FlaskAuthomatic(
             'class_': oauth2.Google,
             'consumer_key': CurrentConfig.GOOGLE_OAUTH_CLIENT_ID,
             'consumer_secret': CurrentConfig.GOOGLE_OAUTH_CLIENT_SECRET,
+            'csrf': 'temp testing 1' 
             'redirect_uri': 'https://google.com/', 
             'scope': [
                 'https://www.googleapis.com/auth/userinfo.profile',
