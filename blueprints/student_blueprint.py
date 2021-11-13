@@ -48,11 +48,11 @@ def _random_smart_club_recommendations(size):
 def _fetch_user_profile(user):
     user_obj = query_to_objects_full(user)
 
-    full_fav_clubs_query = NewOfficerUser.objects \
-        .filter(club__link_name__in=user.favorited_clubs) \
+    full_bookmarked_clubs_query = NewOfficerUser.objects \
+        .filter(club__link_name__in=user.bookmarked_clubs) \
         .only('club.name', 'club.link_name', 'club.events', 'club.recruiting_events')
 
-    full_fav_clubs = [obj['club'] for obj in query_to_objects(full_fav_clubs_query)]
+    full_bookmarked_clubs = [obj['club'] for obj in query_to_objects(full_bookmarked_clubs_query)]
 
 
     full_club_board = {}
@@ -77,7 +77,7 @@ def _fetch_user_profile(user):
         'majors': user_obj['majors'],
         'minors': user_obj['minors'],
         'interests': user_obj['interests'],
-        'favorited_clubs': full_fav_clubs,
+        'bookmarked_clubs': full_bookmarked_clubs,
         'club_board': full_club_board,
         'recommended_clubs': recommended_clubs,
     }
@@ -299,7 +299,7 @@ def edit_profile():
     return _fetch_user_profile(user)
 
 
-@student_blueprint.route('/favorite-clubs', methods=['POST'])
+@student_blueprint.route('/bookmarked-clubs', methods=['POST'])
 @jwt_required
 @role_required(roles=['student'])
 @confirmed_account_required
@@ -318,15 +318,15 @@ def add_favorite_clubs():
     potential_clubs = [club['club']['link_name'] for club in query_to_objects(new_fav_clubs_query)]
 
     for club in potential_clubs:
-        if club not in user.favorited_clubs:
-            user.favorited_clubs += [club]
+        if club not in user.bookmarked_clubs:
+            user.bookmarked_clubs += [club]
 
     user.save()
 
-    return jsonify(_fetch_user_profile(user)['favorited_clubs'])
+    return jsonify(_fetch_user_profile(user)['bookmarked_clubs'])
 
 
-@student_blueprint.route('/favorite-clubs', methods=['DELETE'])
+@student_blueprint.route('/bookmarked-clubs', methods=['DELETE'])
 @jwt_required
 @role_required(roles=['student'])
 @confirmed_account_required
@@ -337,13 +337,13 @@ def remove_favorite_clubs():
     user = get_current_user()
     json = g.clean_json
 
-    for club in user.favorited_clubs:
+    for club in user.bookmarked_clubs:
         if club in json['clubs']:
-            user.favorited_clubs.remove(club)
+            user.bookmarked_clubs.remove(club)
 
     user.save()
 
-    return jsonify(_fetch_user_profile(user)['favorited_clubs'])
+    return jsonify(_fetch_user_profile(user)['bookmarked_clubs'])
 
 
 @student_blueprint.route('/club-board', methods=['PUT'])

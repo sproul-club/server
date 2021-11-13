@@ -25,6 +25,7 @@ class NewStudentUser(NewBaseUser):
     interests = mongo.ListField(mongo.ReferenceField(Tag))
 
     favorited_clubs = mongo.ListField(mongo.StringField(), default=[])
+    bookmarked_clubs = mongo.ListField(mongo.StringField(), default=[])
     visited_clubs = mongo.ListField(mongo.StringField(), default=[])
 
     club_board = mongo.EmbeddedDocumentField(StudentKanbanBoard)
