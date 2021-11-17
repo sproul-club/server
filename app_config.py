@@ -1,7 +1,20 @@
+"""
+This file houses the total backend application configuration. It's setup such that you can load multiple
+configurations based on the environment files' names. For example, having a file called '.env.dev' will
+load the development config and a file called '.env.prod' will load the production config.
+
+You may add more configuration types as you see fit. Scroll down to see examples of how each configuration
+type is implemented.
+"""
+
 import datetime
 import os
 
+"""
+README: If you want to add a new configuration environment, add an entry to 'ALLOWED_MODES'
+"""
 ALLOWED_MODES = ['local', 'dev', 'staging', 'prod']
+
 MODE = os.getenv('MODE')
 if MODE not in ALLOWED_MODES:
     raise Exception(f'Invalid operating mode: "{MODE}"')
@@ -12,6 +25,12 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=ENV_FILE)
 
 class BaseConfig(object):
+    """
+    Base configuration object to load the application.
+
+    NOTE: You should only be changing this if you're adding new variables that affects *all* environments.
+    """
+
     # Flask settings
     SECRET_KEY = os.getenv('SECRET_KEY')
     FLASK_SECRET = os.getenv('SECRET_KEY')
@@ -53,12 +72,16 @@ class BaseConfig(object):
     GOOGLE_OAUTH_CLIENT_ID     = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
     GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
 
+"""
+README: If you want to add a new configuration environment, add a new class like the examples below.
+"""
+
 class LocalConfig(BaseConfig):
     DEBUG = True
     MODE = 'local'
     DATABASE_NAME = 'develop-db'
     FRONTEND_BASE_URL = 'http://localhost:3000'
-    BACKEND_BASE_URL = 'https://sc-backend.ngrok.io'
+    BACKEND_BASE_URL = 'http://localhost:5000'
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
@@ -81,6 +104,12 @@ class ProductionConfig(BaseConfig):
     FRONTEND_BASE_URL = 'https://www.sproul.club'
     BACKEND_BASE_URL = 'https://sc-backend-prod.herokuapp.com'
 
+# Set the respective configuration class to load based on 'MODE'
+
+"""
+README: If you want to add a new configuration environment, add a new if statement clause to ensure that
+CurrentConfig will have the right configuration variables loaded.
+"""
 if MODE == 'local':
     CurrentConfig = LocalConfig
 elif MODE == 'dev':

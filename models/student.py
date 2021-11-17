@@ -6,6 +6,7 @@ import mongoengine_goodjson as gj
 from models.user import NewBaseUser, USER_ROLES
 from models.metadata import Major, Minor, Tag
 
+
 class StudentKanbanBoard(gj.EmbeddedDocument):
     interested_clubs  = mongo.ListField(mongo.StringField(), default=[])
     applied_clubs     = mongo.ListField(mongo.StringField(), default=[])

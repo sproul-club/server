@@ -13,13 +13,28 @@ from nltk.corpus import stopwords
 
 import gensim
 
+
 class ClubRecommender:
+    """
+    This class contains the similar clubs recommender system. It's mostly extracted from the Jupyter Notebooks
+    and optimized for use with backend.
+    """
+
     def __init__(self, mongo_database, model_file_loc, debug = False):
         self.db = mongo_database
         self.model_file_loc = model_file_loc
         self.debug = debug
 
+    ######################
+    ### TRAINING STEPS ###
+    ######################
+
     def _fetch_list_of_club_tags(self):
+        """
+        Utility method to fetch the list of club tags as a 2D array, with each entry in the outer
+        array being a list of club tags itself (i.e a numeric list of tag IDs).
+        """
+
         list_of_tags = []
 
         for user in self.db['new_base_user'].find({
@@ -34,7 +49,14 @@ class ClubRecommender:
 
 
     def _fetch_data(self):
-        # Step 1: Fetch data
+        """
+        Fetches all the raw data from the database specified and stores it in a pandas DataFrame.
+
+        Input: Nothing
+
+        Output: A DataFrame with all the needed *raw* club data for training the model (still needs processing)
+        """
+
         club_info_db = []
 
         for user in self.db['new_base_user'].find({
@@ -63,31 +85,26 @@ class ClubRecommender:
 
         return club_db_df
 
+
     def _clean_data(self, table):
-        # Step 2: Clean data
-        
         """
-        Description:
         Cleans club dataframe descriptions into another column containing a lists of significant words in each description.
-        
+
         Input:
-        table - club dataframe
-        
-        Output:
-        cleaned_table - table with a new column: "cleaned descriptions"
-        
+        * table - The raw DataFrame containing all the club data
+
+        Output: A copy of the input DataFrame with a new column containing a list of the significant words
+        from each club's original description.
         """
         
         def clean_description(description):
             """
-            Description:
             Clean single description into lists of significant words.
 
             Input:
-            description - string of club description 
+            * description - The club description string
 
-            Output:
-            new_description - list of significant words in description
+            Output: A list of significant words from input description.
             """
             
             try: 
@@ -119,25 +136,22 @@ class ClubRecommender:
         
         return cleaned_table
 
+
     def _train_model_vectors(self, table, yield_model = False):
-        # Step 2: Train model vectors from table
+        """
+        Uses the cleaned descriptions to create another column containing word-embedding vectors
+        via gensim's word2vec algorithm.
+
+        Input:
+        * table - Processed DataFrame with *all* required data for training the model.
+
+        Output: A copy of the input table with a new column containing a word-embedding vector of
+        size VECTOR_SIZE for each club.
+        """
 
         MIN_WORD_COUNT = 20
         VECTOR_SIZE = 100
         CONTEXT_WINDOW_SIZE = 10
-        
-        """
-        Description:
-        Uses cleaned table to create another column containing vectors using gensim's word2vec.
-        
-        Input:
-        table - cleaned table
-        
-        Output:
-        vectorized_table - table with a new_column: "vector sum"
-        
-        Run word2vec model
-        """
         
         list_vectors = []
         
@@ -175,19 +189,17 @@ class ClubRecommender:
         else:
             return vectorized_table
 
-    def _generate_dist_table(self, table):
-        # Step 4: Generate cosine distance table from vectors
 
+    def _generate_dist_table(self, table):
         """
-        Description:
-        Uses a vectorized table to create a pivot table containing distances between each club.
-        
+        Uses a vectorized table to create a 2D distance table containing distances between each club.
+
         Input:
-        table - table with vectorized descriptions
-        
+        * table - DataFrame with word-embedding vectors from descriptions
+
         Output:
-        distance_table - table containing all distances between each club
-        
+        * A 2D table of cosine distance between each and every club based on their descriptions. If two clubs
+        are very similar, their distance will be close to 1, and otherwise the distance will be close to 0.
         """
             
         dict = table[['link_name','vector_sum']].set_index('link_name')['vector_sum'].to_dict()
@@ -210,47 +222,69 @@ class ClubRecommender:
         
         return distance_table
 
+
     def train_or_load_model(self, force_train = False):
+        """
+        A convenient function to either load a previously trained model or train a new model from scratch.
+
+        Note that the so-called model is actually a distance table that 'models' the relationships between
+        each of the clubs via its descriptions.
+        """
+
         list_of_club_tags = self._fetch_list_of_club_tags()
         self.club_tags_list = list_of_club_tags
 
+        # Search for the model given the file location and load it...otherwise generate a new one.
         if not force_train and self.model_file_loc and os.path.exists(self.model_file_loc):
             self.distance_table = pd.read_pickle(self.model_file_loc)
         else:
+            # Step 1: Fetch raw data
             clubs_table = self._fetch_data()
+
+            # Step 2: Clean raw data
             cleaned_table = self._clean_data(clubs_table)
+
+            # Step 3: Train model vectors from table
             vectorized_table = self._train_model_vectors(cleaned_table)
+
+            # Step 4: Generate distance table from vectors
             distance_table = self._generate_dist_table(vectorized_table)
             self.distance_table = distance_table
 
+            # Step 5: Save distance table as pickle file
             os.makedirs(os.path.dirname(self.model_file_loc), exist_ok=True)
             self.distance_table.to_pickle(self.model_file_loc)
 
+
+    ###################
+    ### INFERENCING ###
+    ###################
+
     def _count_tags(self, a, b, num_tags):
         """
-        Description:
         Returns if club A and B contain at least k tags in common.
 
         Input:
-        a - list of club tags for club A
-        b - list of club tags for club B
-        num_tags - minimum number of tags required to match
+        * a - list of club tags for club A
+        * b - list of club tags for club B
+        * num_tags - minimum number of tags required to match
 
-        Output:
-        matching_tags - # of matching tags
-
+        Output: The number of matching tags from the set intersection between 'a' and 'b'
         """
+
         matching_tags = len(set(a).intersection(set(b))) >= num_tags
         return matching_tags
 
+
     def _filter_by_tag(self, club_tags, k):
         """
-        Description:
-        Return boolean list that contains max amount of matching tags that satisfies matching k amount of clubs.
+        Returns boolean list that contains max amount of matching tags that satisfies matching 'k' amount of clubs.
 
-        Output:
-        filtered_clubs - list of booleans based off of clubs filtered by tags
+        Input:
+        * club_tags - A 2D list of club tags, with each outer array entry being a list of club tags itself
+        * k - The num
 
+        Output: - A list of booleans based off of clubs filtered by tags
         """
 
         filtered_clubs = []
@@ -271,18 +305,18 @@ class ClubRecommender:
         else:
             return filtered_clubs
 
+
     def recommend(self, club_link_name, k = 3):
         """
         Description:
-        Recommends club based off of k-nearest neighbors, prioritizing matching tags.
+        Given a club's link name, recommend up to 'k' similar clubs, prioritizing first by matching tags and
+        then by description.
         
         Input:
-        club_name - string of club name we want to create recommendations for
-        k - represents how many neighbors
+        club_link_name - The link name of the club, which is typically the ID of the club when it was first created
+        k - Number of similar clubs to recommend
         
-        Output:
-        recommendations - k recommendations based off of closest distances
-        
+        Output: 'k' recommended clubs based on tags and description
         """
 
         try:

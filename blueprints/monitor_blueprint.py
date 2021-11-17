@@ -17,7 +17,11 @@ from models import *
 monitor_blueprint = Blueprint('monitor', __name__, url_prefix='/api/monitor')
 
 
-def fetch_clubs():
+def _fetch_clubs():
+    """
+    Utility function to fetch the entire list of clubs by name, email, confirmation
+    and reactivation status.
+    """
     club_list_query = NewOfficerUser.objects.scalar('club.name', 'email', 'confirmed', 'club.reactivated')
     raw_club_list = query_to_objects(club_list_query)
     club_list = []
@@ -41,6 +45,10 @@ def fetch_clubs():
     'password': {'type': 'string', 'empty': False}
 }, require_all=True)
 def login():
+    """
+    POST endpoint that logs in an existing admin user.
+    """
+
     json = g.clean_json
     email = json['email']
     password = json['password']
@@ -72,10 +80,84 @@ def login():
     }
 
 
+# TODO: Refactor to not be duplicated here from User API
+@monitor_blueprint.route('/refresh', methods=['POST'])
+@jwt_refresh_token_required
+@role_required(roles=['admin'])
+@confirmed_account_required
+def refresh():
+    """
+    POST endpoint that fetches a new access token given a valid refresh token.
+    """
+
+    user = get_current_user()
+    access_token = create_access_token(identity=user)
+    access_jti = get_jti(access_token)
+
+    AccessJTI(owner=user, token_id=access_jti).save()
+
+    return {
+        'access': access_token,
+        'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
+    }
+
+# TODO: Refactor to not be duplicated here from User API
+@monitor_blueprint.route('/revoke-access', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['admin'])
+@confirmed_account_required
+def revoke_access():
+    """
+    DELETE endpoint that revokes an issued access token, preventing further use of it.
+    """
+
+    jti = get_raw_jwt()['jti']
+
+    access_jti = AccessJTI.objects(token_id=jti).first()
+    if access_jti is None:
+        raise JsonError(status='error', reason='Access token does not exist!', status_=404)
+
+    access_jti.expired = True
+    access_jti.save()
+
+    return {
+        'status': 'success',
+        'message': 'Access token revoked!'
+    }
+
+# TODO: Refactor to not be duplicated here from User API
+@monitor_blueprint.route('/revoke-refresh', methods=['DELETE'])
+@jwt_refresh_token_required
+@role_required(roles=['admin'])
+@confirmed_account_required
+def revoke_refresh():
+    """
+    DELETE endpoint that revokes an issued refresh token, preventing further use of it.
+    """
+
+    jti = get_raw_jwt()['jti']
+
+    refresh_jti = RefreshJTI.objects(token_id=jti).first()
+    if refresh_jti is None:
+        raise JsonError(status='error', reason='Refresh token does not exist!', status_=404)
+
+    refresh_jti.expired = True
+    refresh_jti.save()
+
+    return {
+        'status': 'success',
+        'message': 'Refresh token revoked!'
+    }
+
+
 @monitor_blueprint.route('/overview/stats/sign-up', methods=['GET'])
 @jwt_required
 @role_required(roles=['admin'])
 def fetch_sign_up_stats():
+    """
+    GET endpoint that fetches the sign up statistics for all user account types.
+    """
+
     time_delta = pst_right_now() - datetime.timedelta(weeks=1)
     history_deltas = [pst_right_now() - datetime.timedelta(weeks=delay) for delay in range(11)]
 
@@ -143,6 +225,10 @@ def fetch_sign_up_stats():
 @jwt_required
 @role_required(roles=['admin'])
 def fetch_activity_stats():
+    """
+    GET endpoint that fetches the number of active users and recent catalog searches (WIP).
+    """
+
     active_user_stats = mongo_aggregations.fetch_active_users_stats()
 
     return {
@@ -152,11 +238,54 @@ def fetch_activity_stats():
     }
 
 
+@monitor_blueprint.route('/more-stats/social-media', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
+def fetch_social_media_stats():
+    """
+    GET endpoint that fetches the aggregated usage of social media links across all clubs.
+    """
+
+    smedia_stats = mongo_aggregations.fetch_aggregated_social_media_usage()
+    return smedia_stats
+
+
+@monitor_blueprint.route('/more-stats/club-reqs', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
+def fetch_club_req_stats():
+    """
+    GET endpoint that fetches aggregated statistics for club application statuses.
+    """
+
+    club_req_stats = mongo_aggregations.fetch_aggregated_club_requirement_stats()
+    return club_req_stats
+
+
+@monitor_blueprint.route('/more-stats/pic-stats', methods=['GET'])
+@jwt_required
+@role_required(roles=['admin'])
+@as_json
+def fetch_picture_stats():
+    """
+    GET endpoint that fetches the aggregated usage of logo / banner pictures for clubs.
+    """
+
+    pic_stats = mongo_aggregations.fetch_aggregated_picture_stats()
+    return pic_stats
+
+
 @monitor_blueprint.route('/rso/list', methods=['GET'])
 @jwt_required
 @role_required(roles=['admin'])
 @as_json
 def list_rso_users():
+    """
+    GET endpoint that fetches the list of RSO emails scraped from CalLink.
+    """
+
     rso_list = mongo_aggregations.fetch_aggregated_rso_list()
     return rso_list
 
@@ -165,6 +294,10 @@ def list_rso_users():
 @jwt_required
 @role_required(roles=['admin'])
 def download_rso_users():
+    """
+    GET endpoint that downloads a CSV file of the list of RSO emails scraped from CalLink.
+    """
+
     rso_list = mongo_aggregations.fetch_aggregated_rso_list()
     for rso_email in rso_list:
         rso_email['registered'] = 'Yes' if rso_email['registered'] else 'No'
@@ -180,6 +313,10 @@ def download_rso_users():
     'email': {'type': 'string', 'empty': False}
 }, require_all=True)
 def add_rso_user():
+    """
+    POST endpoint that adds a new RSO email.
+    """
+
     email = g.clean_json['email']
 
     rso_email = PreVerifiedEmail.objects(email=email).first()
@@ -194,6 +331,10 @@ def add_rso_user():
 @jwt_required
 @role_required(roles=['admin'])
 def remove_rso_user(email):
+    """
+    DELETE endpoint that removes an existing RSO email.
+    """
+
     rso_email = PreVerifiedEmail.objects(email=email).first()
     if rso_email is None:
         raise JsonError(status='error', reason='Specified RSO Email does not exist!')
@@ -211,7 +352,11 @@ def remove_rso_user(email):
 @role_required(roles=['admin'])
 @as_json
 def list_clubs():
-    club_list = fetch_clubs()
+    """
+    GET endpoint that fetches the list of clubs with relevent info (abridged).
+    """
+
+    club_list = _fetch_clubs()
     return club_list
 
 
@@ -219,9 +364,13 @@ def list_clubs():
 @jwt_required
 @role_required(roles=['admin'])
 def download_clubs():
-    club_list = fetch_clubs()
+    """
+    GET endpoint that downloads a CSV file of the list of clubs with relevent info (abridged).
+    """
+
+    club_list = _fetch_clubs()
     for club in club_list:
-        club['confirmed']   = 'Yes' if club['confirmed'] else 'No'
+        club['confirmed'] = 'Yes' if club['confirmed'] else 'No'
         club['reactivated'] = 'Yes' if club['reactivated'] else 'No'
 
     return send_csv(club_list, 'clubs.csv', ['name', 'email', 'confirmed', 'reactivated'], cache_timeout=0)
@@ -231,6 +380,10 @@ def download_clubs():
 @jwt_required
 @role_required(roles=['admin'])
 def delete_club(email):
+    """
+    DELETE endpoint that removes an existing officer user and thus, their respective club.
+    """
+
     user = NewOfficerUser.objects(email=email).first()
     if user is None:
         raise JsonError(status='error', reason='The user does not exist!')
@@ -244,7 +397,10 @@ def delete_club(email):
 @role_required(roles=['admin'])
 @as_json
 def list_tags_with_usage():
-    # This pipeline will associate the tags with the number of clubs that have said tag
+    """
+    GET endpoint that fetches the list of club tags with usage statistics per tag.
+    """
+
     tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
     return tags_with_usage
 
@@ -253,6 +409,10 @@ def list_tags_with_usage():
 @jwt_required
 @role_required(roles=['admin'])
 def download_tags_with_usage():
+    """
+    GET endpoint that downloads a CSV file of the list of club tags with usage statistics per tag.
+    """
+
     tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
     return send_csv(tags_with_usage, 'tags.csv', ['_id', 'name', 'num_clubs'], cache_timeout=0)
 
@@ -264,6 +424,10 @@ def download_tags_with_usage():
     'name': {'type': 'string', 'empty': False}
 }, require_all=True)
 def add_tag():
+    """
+    POST endpoint that adds a new club tag.
+    """
+
     tag_name = g.clean_json['name']
 
     # Auto-determine new tag ID by filling in nearest
@@ -298,6 +462,10 @@ def add_tag():
     'name': {'type': 'string', 'empty': False}
 }, require_all=True)
 def edit_tag(tag_id):
+    """
+    PUT endpoint that edits an existing club tag.
+    """
+
     new_tag_name = g.clean_json['name']
 
     old_tag = Tag.objects(id=tag_id).first()
@@ -317,6 +485,10 @@ def edit_tag(tag_id):
 @jwt_required
 @role_required(roles=['admin'])
 def remove_tag(tag_id):
+    """
+    DELETE endpoint that removes an existing club tag, if there are no clubs using said tag.
+    """
+
     tags_with_usage = mongo_aggregations.fetch_aggregated_tag_list()
 
     selected_tag = None
@@ -332,30 +504,3 @@ def remove_tag(tag_id):
         tag = Tag.objects(id=int(tag_id)).first()
         tag.delete()
         return {'status': 'success'}
-
-
-@monitor_blueprint.route('/more-stats/social-media', methods=['GET'])
-@jwt_required
-@role_required(roles=['admin'])
-@as_json
-def fetch_social_media_stats():
-    smedia_stats = mongo_aggregations.fetch_aggregated_social_media_usage()
-    return smedia_stats
-
-
-@monitor_blueprint.route('/more-stats/club-reqs', methods=['GET'])
-@jwt_required
-@role_required(roles=['admin'])
-@as_json
-def fetch_club_req_stats():
-    club_req_stats = mongo_aggregations.fetch_aggregated_club_requirement_stats()
-    return club_req_stats
-
-
-@monitor_blueprint.route('/more-stats/pic-stats', methods=['GET'])
-@jwt_required
-@role_required(roles=['admin'])
-@as_json
-def fetch_picture_stats():
-    pic_stats = mongo_aggregations.fetch_aggregated_picture_stats()
-    return pic_stats

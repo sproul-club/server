@@ -1,7 +1,15 @@
+"""
+This file contains all the MongoDB aggregation pipelines for the Admin Dashboard.
+"""
+
 from models import PreVerifiedEmail, Tag, NewBaseUser, AccessJTI
 
+
 def fetch_aggregated_rso_list():
-    # This pipeline will fill in the 'registered' and 'confirmed' fields into the RSO list
+    """
+    This pipeline will fill in the 'registered' and 'confirmed' fields into the RSO list.
+    """
+
     return list(PreVerifiedEmail.objects.aggregate([
         {
             '$lookup': {
@@ -17,7 +25,13 @@ def fetch_aggregated_rso_list():
             }
         }, {
             '$match': {
-                'user.role': 'officer'
+                '$or': [
+                    {
+                        'user.role': 'officer'
+                    }, {
+                        'user': None
+                    }
+                ]
             }
         }, {
             '$project': {
@@ -43,7 +57,10 @@ def fetch_aggregated_rso_list():
 
 
 def fetch_aggregated_tag_list():
-    # This pipeline will associate the tags with the number of clubs that have said tag
+    """
+    This pipeline will associate the tags with the number of clubs that have said tag.
+    """
+
     return list(Tag.objects.aggregate([
         {
             '$lookup': {
@@ -66,7 +83,10 @@ def fetch_aggregated_tag_list():
 
 
 def fetch_aggregated_social_media_usage():
-    # This pipeline will count up the number of various social media links from all clubs available
+    """
+    This pipeline will count up the number of various social media links from all clubs available.
+    """
+
     return list(NewBaseUser.objects.aggregate([
         {
             '$match': {
@@ -141,11 +161,14 @@ def fetch_aggregated_social_media_usage():
                 '_id': 0
             }
         }
-    ]));
+    ]))
 
 
 def fetch_aggregated_club_requirement_stats():
-    # This pipeline will count up the number of club requirements various social media links from all clubs available
+    """
+    This pipeline will count up the number of club requirements various social media links from all clubs available.
+    """
+
     return list(NewBaseUser.objects.aggregate([
         {
             '$match': {
@@ -181,10 +204,14 @@ def fetch_aggregated_club_requirement_stats():
                 '_id': 0
             }
         }
-    ]));
+    ]))
+
 
 def fetch_aggregated_picture_stats():
-    # This pipeline will count up the number of clubs having logo/banner pictures from all clubs available
+    """
+    This pipeline will count up the number of clubs having logo/banner pictures from all clubs available.
+    """
+
     return list(NewBaseUser.objects.aggregate([
         {
             '$match': {
@@ -222,7 +249,13 @@ def fetch_aggregated_picture_stats():
         }
     ]))
 
+
 def fetch_active_users_stats():
+    """
+    This pipeline will count up how many users of the various account types are 'active' by counting the
+    access tokens (since they have a relatively short expiry time).
+    """
+
     active_stats = list(AccessJTI.objects.aggregate([
         {
             '$lookup': {

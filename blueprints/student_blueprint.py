@@ -28,6 +28,10 @@ student_blueprint = Blueprint('student', __name__, url_prefix='/api/student')
 
 
 def _random_smart_club_recommendations(size):
+    """
+    Generates random "smart" clubs recommendations, intended for testing purposes only.
+    """
+
     random_recommended_users = NewOfficerUser.objects \
         .filter(confirmed=True) \
         .filter(club__reactivated=True) \
@@ -46,6 +50,10 @@ def _random_smart_club_recommendations(size):
 
 
 def _fetch_user_profile(user):
+    """
+    Helper function to fetch the user's profile as a dictionary ready to be sent as JSON.
+    """
+
     user_obj = query_to_objects_full(user)
 
     full_fav_clubs_query = NewOfficerUser.objects \
@@ -65,11 +73,11 @@ def _fetch_user_profile(user):
         column_clubs = [obj['club'] for obj in query_to_objects(club_query)]
         full_club_board[key] = column_clubs
 
-    # FIXME!!!
-    if CurrentConfig.DEBUG or True:
+    if CurrentConfig.DEBUG:
         recommended_clubs = _random_smart_club_recommendations(3)
     else:
-        pass
+        # TODO: Implement "smart" club recommendations.
+        recommended_clubs = _random_smart_club_recommendations(3)
 
     return {
         'full_name': user.full_name,
@@ -83,6 +91,7 @@ def _fetch_user_profile(user):
     }
 
 
+# TODO: Wrap this object in a easy-to-access utility function.
 fa = FlaskAuthomatic(
     config={
         'google': {
@@ -103,6 +112,10 @@ fa = FlaskAuthomatic(
 @student_blueprint.route('/login', methods=['GET'])
 @fa.login('google')
 def login():
+    """
+    GET endpoint that redirects a student user into logging into their UC Berkeley Google account
+    via the CalNet portal.
+    """
     if fa.result is not None:
         google_user = fa.result.user
         login_error = fa.result.error
@@ -172,6 +185,11 @@ def login():
     'interests': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
 }, require_all=True)
 def finish_register():
+    """
+    POST endpoint that finishes registeration of the student user with additional details of
+    them. This is usually called after the student successfully logged in via CalNet.
+    """
+
     json = g.clean_json
 
     student_email = json['email']
@@ -192,12 +210,16 @@ def finish_register():
 
     return {'status': 'success'}
 
-# TODO: Refactor to not be duplicated here
+# TODO: Refactor to not be duplicated here from User API
 @student_blueprint.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 @role_required(roles=['student'])
 @confirmed_account_required
 def refresh():
+    """
+    POST endpoint that fetches a new access token given a valid refresh token.
+    """
+
     user = get_current_user()
     access_token = create_access_token(identity=user)
     access_jti = get_jti(access_token)
@@ -209,12 +231,16 @@ def refresh():
         'access_expires_in': int(CurrentConfig.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
     }
 
-# TODO: Refactor to not be duplicated here
+# TODO: Refactor to not be duplicated here from User API
 @student_blueprint.route('/revoke-access', methods=['DELETE'])
 @jwt_required
 @role_required(roles=['student'])
 @confirmed_account_required
 def revoke_access():
+    """
+    DELETE endpoint that revokes an issued access token, preventing further use of it.
+    """
+
     jti = get_raw_jwt()['jti']
 
     access_jti = AccessJTI.objects(token_id=jti).first()
@@ -229,12 +255,16 @@ def revoke_access():
         'message': 'Access token revoked!'
     }
 
-# TODO: Refactor to not be duplicated here
+# TODO: Refactor to not be duplicated here from User API
 @student_blueprint.route('/revoke-refresh', methods=['DELETE'])
 @jwt_refresh_token_required
 @role_required(roles=['student'])
 @confirmed_account_required
 def revoke_refresh():
+    """
+    DELETE endpoint that revokes an issued refresh token, preventing further use of it.
+    """
+
     jti = get_raw_jwt()['jti']
 
     refresh_jti = RefreshJTI.objects(token_id=jti).first()
@@ -253,18 +283,30 @@ def revoke_refresh():
 @student_blueprint.route('/majors', methods=['GET'])
 @as_json
 def get_majors():
+    """
+    GET endpoint that fetches the set of majors in UC Berkeley.
+    """
+
     return query_to_objects(Major.objects.all())
 
 
 @student_blueprint.route('/minors', methods=['GET'])
 @as_json
 def get_minors():
+    """
+    GET endpoint that fetches the set of minors in UC Berkeley.
+    """
+
     return query_to_objects(Minor.objects.all())
 
 
 @student_blueprint.route('/years', methods=['GET'])
 @as_json
 def get_student_years():
+    """
+    GET endpoint that fetches the set of student years.
+    """
+
     return query_to_objects(StudentYear.objects.all())
 
 
@@ -273,6 +315,10 @@ def get_student_years():
 @role_required(roles=['student'])
 @confirmed_account_required
 def fetch_profile():
+    """
+    GET endpoint that fetches the complete student profile.
+    """
+
     user = get_current_user()
     return _fetch_user_profile(user)
 
@@ -287,6 +333,10 @@ def fetch_profile():
     'interests': {'type': 'list', 'schema': {'type': 'integer'}, 'empty': False, 'maxlength': 3},
 })
 def edit_profile():
+    """
+    POST endpoint that edits the student profile.
+    """
+
     user = get_current_user()
     json = g.clean_json
 
@@ -307,6 +357,11 @@ def edit_profile():
     'clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
 })
 def add_favorite_clubs():
+    """
+    POST endpoint that adds favorite club(s) for student user. Ordering is preserved
+    based on *when* they favorited.
+    """
+
     user = get_current_user()
     json = g.clean_json
 
@@ -334,6 +389,9 @@ def add_favorite_clubs():
     'clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
 })
 def remove_favorite_clubs():
+    """
+    POST endpoint that removes favorite club(s) for student user.
+    """
     user = get_current_user()
     json = g.clean_json
 
@@ -356,6 +414,10 @@ def remove_favorite_clubs():
     'interviewed_clubs': {'type': 'list', 'schema': {'type': 'string'}, 'empty': False},
 })
 def update_club_board():
+    """
+    POST endpoint that edits club Kanban board.
+    """
+
     user = get_current_user()
     json = g.clean_json
 

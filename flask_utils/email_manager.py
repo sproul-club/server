@@ -12,19 +12,54 @@ TokenTypes = {
     'reset-password': ResetPasswordToken
 }
 
-"""
-This class is for handling the verification of temporary email links via email tokens, mainly
-for email confirmation and password resetting. Using a specified salt and an equivalent MongoDB
-class to represent the tokens, it'll handle when tokens are either valid, expired or used.
-"""
+
 class EmailVerifier:
-    # A convenience constructor for initializing the email verifier
+    """
+    This class is for handling the verification of temporary email links via email tokens, mainly
+    for email confirmations and password resetting. Using a specified salt and an equivalent MongoDB
+    class to represent the tokens, it'll handle when tokens are either valid, expired or used.
+
+    Example for email confirmation:
+
+    app = Flask(__name__)
+
+    email_verifier = EmailVerifier(app)
+
+    ...
+
+    # NOTE: For password resets, switch from 'confirm-email' to 'reset-password'
+    email_token = email_verifier.generate_token('test@gmail.com', 'confirm-email')
+
+    ...
+
+    possible_email = email_verifier.confirm_token(email_token)
+    if possible_email is not None:
+        print('Email is verified!')
+    else:
+        print('Email is NOT verified!')
+
+    ...
+
+    email_verifier.revoke_token(email_token)
+    another_possible_email = email_verifier.confirm_token(email_token)
+
+    print(another_possible_email) # will print None
+    """
+
     def __init__(self, app=None):
+        """
+        A convenience constructor for initializing the email verifier.
+        """
+
         if isinstance(app, Flask):
             self.init_app(app)
 
-    # Initialize the email verifier by pulling any required settings from the Flask config
+
     def init_app(self, app):
+        """
+        Initialize the email verifier by pulling any required settings from the Flask config.
+        """
+
         if isinstance(app, Flask):
             self.serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
@@ -38,8 +73,12 @@ class EmailVerifier:
                 'reset-password': int(app.config['CONFIRM_EMAIL_EXPIRY'].total_seconds())
             }
 
-    # This will generate a temporary token based on the type and the given email and save it to the database.
+
     def generate_token(self, email, token_type):
+        """
+        This will generate a temporary token based on the type and the given email and save it to the database.
+        """
+
         if token_type not in self.token_salts:
             raise JsonError(status='error', reason='Invalid token type provided', status_=500)
 
@@ -52,8 +91,12 @@ class EmailVerifier:
 
         return token
 
-    # This will verify the given email token, if it exists
+
     def confirm_token(self, token, token_type):
+        """
+        This will verify the given email token, if it exists.
+        """
+
         if token_type not in self.token_salts:
             raise JsonError(status='error', reason='Invalid token type provided', status_=500)
 
@@ -63,7 +106,7 @@ class EmailVerifier:
         if email_token is None or email_token.used:
             return None
 
-        # Then try to decrypt the token and fetch the email originally encoded into the token, given a maximum age.
+        # Then try to decrypt the token and fetch the email originally encoded into the token, given a maximum age
         try:
             email = self.serializer.loads(token, salt=self.token_salts[token_type], max_age=self.expiry_durations[token_type])
         except:
@@ -71,8 +114,12 @@ class EmailVerifier:
 
         return email
 
-    # This will revoke the given email token, if it exists
+
     def revoke_token(self, token, token_type):
+        """
+        This will revoke the given email token, if it exists.
+        """
+
         if token_type not in self.token_salts:
             raise JsonError(status='error', reason='Invalid token type provided', status_=500)
 
@@ -84,25 +131,51 @@ class EmailVerifier:
             email_token.save()
 
 
-"""
-This class is for sending emails in a convenient manner, using the Mail SMTP
-server settings as specified in the Flask config object.
-"""
 class EmailSender:
-    # A convenience constructor for initializing the email sender
+    """
+    This class is for sending emails in a convenient manner, using the Mail SMTP
+    server settings as specified in the Flask config object.
+
+    Example for email confirmation:
+
+    app = Flask(__name__)
+
+    email_sender = EmailSender(app)
+
+    ...
+
+    recipients = ['tom_cruise@gmail.com']
+    subject    = 'message from generic fan girl #34193'
+    body       = 'HIIII OMG I'M YOUR BIGGEST FAN CAN I HAVE YOUR DIGITAL AUTOGRAPH'
+
+    email_sender.send(recipients, subject, body)
+    """
+
     def __init__(self, app=None):
+        """
+        A convenience constructor for initializing the email sender
+        """
+
         if isinstance(app, Flask):
             self.init_app(app)
 
-    # Initialize the email sender by pulling any required settings from the Flask config
+
     def init_app(self, app):
+        """
+        Initialize the email sender by pulling any required settings from the Flask config
+        """
+
         if isinstance(app, Flask):
             self.mail = Mail()
             self.mail.init_app(app)
             self.sender = app.config['MAIL_DEFAULT_SENDER']
 
-    # A simple method to send an HTML email to a list of recipients with a subject
+
     def send(self, recipients, subject, body):
+        """
+        A simple method to send an HTML email to a list of recipients with a subject
+        """
+
         try:
             self.mail.send_message(
                 subject=subject,
