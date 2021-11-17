@@ -32,6 +32,13 @@ user_blueprint = Blueprint('user', __name__, url_prefix='/api/user')
     'email': {'type': 'string', 'empty': False}
 }, require_all=True)
 def does_email_exist():
+    """
+    POST endpoint that checks if a given email exists within our list
+    of scraped CalLink emails?
+
+    TODO: Should really be a GET request
+    """
+
     json = g.clean_json
     email = json['email']
 
@@ -43,6 +50,13 @@ def does_email_exist():
     'password': {'type': 'string', 'empty': False}
 }, require_all=True)
 def is_password_strong_enough():
+    """
+    POST endpoint that checks if a given password is strong enough.
+
+    TODO: Should really be a GET request
+    TODO: This endpoint needs to be secured or reworked ASAP!!!
+    """
+
     json = g.clean_json
     password = json['password']
 
@@ -64,6 +78,10 @@ def is_password_strong_enough():
     'recruiting_end': {'type': 'datetime', 'nullable': True, 'coerce': try_parsing_datetime},
 }, require_all=True)
 def register():
+    """
+    POST endpoint that registers a new officer user and a corresponding club.
+    """
+
     json = g.clean_json
 
     club_name = json['name']
@@ -137,6 +155,10 @@ def register():
     'email': {'type': 'string', 'empty': False}
 }, require_all=True)
 def resend_confirm_email():
+    """
+    POST endpoint that resends a new confirmation email if the user exists.
+    """
+
     json = g.clean_json
     club_email = json['email']
 
@@ -163,6 +185,11 @@ def resend_confirm_email():
 
 @user_blueprint.route('/confirm/<token>', methods=['GET'])
 def confirm_email(token):
+    """
+    GET endpoint that confirms the new officer user. This endpoint link is normally within
+    the confirmation email.
+    """
+
     club_email = flask_exts.email_verifier.confirm_token(token, 'confirm-email')
     if club_email is None:
         raise JsonError(status='error', reason='The confirmation link is invalid.', status_=404)
@@ -195,6 +222,10 @@ def confirm_email(token):
     'password': {'type': 'string', 'empty': False}
 }, require_all=True)
 def login():
+    """
+    POST endpoint that logs in an existing officer user.
+    """
+
     json = g.clean_json
     email = json['email']
     password = json['password']
@@ -228,6 +259,10 @@ def login():
     'email': {'type': 'string', 'empty': False}
 }, require_all=True)
 def request_reset_password():
+    """
+    POST endpoint that sends a password reset email to the user's email.
+    """
+
     json = g.clean_json
     club_email = json['email']
 
@@ -253,6 +288,11 @@ def request_reset_password():
     'password': {'type': 'string', 'empty': False}
 }, require_all=True)
 def confirm_reset_password():
+    """
+    POST endpoint that resets the officer user's password and revokes all existing
+    access and refresh tokens.
+    """
+
     json = g.clean_json
 
     token = json['token']
@@ -289,6 +329,10 @@ def confirm_reset_password():
 @jwt_refresh_token_required
 @role_required(roles=['officer', 'admin'])
 def refresh():
+    """
+    POST endpoint that fetches a new access token given a valid refresh token.
+    """
+
     user = get_current_user()
     access_token = create_access_token(identity=user)
     access_jti = get_jti(access_token)
@@ -305,6 +349,10 @@ def refresh():
 @jwt_required
 @role_required(roles=['officer', 'admin'])
 def revoke_access():
+    """
+    DELETE endpoint that revokes an issued access token, preventing further use of it.
+    """
+
     jti = get_raw_jwt()['jti']
 
     access_jti = AccessJTI.objects(token_id=jti).first()
@@ -324,6 +372,10 @@ def revoke_access():
 @jwt_refresh_token_required
 @role_required(roles=['officer', 'admin'])
 def revoke_refresh():
+    """
+    DELETE endpoint that revokes an issued refresh token, preventing further use of it.
+    """
+
     jti = get_raw_jwt()['jti']
 
     refresh_jti = RefreshJTI.objects(token_id=jti).first()
