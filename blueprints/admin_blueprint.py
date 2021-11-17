@@ -26,6 +26,10 @@ _fetch_gallery_media_list = lambda user: [query_to_objects(gallery_media) for ga
 @jwt_required
 @role_required(roles=['officer'])
 def fetch_profile():
+    """
+    GET endpoint that fetches the complete club profile from an officer user.
+    """
+
     user = get_current_user()
 
     club_obj = query_to_objects(user.club)
@@ -71,6 +75,10 @@ def fetch_profile():
     }
 })
 def edit_profile():
+    """
+    POST endpoint that edits the club profile.
+    """
+
     user = get_current_user()
     json = g.clean_json
 
@@ -97,10 +105,55 @@ def edit_profile():
     return {'status': 'success'}
 
 
+@admin_blueprint.route('/change-password', methods=['POST'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'old_password': {'type': 'string', 'empty': False},
+    'new_password': {'type': 'string', 'empty': False}
+}, require_all=True)
+def change_password():
+    """
+    POST endpoint that changes the current user's password without revoking all the access
+    and refresh tokens.
+    """
+
+    user = get_current_user()
+    club = user.club
+
+    json = g.clean_json
+
+    old_password = json['old_password']
+    new_password = json['new_password']
+
+    if not hash_manager.verify(old_password, user.password):
+        raise JsonError(status='error', reason='The old password is incorrect.')
+
+    # Check if the password is the same
+    if old_password == new_password:
+        raise JsonError(status='error', reason='The old and new passwords are identical.')
+
+    # Check if the password is strong enough
+    is_password_strong = flask_exts.password_checker.check(new_password)
+    if not is_password_strong:
+        raise JsonError(status='error', reason='The new password is not strong enough')
+
+    # Only set the new password if the old password is verified
+    user.password = hash_manager.hash(new_password)
+    user.save()
+
+    return {'status': 'success'}
+
+
 @admin_blueprint.route('/upload-logo', methods=['POST'])
 @jwt_required
 @role_required(roles=['officer'])
 def upload_logo():
+    """
+    POST endpoint that replaces the current club's logo with a new one. Logos must respect
+    a 1:1 aspect ratio (with a default 5% deviation allowed). A 2 MB limit is imposed as well.
+    """
+
     user = get_current_user()
 
     logo_file = request.files.get('logo', None)
@@ -125,6 +178,11 @@ def upload_logo():
 @jwt_required
 @role_required(roles=['officer'])
 def upload_banner():
+    """
+    POST endpoint that replaces the current club's banner with a new one. Banners must respect
+    a 10:3 aspect ratio (with a default 5% deviation allowed). A 2 MB limit is imposed as well.
+    """
+
     user = get_current_user()
 
     banner_file = request.files.get('banner', None)
@@ -150,6 +208,11 @@ def upload_banner():
 @role_required(roles=['officer'])
 @as_json
 def get_gallery_media():
+    """
+    GET endpoint that fetches all gallery pictures' metadata from a club. Each media object has an
+    ID, URL, and caption.
+    """
+
     user = get_current_user()
     return _fetch_gallery_media_list(user)
 
@@ -162,6 +225,10 @@ def get_gallery_media():
 }, require_all=True, form_keys=['caption'])
 @as_json
 def add_gallery_media_pic():
+    """
+    POST endpoint that adds a new gallery picture to the club with an image upload and a caption.
+    """
+
     user = get_current_user()
     json = g.clean_json
 
@@ -196,6 +263,11 @@ def add_gallery_media_pic():
 }, form_keys=['caption'])
 @as_json
 def modify_gallery_pic(pic_id):
+    """
+    PUT endpoint that either replaces an existing gallery picture, changes the image's
+    caption or does both at the same time.
+    """
+
     user = get_current_user()
     json = g.clean_json
 
@@ -229,6 +301,10 @@ def modify_gallery_pic(pic_id):
 @role_required(roles=['officer'])
 @as_json
 def remove_gallery_media(media_id):
+    """
+    DELETE endpoint that deletes an existing gallery picture.
+    """
+
     user = get_current_user()
 
     user.club.gallery_media = [gallery_media for gallery_media in user.club.gallery_media if gallery_media.id != media_id]
@@ -243,6 +319,10 @@ def remove_gallery_media(media_id):
 @role_required(roles=['officer'])
 @as_json
 def get_resources():
+    """
+    GET endpoint that fetches all the resource links from a club.
+    """
+
     user = get_current_user()
     return _fetch_resources_list(user)
 
@@ -256,6 +336,10 @@ def get_resources():
 }, require_all=True)
 @as_json
 def add_resource():
+    """
+    POST endpoint that adds a new resource link to the club profile.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -292,6 +376,10 @@ def add_resource():
 })
 @as_json
 def update_resource(resource_id):
+    """
+    PUT endpoint that updates an existing resource link.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -316,6 +404,10 @@ def update_resource(resource_id):
 @role_required(roles=['officer'])
 @as_json
 def delete_resource(resource_id):
+    """
+    DELETE endpoint that deletes an existing resource link.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -338,6 +430,10 @@ def delete_resource(resource_id):
 @role_required(roles=['officer'])
 @as_json
 def get_events():
+    """
+    GET endpoint that fetches all events from the club profile.
+    """
+
     user = get_current_user()
     return _fetch_event_list(user)
 
@@ -354,6 +450,10 @@ def get_events():
 })
 @as_json
 def add_event():
+    """
+    POST endpoint that adds a new event.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -399,6 +499,10 @@ def add_event():
 })
 @as_json
 def update_event(event_id):
+    """
+    PUT endpoint that updates an existing event.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -423,6 +527,10 @@ def update_event(event_id):
 @role_required(roles=['officer'])
 @as_json
 def delete_event(event_id):
+    """
+    DELETE endpoint that deletes an existing event.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -445,6 +553,10 @@ def delete_event(event_id):
 @role_required(roles=['officer'])
 @as_json
 def get_recruiting_events():
+    """
+    GET endpoint that fetches all recruiting events from the club profile.
+    """
+
     user = get_current_user()
     return _fetch_recruiting_events_list(user)
 
@@ -463,6 +575,10 @@ def get_recruiting_events():
 })
 @as_json
 def add_recruiting_event():
+    """
+    POST endpoint that adds a new recruiting event.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -507,6 +623,10 @@ def add_recruiting_event():
 })
 @as_json
 def update_recruiting_event(r_event_id):
+    """
+    PUT endpoint that updates an existing recruiting event.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -530,6 +650,10 @@ def update_recruiting_event(r_event_id):
 @role_required(roles=['officer'])
 @as_json
 def delete_recruiting_event(r_event_id):
+    """
+    DELETE endpoint that deletes an existing recruiting event.
+    """
+
     user = get_current_user()
     club = user.club
 
@@ -545,39 +669,3 @@ def delete_recruiting_event(r_event_id):
         return _fetch_recruiting_events_list(user)
     else:
         raise JsonError(status='error', reason='Requested recruiting event does not exist', status_=404)
-
-
-
-@admin_blueprint.route('/change-password', methods=['POST'])
-@jwt_required
-@role_required(roles=['officer'])
-@validate_json(schema={
-    'old_password': {'type': 'string', 'empty': False},
-    'new_password': {'type': 'string', 'empty': False}
-}, require_all=True)
-def change_password():
-    user = get_current_user()
-    club = user.club
-
-    json = g.clean_json
-
-    old_password = json['old_password']
-    new_password = json['new_password']
-
-    if not hash_manager.verify(old_password, user.password):
-        raise JsonError(status='error', reason='The old password is incorrect.')
-
-    # Check if the password is the same
-    if old_password == new_password:
-        raise JsonError(status='error', reason='The old and new passwords are identical.')
-
-    # Check if the password is strong enough
-    is_password_strong = flask_exts.password_checker.check(new_password)
-    if not is_password_strong:
-        raise JsonError(status='error', reason='The new password is not strong enough')
-
-    # Only set the new password if the old password is verified
-    user.password = hash_manager.hash(new_password)
-    user.save()
-
-    return {'status': 'success'}
