@@ -7,8 +7,8 @@ from utils import pst_right_now, array_diff
 from flask import Blueprint, g
 from flask_json import as_json, JsonError
 from flask_csv import send_csv
-from flask_utils import validate_json, query_to_objects, role_required, mongo_aggregations
-from flask_jwt_extended import jwt_required, jwt_refresh_token_required, confirmed_account_required, get_jwt_identity, create_access_token, create_refresh_token, get_jti
+from flask_utils import validate_json, query_to_objects, role_required, mongo_aggregations, confirmed_account_required
+from flask_jwt_extended import jwt_required, jwt_refresh_token_required, get_jwt_identity, create_access_token, create_refresh_token, get_jti
 
 from app_config import CurrentConfig
 
