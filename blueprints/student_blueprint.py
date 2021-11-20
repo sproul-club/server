@@ -22,7 +22,7 @@ from authomatic.providers import oauth2
 from app_config import CurrentConfig
 
 PSEUDO_PASSWORD_PREFIX = 'UNUSABLE_PASSWORD'
-_fetch_fav_clubs_list = lambda user: [query_to_objects(club) for club in user.favorited_clubs]
+# _fetch_fav_clubs_list = lambda user: [query_to_objects(club) for club in user.favorited_clubs]
 
 student_blueprint = Blueprint('student', __name__, url_prefix='/api/student')
 
