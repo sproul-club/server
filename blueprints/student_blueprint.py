@@ -102,6 +102,7 @@ fa = FlaskAuthomatic(
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'https://www.googleapis.com/auth/userinfo.email'
             ],
+            'redirect_uri': 'https://sc-backend-dev.herokuapp.com/api/student/finish-register', 
         }
     },
     secret=CurrentConfig.SECRET_KEY,
