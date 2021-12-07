@@ -3,6 +3,7 @@ import dateutil.parser
 
 from passlib.hash import pbkdf2_sha512 as hash_manager
 from slugify import slugify
+from models.officer import Question
 
 from utils import try_parsing_datetime, random_slugify, pst_right_now
 
@@ -20,6 +21,7 @@ _fetch_resources_list = lambda user: [query_to_objects(res) for res in user.club
 _fetch_event_list = lambda user: [query_to_objects(event) for event in user.club.events]
 _fetch_recruiting_events_list = lambda user: [query_to_objects(r_event) for r_event in user.club.recruiting_events]
 _fetch_gallery_media_list = lambda user: [query_to_objects(gallery_media) for gallery_media in user.club.gallery_media]
+_fetch_question_list = lambda user: [query_to_objects(question) for question in user.club.faq]
 
 
 @admin_blueprint.route('/profile', methods=['GET'])
@@ -681,3 +683,76 @@ def delete_recruiting_event(r_event_id):
         return _fetch_recruiting_events_list(user)
     else:
         raise JsonError(status='error', reason='Requested recruiting event does not exist', status_=404)
+
+@admin_blueprint.route('/faq', methods=['GET'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def get_questions():
+    """
+    GET endpoint that fetches all frequently asked questions from the club profile.
+    """
+    user = get_current_user()
+    return _fetch_question_list(user)
+
+
+@admin_blueprint.route('/faq', methods=['POST'])
+@jwt_required
+@role_required(roles=['officer'])
+@validate_json(schema={
+    'question': {'type': 'string', 'required': True},
+    'answer': {'type': 'string', 'required': True}
+})
+@as_json
+def add_question():
+    """
+    POST endpoint that adds a new frequently asked question.
+    """
+    user = get_current_user()
+    club = user.club
+
+    json = g.clean_json
+    question_statement = json['question']
+
+    new_question_id = random_slugify(question_statement, max_length=100)
+    for question in club.faq: 
+        if question.id == new_question_id:
+            raise JsonError(status='error', reason='Question already exists')
+
+    new_question = Question(
+            id = new_question_id,
+            question = question_statement,
+            answer = json['answer']
+        )
+
+    club.faq += [new_question]
+
+    user.club.last_updated = pst_right_now()
+    user.save()
+
+    return _fetch_question_list(user)
+
+
+@admin_blueprint.route('/faq/<question_id>', methods=['DELETE'])
+@jwt_required
+@role_required(roles=['officer'])
+@as_json
+def delete_question(question_id):
+    """
+    DELETE endpoint that deletes an existing question.
+    """
+    user = get_current_user()
+    club = user.club
+
+    prev_len = len(club.faq)
+
+    club.faq = [question for question in club.faq if question.id != question_id]
+
+    user.club.last_updated = pst_right_now()
+    user.save()
+    
+    new_len = len(club.faq)
+    if new_len != prev_len:
+        return _fetch_question_list(user)
+    else:
+        raise JsonError(status='error', reason='Requested question does not exist', status_=404)

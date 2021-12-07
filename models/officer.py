@@ -68,6 +68,14 @@ class SocialMediaLinks(gj.EmbeddedDocument):
     meta = {'auto_create_index': False}
 
 
+class Question(gj.EmbeddedDocument): 
+    id = mongo.StringField(required=True, max_length=100)
+    question = mongo.StringField(required=True, max_length=200)
+    answer = mongo.StringField(required=True, max_length=500)
+
+    meta = {'auto_create_index': False}
+
+
 class GalleryMedia(gj.EmbeddedDocument):
     id      = mongo.StringField(required=True, max_length=100)
     type    = mongo.StringField(required=True, choices=GALLERY_MEDIA_TYPES)
@@ -118,6 +126,8 @@ class NewClub(gj.EmbeddedDocument):
     recruiting_events = mongo.EmbeddedDocumentListField(RecruitingEvent, default=[])
 
     social_media_links = mongo.EmbeddedDocumentField(SocialMediaLinks)
+
+    faq = mongo.EmbeddedDocumentListField(Question, default=[])
 
     last_updated = mongo.DateTimeField(null=True)
 
