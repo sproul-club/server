@@ -22,18 +22,22 @@ GALLERY_MEDIA_TYPES = [
 
 class Event(gj.EmbeddedDocument):
     id   = mongo.StringField(required=True, max_length=100)
+    invite_only = mongo.BooleanField()
     name = mongo.StringField(required=True, max_length=100)
-    link = RelaxedURLField(null=True, default=None)
+    link = RelaxedURLField(null=True, default='') # TODO: remove "link" in favor of "links", make mongo migration script for existing events with only one "link"
+    links = mongo.ListField(RelaxedURLField(), default=[], max_length=100)
+    location = mongo.StringField(required=True, default='', max_length=1000)
     event_start = mongo.DateTimeField(required=True)
     event_end   = mongo.DateTimeField(required=True)
     description = mongo.StringField(required=True, max_length=1000)
-
+    tags = mongo.ListField(mongo.ReferenceField(Tag), max_length=100, default=[])
     meta = {'auto_create_index': False, 'allow_inheritance': True}
 
 
 class RecruitingEvent(Event):
     description = mongo.StringField(required=True, max_length=200)
     virtual_link = RelaxedURLField(null=True, default=None)
+    link = RelaxedURLField(required=False)
     invite_only = mongo.BooleanField(required=True)
 
     meta = {'auto_create_index': False}
@@ -60,6 +64,14 @@ class SocialMediaLinks(gj.EmbeddedDocument):
     medium      = RelaxedURLField(null=True, default=None)
     gcalendar   = RelaxedURLField(null=True, default=None)
     discord     = RelaxedURLField(null=True, default=None)
+
+    meta = {'auto_create_index': False}
+
+
+class Question(gj.EmbeddedDocument): 
+    id = mongo.StringField(required=True, max_length=100)
+    question = mongo.StringField(required=True, max_length=200)
+    answer = mongo.StringField(required=True, max_length=500)
 
     meta = {'auto_create_index': False}
 
@@ -114,6 +126,8 @@ class NewClub(gj.EmbeddedDocument):
     recruiting_events = mongo.EmbeddedDocumentListField(RecruitingEvent, default=[])
 
     social_media_links = mongo.EmbeddedDocumentField(SocialMediaLinks)
+
+    faq = mongo.EmbeddedDocumentListField(Question, default=[])
 
     last_updated = mongo.DateTimeField(null=True)
 
